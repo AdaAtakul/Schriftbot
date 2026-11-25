@@ -22,7 +22,12 @@ export function attachPen(canvas, { unit, top = 0, onLive, onStroke, onReject })
 
   canvas.addEventListener('pointerdown', e => {
     if (e.pointerType !== 'pen' && !getSettings().allowNonPen) return onReject?.();
-    if (pointerId !== null) return;
+    if (pointerId !== null) {
+      // Es gibt nur einen Pencil: setzt er neu an, ist der alte Strich vorbei, auch wenn Safari kein pointerup geschickt hat.
+      // Sonst bliebe die Fläche für immer gesperrt.
+      if (e.pointerType !== 'pen') return;
+      end({ pointerId });
+    }
     e.preventDefault();
     pointerId = e.pointerId;
     rect = canvas.getBoundingClientRect();
@@ -51,6 +56,7 @@ export function attachPen(canvas, { unit, top = 0, onLive, onStroke, onReject })
   };
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', end);
+  canvas.addEventListener('lostpointercapture', end);
 
   // Safari startet beim Pencil sonst trotz user-select Textauswahl, Lupe oder Scribble.
   // Nur Touch-Events abfangen: Pointer-Events kommen weiter an.
