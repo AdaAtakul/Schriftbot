@@ -32,6 +32,10 @@
   <main>
     <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel">
       <aside class="charlist">
+        <div class="mode-switch" role="group" aria-label="Art der Aufnahme">
+          <button data-mode="einzeln" aria-pressed="true">Einzeln</button>
+          <button data-mode="text" aria-pressed="false">Als Text</button>
+        </div>
         <div class="progress">
           <strong id="progress-text"></strong>
           <progress id="progress-bar"></progress>
@@ -43,7 +47,19 @@
           <button type="submit">＋ Hinzufügen</button>
         </form>
       </aside>
-      <div class="recorder">
+      <div id="text-recorder" class="recorder" hidden>
+        <div class="recorder-head">
+          <button id="text-prev" aria-label="Vorherige Seite">◀</button>
+          <div id="text-info" class="text-info"></div>
+          <button id="text-next" aria-label="Nächste Seite">▶</button>
+          <button id="text-undo">↶ Rückgängig</button>
+          <button id="text-clear">🗑 Leeren</button>
+          <button id="text-commit" class="primary">✓ Übernehmen</button>
+        </div>
+        <p id="text-hint" class="hint"></p>
+        <div id="text-page-wrap" class="text-page-wrap"><canvas id="text-page"></canvas></div>
+      </div>
+      <div id="single-recorder" class="recorder">
         <div class="recorder-head">
           <button id="prev-char" aria-label="Vorheriges Zeichen">◀</button>
           <div id="current-char" class="current-char"></div>

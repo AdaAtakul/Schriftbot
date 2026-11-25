@@ -2,6 +2,8 @@
 import { VARIANTS, groupsFor, variantsOf, recordedCount, progress, checkPair, label } from './profile.js';
 import { saveProfile, getSettings, setSetting } from './storage.js';
 import { fillStrokes } from './ink.js';
+import { drawGhost } from './ghost.js';
+import { attachPen } from './pen.js';
 
 // Kästchen-Geometrie in x-Höhen: oben 2,5 über, unten 1,5 unter der Grundlinie.
 const TOP = -2.5, BOTTOM = 1.5, HEIGHT = BOTTOM - TOP;
@@ -15,7 +17,7 @@ const ACTIONS_H = 60; // Platz für die Knöpfe unter jedem Kästchen (px)
 const GAP = 16;
 
 const boxWidth = ch => ch === ' ' ? 4 : [...ch].length === 1 ? 3 : 1.2 + 1.8 * [...ch].length;
-const round = (n, d) => Math.round(n * d) / d;
+export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. (Maus/Finger lassen sich im Profil-Tab als Testmodus erlauben.)';
 
 export function initAufnahme(profile) {
   const $ = id => document.getElementById(id);
@@ -122,7 +124,13 @@ export function initAufnahme(profile) {
       actions.append(undo, clear);
       wrap.append(canvas, actions);
       boxesEl.append(wrap);
-      attachPen(box);
+      attachPen(canvas, {
+        unit: () => box.unit,
+        top: TOP,
+        onLive: live => { box.live = live; draw(box); },
+        onStroke: stroke => { box.live = null; strokes.push(stroke); changed(box); },
+        onReject: () => { hintEl.textContent = PEN_ONLY; },
+      });
       draw(box);
       return box;
     });
@@ -161,59 +169,9 @@ export function initAufnahme(profile) {
     ctx.font = `${12 / unit}px -apple-system, sans-serif`;
     ctx.textAlign = 'right';
     for (const g of GUIDES) ctx.fillText(g.name, w - 4 / unit, g.y - 3 / unit);
+    drawGhost(ctx, current, w);
     ctx.fillStyle = '#1d1d1f';
     fillStrokes(ctx, live ? [...strokes, live] : strokes);
-  }
-
-  // ---------- Pencil-Eingabe ----------
-  function attachPen(box) {
-    const { canvas } = box;
-    let rect, t0, pointerId = null, frame = 0;
-
-    const toPoint = e => {
-      // Maus liefert festen Druck 0,5, Finger oft 0 – dann mittleren Druck annehmen.
-      const p = e.pointerType === 'pen' ? Math.max(e.pressure, 0.05) : (e.pressure || 0.5);
-      return [
-        round((e.clientX - rect.left) / box.unit, 1000),
-        round((e.clientY - rect.top) / box.unit + TOP, 1000),
-        round(p, 100),
-        Math.round(e.timeStamp - t0),
-      ];
-    };
-    const redraw = () => { if (!frame) frame = requestAnimationFrame(() => { frame = 0; draw(box); }); };
-
-    canvas.addEventListener('pointerdown', e => {
-      if (e.pointerType !== 'pen' && !getSettings().allowNonPen) {
-        hintEl.textContent = 'Bitte mit dem Apple Pencil schreiben. (Maus/Finger lassen sich im Profil-Tab als Testmodus erlauben.)';
-        return;
-      }
-      if (pointerId !== null) return;
-      e.preventDefault();
-      pointerId = e.pointerId;
-      rect = canvas.getBoundingClientRect();
-      t0 = e.timeStamp;
-      box.live = [toPoint(e)];
-      try { canvas.setPointerCapture(pointerId); } catch {} // ohne Capture geht es auch, nur Rand-Fälle leiden
-      redraw();
-    });
-
-    canvas.addEventListener('pointermove', e => {
-      if (e.pointerId !== pointerId) return;
-      const events = e.getCoalescedEvents?.() || [];
-      for (const ev of events.length ? events : [e]) box.live.push(toPoint(ev));
-      redraw();
-    });
-
-    const end = e => {
-      if (e.pointerId !== pointerId) return;
-      pointerId = null;
-      if (!box.live) return;
-      box.strokes.push(box.live);
-      box.live = null;
-      changed(box);
-    };
-    canvas.addEventListener('pointerup', end);
-    canvas.addEventListener('pointercancel', end);
   }
 
   // ---------- Navigation und eigene Paare ----------
@@ -267,4 +225,6 @@ export function initAufnahme(profile) {
 
   renderList();
   select(current);
+  // Nach einer Text-Aufnahme: Liste, Fortschritt und Kästchen neu aufbauen.
+  return { refresh: () => { renderList(); select(current); } };
 }

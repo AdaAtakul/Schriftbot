@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v8';
+const VERSION = 'v10';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',
@@ -8,7 +8,11 @@ const FILES = [
   'js/app.js',
   'js/aufnahme.js',
   'js/export.js',
+  'js/ghost.js',
   'js/ink.js',
+  'js/pen.js',
+  'js/textaufnahme.js',
+  'js/textplan.js',
   'js/layout.js',
   'js/render.js',
   'js/schreiben.js',

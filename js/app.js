@@ -1,5 +1,6 @@
 import { loadProfile } from './storage.js';
 import { initAufnahme } from './aufnahme.js';
+import { initTextAufnahme } from './textaufnahme.js';
 import { initProfil } from './profil.js';
 import { initSchreiben } from './schreiben.js';
 
@@ -29,7 +30,8 @@ try {
     '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, im Profil-Tab ein Backup importieren.');
   throw err;
 }
-initAufnahme(profile);
+const aufnahme = initAufnahme(profile);
+initTextAufnahme(profile, aufnahme.refresh);
 initSchreiben(profile); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
 
