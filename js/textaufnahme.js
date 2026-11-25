@@ -2,7 +2,7 @@
 // Jedes Zeichen der Vorlage hat ein festes Feld; ein Strich gehört zu dem Feld, über dem seine Mitte liegt.
 // Gespeichert wird in die erste freie Variante – vorhandene Aufnahmen werden nie überschrieben.
 import { plan } from './textplan.js';
-import { variantsOf, label } from './profile.js';
+import { variantsOf, label, align } from './profile.js';
 import { saveProfile, getSettings, setSetting } from './storage.js';
 import { fillStrokes } from './ink.js';
 import { drawGhost, ghostWidth } from './ghost.js';
@@ -142,6 +142,7 @@ export function initTextAufnahme(profile, onSaved) {
         if (!free) return full.add(s.key);
         const baseY = r * PITCH + BASE;
         free.push(...sts.map(st => st.map(([x, y, p, t]) => [round3(x - s.x), round3(y - baseY), p, t])));
+        align(s.key, free);
         saved++;
       });
       // Wortabstände werden zu Leerzeichen-Varianten (wie der waagerechte Strich bei der Einzelaufnahme).

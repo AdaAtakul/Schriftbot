@@ -1,4 +1,5 @@
-import { loadProfile } from './storage.js';
+import { loadProfile, saveProfile } from './storage.js';
+import { alignAll } from './profile.js';
 import { initAufnahme } from './aufnahme.js';
 import { initTextAufnahme } from './textaufnahme.js';
 import { initProfil } from './profil.js';
@@ -7,7 +8,11 @@ import { initSchreiben } from './schreiben.js';
 // Navigation zwischen den Modulen; letzter Tab wird gemerkt.
 const tabs = document.querySelectorAll('.tabs [data-view]');
 
+let profile;
+
 function showView(name) {
+  // Beim Tabwechsel frisch geschriebene Zeichen ausrichten, damit „Schreiben“ sie schon gerade sieht.
+  if (profile && alignAll(profile)) saveProfile(profile);
   for (const tab of tabs) {
     const active = tab.dataset.view === name;
     tab.setAttribute('aria-selected', active);
@@ -22,9 +27,9 @@ let last = null;
 try { last = localStorage.getItem('lastView'); } catch {}
 if (last && document.getElementById('view-' + last)) showView(last);
 
-let profile;
 try {
   profile = await loadProfile();
+  if (alignAll(profile)) saveProfile(profile); // ältere Aufnahmen nachträglich ausrichten
 } catch (err) {
   alert('Das Handschrift-Profil konnte nicht geladen werden: ' + err.message +
     '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, im Profil-Tab ein Backup importieren.');

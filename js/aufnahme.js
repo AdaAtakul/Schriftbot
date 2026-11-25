@@ -1,5 +1,5 @@
 // Modul 1: Handschrift-Aufnahme.
-import { VARIANTS, groupsFor, variantsOf, recordedCount, progress, checkPair, label } from './profile.js';
+import { VARIANTS, groupsFor, variantsOf, recordedCount, progress, checkPair, label, boxWidth, align } from './profile.js';
 import { saveProfile, getSettings, setSetting } from './storage.js';
 import { fillStrokes } from './ink.js';
 import { drawGhost } from './ghost.js';
@@ -16,7 +16,6 @@ const GUIDES = [
 const ACTIONS_H = 60; // Platz für die Knöpfe unter jedem Kästchen (px)
 const GAP = 16;
 
-const boxWidth = ch => ch === ' ' ? 4 : [...ch].length === 1 ? 3 : 1.2 + 1.8 * [...ch].length;
 export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. (Maus/Finger lassen sich im Profil-Tab als Testmodus erlauben.)';
 
 export function initAufnahme(profile) {
@@ -65,6 +64,8 @@ export function initAufnahme(profile) {
   }
 
   function select(ch) {
+    // Beim Verlassen ausrichten, nicht nach jedem Strich: sonst springt z. B. der erste Strich eines H in die Mitte.
+    if (current !== ch && variantsOf(profile, current).map(v => align(current, v)).some(Boolean)) saveProfile(profile);
     current = ch;
     setSetting('aufnahmeChar', ch);
     for (const b of groupsEl.querySelectorAll('.chip')) b.setAttribute('aria-current', b.dataset.ch === ch);

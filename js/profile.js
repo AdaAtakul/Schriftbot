@@ -23,6 +23,42 @@ export const GROUPS = [
 
 export const label = ch => (ch === ' ' ? 'Leerzeichen' : ch);
 
+// Breite des Aufnahme-Kästchens in x-Höhen.
+export const boxWidth = ch => ch === ' ' ? 4 : [...ch].length === 1 ? 3 : 1.2 + 1.8 * [...ch].length;
+
+// Zeichen, deren Unterkante auf der Grundlinie steht (ohne Unterlänge, nicht schwebend wie - + = ").
+const ON_BASELINE = new Set('abcdehiklmnorstuvwxzäöüßABCDEFGHIKLMNOPRSTUVWXYZÄÖÜ0123456789.!?:;%');
+const SNAP = 0.35; // größere Abweichung ist gewollt (z. B. ein f mit Unterlänge) und bleibt stehen
+
+// Variante ausrichten: waagerecht mittig ins Kästchen (unter die Vorlage) und – wenn das Zeichen
+// auf der Grundlinie steht und nur knapp daneben liegt – mit der Unterkante genau auf die Grundlinie.
+// Verschiebt die Punkte an Ort und Stelle; gibt zurück, ob sich etwas geändert hat.
+export function align(ch, strokes) {
+  if (ch === ' ' || !strokes.length) return false;
+  let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const s of strokes) for (const [x, y] of s) {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  }
+  let dx = Math.round((boxWidth(ch) / 2 - (minX + maxX) / 2) * 1000) / 1000;
+  if (Math.abs(dx) < 0.01) dx = 0; // Rundungsrest, sonst wandert die Variante bei jedem Laden minimal
+  const dy = [...ch].every(c => ON_BASELINE.has(c)) && Math.abs(maxY) <= SNAP ? -maxY : 0;
+  if (!dx && !dy) return false;
+  for (const s of strokes) for (const p of s) {
+    p[0] = Math.round((p[0] + dx) * 1000) / 1000;
+    p[1] = Math.round((p[1] + dy) * 1000) / 1000;
+  }
+  return true;
+}
+
+// Alle Aufnahmen ausrichten (für Aufnahmen von vor dieser Funktion). Gibt zurück, ob sich etwas geändert hat.
+export function alignAll(profile) {
+  let changed = false;
+  for (const [ch, variants] of Object.entries(profile.glyphs)) for (const v of variants) changed = align(ch, v) || changed;
+  return changed;
+}
+
 export function emptyProfile() {
   return { format: 'handschrift-profil', version: 1, customPairs: [], glyphs: {} };
 }
