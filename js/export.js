@@ -1,14 +1,14 @@
 // Modul 3: Export als PDF (Vektor) und PNG, Weitergabe über das Teilen-Menü (z. B. an GoodNotes).
-import { outline } from './ink.js';
+import { outline, PEN_SIZE } from './ink.js';
 import { drawPage, drawPaper, MISSING_COLOR } from './render.js';
 
 const PNG_DPI = 300;
 const PAPER_LINE = '#b8c7dc';
 
 // Umrisse eines Glyph-Items in Seitenkoordinaten (mm): Drehung und Skalierung schon angewendet.
-export function itemPolygons(it) {
+export function itemPolygons(it, size = PEN_SIZE) {
   const c = Math.cos(it.rot || 0), s = Math.sin(it.rot || 0);
-  return it.strokes.map(st => outline(st).map(([px, py]) => [
+  return it.strokes.map(st => outline(st, size).map(([px, py]) => [
     it.x + (px * c - py * s) * it.s,
     it.y + (px * s + py * c) * it.s,
   ]));
@@ -61,7 +61,7 @@ export function buildPdf(result, o, color, withPaper) {
         continue;
       }
       doc.setFillColor(color);
-      for (const poly of itemPolygons(it).map(pts => simplify(pts))) {
+      for (const poly of itemPolygons(it, o.penSize).map(pts => simplify(pts))) {
         if (poly.length < 3) continue;
         doc.moveTo(poly[0][0], poly[0][1]);
         for (let k = 1; k < poly.length; k++) doc.lineTo(poly[k][0], poly[k][1]);
@@ -86,7 +86,7 @@ export function buildPng(page, o, color, withPaper) {
   }
   ctx.setTransform(pxPerMm, 0, 0, pxPerMm, 0, 0);
   if (withPaper) drawPaper(ctx, o);
-  drawPage(ctx, page, color);
+  drawPage(ctx, page, color, o.penSize);
   return new Promise((resolve, reject) => canvas.toBlob(blob => {
     canvas.width = canvas.height = 0; // Speicher auf dem iPad sofort freigeben
     blob ? resolve(blob) : reject(new Error('PNG konnte nicht erzeugt werden.'));

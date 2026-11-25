@@ -33,3 +33,9 @@ const wave = Array.from({ length: 200 }, (_, i) => [i / 20, Math.sin(i / 10)]);
 const w2 = simplify(wave, 0.02);
 assert.ok(w2.length < wave.length / 2, `${w2.length} von ${wave.length} Punkten`);
 console.log(`OK – Export: ${result.pages.length} Seiten, ${Math.round(blob.size / 1024)} KB`);
+
+// Strichdicke: doppelte Stiftbreite ergibt einen breiteren Umriss
+const width = pts => Math.max(...pts.map(q => q[1])) - Math.min(...pts.map(q => q[1]));
+const flat = { strokes: [[[0, 0, 0.5, 0], [1, 0, 0.5, 10]]], x: 0, y: 0, s: 1 };
+assert.ok(width(itemPolygons(flat, 0.26)[0]) > 1.8 * width(itemPolygons(flat, 0.13)[0]), 'Strichdicke');
+console.log('Strichdicke OK');

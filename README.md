@@ -75,6 +75,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - **Papier**: Liniert breit / schmal, Kariert 5 mm oder Blanko. Auf liniertem und kariertem Papier steht jede Zeile genau auf einer Linie.
 - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
 - **Unordnung**: kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage – wie echte Handschrift.
+- **Strichdicke**: dünner oder kräftiger schreiben (40–250 %), gilt für Vorschau und alle Exporte.
 - **Schriftgröße, Zeilenabstand, Rand, Tintenfarbe** nach Geschmack.
 - **🎲 Neu würfeln**: andere Mischung der Varianten.
 - **📏 Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **↶ Angleichen rückgängig** geht, bis du die App schließt.
@@ -105,13 +106,25 @@ Gut zu wissen:
 
 ### Nach GoodNotes exportieren
 
-1. **📄 PDF teilen** antippen.
+**Als GoodNotes-Notizbuch (radierbar):**
+
+1. **📓 GoodNotes** antippen.
+2. Im Teilen-Menü **GoodNotes** wählen. Fehlt GoodNotes dort, „In Dateien sichern“ wählen und die Datei in der Dateien-App antippen → „Öffnen in GoodNotes“ (oder in GoodNotes über **Importieren**).
+3. GoodNotes legt ein neues Notizbuch an. Jeder Strich ist ein echter Kugelschreiber-Strich: mit dem **Radierer** einzelne Buchstaben löschen, mit dem **Lasso** verschieben, umfärben oder löschen. Buchstaben aus mehreren Strichen (t, ä, i …) brauchen einen Radierer-Tipp pro Strich.
+
+- Mit „Linien mitexportieren“ bekommt jede Seite die Linien als Papier.
+- Das .goodnotes-Format ist nicht offiziell dokumentiert, die App baut es nach dem offenen Projekt [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) (MIT) nach. Ein GoodNotes-Update kann den Import brechen – dann vorübergehend das PDF nehmen.
+- GoodNotes-Striche haben eine feste Breite, der Druck des Pencils geht dabei verloren.
+
+**Als PDF (Seitenhintergrund, nicht radierbar):**
+
+1. **📄 PDF** antippen.
 2. Im Teilen-Menü **GoodNotes** wählen (ggf. unter „Mehr“). GoodNotes legt ein neues Dokument an oder fügt die Seiten an.
 3. Erscheint stattdessen der Knopf **📤 Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
 
 - Das PDF ist A4, mehrseitig und in Vektorqualität – die Schrift bleibt bei jedem Zoom scharf.
 - **Linien mitexportieren**: Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommen die Linien standardmäßig mit ins PDF.
-- **🖼 PNG teilen** erzeugt ein Bild pro Seite (300 dpi). Ohne „Linien mitexportieren“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
+- **🖼 PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne „Linien mitexportieren“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
 
 ### Linien an GoodNotes anpassen
 
@@ -128,7 +141,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v18';` hochzählen (z. B. auf `'v19'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v19';` hochzählen (z. B. auf `'v20'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -154,6 +167,7 @@ js/schreiben.js         Modul 2: Textfeld, Vorschau, Einstellungen, Export-Knöp
 js/layout.js            Satz: Paare, Varianten, Unordnung, Umbruch, Seiten, Linien
 js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
 js/export.js            PDF (Vektor), PNG, Teilen
+js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Tab Profil: Backup, Testmodus
@@ -173,6 +187,7 @@ Selbsttests (Node.js ≥ 18):
 node tests/profile.test.mjs
 node tests/layout.test.mjs
 node tests/export.test.mjs
+node tests/goodnotes.test.mjs
 node tests/textplan.test.mjs
 node tests/ki.test.mjs
 ```

@@ -6,7 +6,7 @@ import { drawGhost } from './ghost.js';
 import { attachPen } from './pen.js';
 import { layout } from './layout.js';
 import { drawPage } from './render.js';
-import { current as writeSettings, INKS } from './schreiben.js';
+import { current as writeSettings, options as writeOptions, INKS } from './schreiben.js';
 import { previewText } from './textplan.js';
 
 
@@ -175,7 +175,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
     canvas.height = Math.round(cssH * dpr);
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
-    drawPage(ctx, result.pages[0], (INKS[s.ink] || INKS.blau).color);
+    drawPage(ctx, result.pages[0], (INKS[s.ink] || INKS.blau).color, writeOptions(s).penSize);
   }
 
   function draw({ ctx, strokes, unit, w, live }) {

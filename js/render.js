@@ -1,5 +1,5 @@
 // Eine Layout-Seite auf ein Canvas zeichnen. ctx muss bereits in mm skaliert sein.
-import { fillStrokes } from './ink.js';
+import { fillStrokes, PEN_SIZE } from './ink.js';
 
 export const MISSING_COLOR = '#d0021b';
 
@@ -22,7 +22,7 @@ export function drawPaper(ctx, o) {
   ctx.stroke();
 }
 
-export function drawPage(ctx, page, color) {
+export function drawPage(ctx, page, color, size = PEN_SIZE) {
   for (const it of page.items) {
     ctx.save();
     ctx.translate(it.x, it.y);
@@ -42,7 +42,7 @@ export function drawPage(ctx, page, color) {
       ctx.fillText(it.missing === ' ' ? '␣' : it.missing, w / 2, 0);
     } else {
       ctx.fillStyle = color;
-      fillStrokes(ctx, it.strokes);
+      fillStrokes(ctx, it.strokes, size);
     }
     ctx.restore();
   }

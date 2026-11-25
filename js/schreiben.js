@@ -3,7 +3,9 @@ import { layout, lineMetrics, DEFAULTS } from './layout.js';
 import { drawPage, drawPaper } from './render.js';
 import { getSettings, setSetting, saveProfile } from './storage.js';
 import { equalize } from './profile.js';
+import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
+import { buildGoodnotes } from './goodnotes.js';
 
 // Linienabstände der GoodNotes-Vorlagen sind nicht offiziell dokumentiert (Nutzerangaben),
 // deshalb lassen sie sich unten feinjustieren.
@@ -23,13 +25,14 @@ export const INKS = {
 
 const STANDARD = {
   paper: 'liniert-breit', ink: 'blau', connect: 70, chaos: 50,
-  xHeight: 3, lineHeight: 8.8, margin: 20, lineSpacing: 8.8, lineTop: 20,
+  weight: 100, xHeight: 3, lineHeight: 8.8, margin: 20, lineSpacing: 8.8, lineTop: 20,
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
 const SLIDERS = [
   { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
   { key: 'chaos', label: 'Unordnung', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
+  { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: v => v + ' %' },
   { key: 'xHeight', label: 'Schriftgröße (x-Höhe)', min: 1.5, max: 6, step: 0.1, fmt: mm },
   { key: 'lineHeight', label: 'Zeilenabstand', min: 4, max: 20, step: 0.1, fmt: (v, s) => {
     const lm = lineMetrics(options(s));
@@ -49,7 +52,7 @@ export function current() {
 export function options(s = current()) {
   const paper = PAPERS[s.paper] || PAPERS[STANDARD.paper];
   return {
-    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin,
+    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
     connect: s.connect / 100, chaos: s.chaos / 100,
     ruled: paper.ruled, grid: !!paper.grid, lineSpacing: +s.lineSpacing, lineTop: +s.lineTop,
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,
@@ -140,7 +143,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr * pxPerMm, 0, 0, dpr * pxPerMm, 0, 0);
       drawPaper(ctx, o);
-      drawPage(ctx, page, color);
+      drawPage(ctx, page, color, o.penSize);
     });
 
     const notes = [`${result.pages.length} ${result.pages.length === 1 ? 'Seite' : 'Seiten'}`];
@@ -196,7 +199,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
   // ---------- Export ----------
   const paperBox = $('export-paper'), shareAgain = $('share-again');
-  const exportButtons = [$('export-pdf'), $('export-png')];
+  const exportButtons = [$('export-goodnotes'), $('export-pdf'), $('export-png')];
   paperBox.checked = getSettings().exportPaper ?? true;
   paperBox.addEventListener('change', () => setSetting('exportPaper', paperBox.checked));
   let pending = null;
@@ -215,7 +218,11 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     shareAgain.hidden = true;
     try {
       let files;
-      if (kind === 'pdf') {
+      if (kind === 'goodnotes') {
+        // Linien (falls gewählt) als Papier, die Schrift als einzelne radierbare Striche darüber
+        const paper = new Uint8Array(await buildPdf({ pages: [{ items: [] }] }, o, color, paperBox.checked).arrayBuffer());
+        files = [new File([buildGoodnotes(result, o, color, paper, `Handschrift ${date}`)], `handschrift-${date}.goodnotes`, { type: 'application/octet-stream' })];
+      } else if (kind === 'pdf') {
         files = [new File([buildPdf(result, o, color, paperBox.checked)], `handschrift-${date}.pdf`, { type: 'application/pdf' })];
       } else {
         files = [];
@@ -232,6 +239,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       exportButtons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
     }
   }
+  $('export-goodnotes').addEventListener('click', () => doExport('goodnotes'));
   $('export-pdf').addEventListener('click', () => doExport('pdf'));
   $('export-png').addEventListener('click', () => doExport('png'));
   shareAgain.addEventListener('click', async () => {

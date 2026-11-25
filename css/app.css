@@ -138,6 +138,7 @@ main { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: co
 .editor { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .export { display: grid; gap: 4px; }
 .export .row button { flex: 1; }
+#export-goodnotes { flex-basis: 100%; }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
 button:disabled { opacity: 0.6; }
 .editor textarea { flex: 1 0 200px; }
