@@ -1,6 +1,6 @@
 // Selbsttest für die KI-Anbindung (ohne echten Aufruf): node tests/ki.test.mjs
 import assert from 'node:assert/strict';
-import { ask, buildRequest, DEFAULT_CONFIG } from '../js/ki.js';
+import { ask, buildRequest, DEFAULT_CONFIG, chatPrompt, cleanAnswer } from '../js/ki.js';
 
 const fake = (status, data) => {
   const calls = [];
@@ -28,7 +28,7 @@ assert.equal(JSON.parse(buildRequest({ ...claude, model: 'claude-haiku-5-5' }, '
 // Ablehnung, falscher Schlüssel, fehlender Schlüssel, offline
 await assert.rejects(ask(claude, 'x', '', '', fake(200, { stop_reason: 'refusal', content: [] }).fn), /abgelehnt/);
 await assert.rejects(ask(claude, 'x', '', '', fake(401, { error: { message: 'invalid x-api-key' } }).fn), /Schlüssel ungültig.*invalid x-api-key/);
-await assert.rejects(ask({ ...claude, key: '' }, 'x', '', ''), /API-Schlüssel eintragen/);
+await assert.rejects(ask({ ...claude, key: '' }, 'x', '', ''), /Kein API-Schlüssel/);
 await assert.rejects(ask(claude, 'x', '', '', async () => { throw new TypeError('Failed to fetch'); }), /Keine Verbindung/);
 
 // OpenAI-kompatibel: Bearer-Header, /chat/completions, Antwort aus choices
@@ -39,4 +39,9 @@ assert.equal(f.calls[0].url, 'https://example.test/v1/chat/completions');
 assert.equal(f.calls[0].init.headers.authorization, 'Bearer k2');
 assert.equal(f.calls[0].body.messages[0].role, 'system');
 await assert.rejects(ask({ ...other, model: '' }, 'x', '', ''), /Modell/);
+
+// Kopierweg über die Claude-App: eine Nachricht mit Vorgaben, Text und Auftrag; Antwort wird entformatiert
+const msg = chatPrompt('Kürzen', 'Mein Text', 'a b');
+assert.ok(msg.includes('a b') && msg.includes('Mein Text') && msg.includes('Auftrag: Kürzen'));
+assert.equal(cleanAnswer('```\n## Titel\n**fett** und normal\n```\n'), 'Titel\nfett und normal');
 console.log('OK – KI-Anbindung');

@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',

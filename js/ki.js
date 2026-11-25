@@ -77,8 +77,18 @@ function httpError(status, data) {
   return new Error(`Fehler ${status}. ${msg}`);
 }
 
+// Für den kostenlosen Weg über die Claude-App: alles in einer Nachricht zum Kopieren.
+export const chatPrompt = (task, text, chars) => `${systemPrompt(chars)}\n\n${userMessage(task, text)}`;
+
+// Aus einer Chat-Antwort übrig gebliebene Formatierung entfernen (Codeblöcke, Fettdruck, Überschriften-Rauten).
+export const cleanAnswer = text => text
+  .replace(/^```.*$/gm, '')
+  .replace(/\*\*(.+?)\*\*/g, '$1')
+  .replace(/^#{1,6}\s+/gm, '')
+  .trim();
+
 export async function ask(cfg, task, text, chars, fetchImpl = fetch) {
-  if (!cfg.key) throw new Error('Bitte zuerst im Profil-Tab einen API-Schlüssel eintragen.');
+  if (!cfg.key) throw new Error('Kein API-Schlüssel eingetragen (Tab „Profil“). Ohne Schlüssel geht es kostenlos über „In Claude-App fragen“.');
   if (cfg.provider !== 'claude' && (!cfg.model || !cfg.baseUrl)) throw new Error('Bitte im Profil-Tab Adresse und Modell der KI eintragen.');
   const { url, init } = buildRequest(cfg, systemPrompt(chars), userMessage(task, text));
   let res;

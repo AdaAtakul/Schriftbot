@@ -1,6 +1,6 @@
 // KI-Assistent: Einstellungen im Profil-Tab, Aufträge im Schreiben-Tab.
 // Der Schlüssel liegt nur in localStorage dieses Geräts (nicht im Profil-Backup).
-import { PROVIDERS, DEFAULT_CONFIG, ask } from './ki.js';
+import { PROVIDERS, DEFAULT_CONFIG, ask, chatPrompt, cleanAnswer } from './ki.js';
 import { groupsFor, recordedCount } from './profile.js';
 
 const KEY = 'ki';
@@ -56,17 +56,21 @@ export function initKi(profile) {
     input.dispatchEvent(new Event('input')); // Schreiben-Tab speichert und zeichnet die Vorschau neu
   };
 
+  // Antwort übernehmen, vorherigen Text für „Zurückholen“ merken.
+  function apply(answer) {
+    previous = input.value;
+    setText(answer);
+    undo.hidden = false;
+    status.textContent = '✓ Fertig. Der Text steht jetzt oben und in der Vorschau.';
+  }
+
   async function run(job) {
     if (!job.trim()) { task.focus(); return; }
     const name = cfg.provider === 'claude' ? 'Claude' : 'Die KI';
     buttons.forEach(b => { b.disabled = true; });
     status.textContent = `⏳ ${name} schreibt …`;
     try {
-      const answer = await ask(cfg, job.trim(), input.value, charset());
-      previous = input.value;
-      setText(answer);
-      undo.hidden = false;
-      status.textContent = '✓ Fertig. Der Text steht jetzt oben und in der Vorschau.';
+      apply(await ask(cfg, job.trim(), input.value, charset()));
     } catch (err) {
       status.textContent = '⚠️ ' + err.message;
     } finally {
@@ -81,6 +85,31 @@ export function initKi(profile) {
       run(b.dataset.ki);
     });
   }
+  // Kostenlos über das eigene Claude-Abo: Auftrag kopieren, in der Claude-App einfügen, Antwort zurückkopieren.
+  $('ki-copy').addEventListener('click', () => {
+    if (!task.value.trim()) { status.textContent = 'Bitte zuerst oben einen Auftrag eintippen.'; task.focus(); return; }
+    const text = chatPrompt(task.value.trim(), input.value, charset());
+    // Kopieren und Öffnen im selben Tipp, sonst blockiert Safari das neue Fenster.
+    navigator.clipboard.writeText(text).then(
+      () => { status.textContent = '📋 Kopiert. In der Claude-App einfügen und senden, die Antwort kopieren (lange drücken → Kopieren), dann hier „📥 Antwort einfügen“.'; },
+      () => { status.textContent = '⚠️ Kopieren hat nicht geklappt. Bitte noch einmal tippen.'; },
+    );
+    window.open('https://claude.ai/new', '_blank'); // öffnet die Claude-App, falls installiert, sonst claude.ai
+  });
+
+  $('ki-paste').addEventListener('click', async () => {
+    let text = '';
+    try {
+      text = cleanAnswer(await navigator.clipboard.readText()); // Safari fragt mit „Einfügen“ nach
+    } catch {
+      status.textContent = '⚠️ Kein Zugriff auf die Zwischenablage. Tippe in Safari auf „Einfügen“, wenn es erscheint.';
+      return;
+    }
+    if (!text) { status.textContent = 'Die Zwischenablage ist leer. Bitte zuerst die Antwort in der Claude-App kopieren.'; return; }
+    if (text.includes('Wird ein aktueller Text mitgeschickt')) { status.textContent = 'Das ist noch der kopierte Auftrag. Bitte erst die Antwort in der Claude-App kopieren.'; return; }
+    apply(text);
+  });
+
   undo.addEventListener('click', () => {
     if (previous === null) return;
     setText(previous);

@@ -83,7 +83,13 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 
 Im Tab **Schreiben** unter **✨ KI-Assistent** schreibst du einen Auftrag, z. B. „Fasse die Photosynthese in 5 Sätzen zusammen“. Die Antwort ersetzt den Text im Textfeld und erscheint sofort in deiner Handschrift. **Korrigieren**, **Kürzen** und **Stichpunkte** bearbeiten den vorhandenen Text. **↶ Vorherigen Text zurückholen** macht die letzte Änderung rückgängig.
 
-Einrichten im Tab **Profil → KI-Assistent**:
+**Kostenlos über dein Claude-Abo (ohne API-Schlüssel):**
+
+1. Auftrag eintippen und **📋 In Claude-App fragen** antippen. Auftrag, dein Text und die Zeichenvorgaben landen in der Zwischenablage, und die Claude-App (oder claude.ai) öffnet sich.
+2. Dort ins Eingabefeld einfügen und senden.
+3. Die Antwort kopieren (lange drücken → Kopieren), zurück zur Handschrift-App wechseln und **📥 Antwort einfügen** antippen. Safari fragt einmal mit „Einfügen“ nach.
+
+**Direkt mit API-Schlüssel** (schneller, aber pro Anfrage kostenpflichtig): **✨ Ausführen** und die Schnellknöpfe. Einrichten im Tab **Profil → KI-Assistent**:
 
 - **Claude**: Unter [console.anthropic.com](https://console.anthropic.com) → *API Keys* einen Schlüssel anlegen und Guthaben aufladen, dann den Schlüssel einfügen. Voreingestellt ist `claude-opus-5-5`; `claude-haiku-5-5` ist deutlich günstiger.
 - **Andere KI**: „Andere KI (OpenAI-kompatibel)“ wählen und Adresse, Modellname und Schlüssel des Anbieters eintragen (z. B. OpenAI `https://api.openai.com/v1`, OpenRouter `https://openrouter.ai/api/v1`). Manche Anbieter erlauben keinen Zugriff direkt aus dem Browser. Dann erscheint „Keine Verbindung“.
@@ -120,7 +126,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v15';` hochzählen (z. B. auf `'v16'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v16';` hochzählen (z. B. auf `'v17'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
