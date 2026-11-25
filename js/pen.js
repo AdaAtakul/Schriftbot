@@ -51,4 +51,8 @@ export function attachPen(canvas, { unit, top = 0, onLive, onStroke, onReject })
   };
   canvas.addEventListener('pointerup', end);
   canvas.addEventListener('pointercancel', end);
+
+  // Safari startet beim Pencil sonst trotz user-select Textauswahl, Lupe oder Scribble.
+  // Nur Touch-Events abfangen: Pointer-Events kommen weiter an.
+  for (const type of ['touchstart', 'touchmove']) canvas.addEventListener(type, e => e.preventDefault(), { passive: false });
 }

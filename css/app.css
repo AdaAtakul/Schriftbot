@@ -68,12 +68,14 @@ button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
   color: #fff;
 }
 
-body { touch-action: manipulation; } /* kein Doppeltipp-Zoom in der ganzen App */
-button, .tabs, .chips, summary {
+/* Kein Doppeltipp-Zoom und keine Textauswahl in der ganzen App: der Pencil markiert sonst beim Schreiben Text. */
+body {
+  touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
 }
+input, textarea { -webkit-user-select: text; user-select: text; }
 
 .tabs button { position: relative; }
 .tabs button.badge::after {
@@ -274,9 +276,6 @@ input[type="text"], input:not([type]) {
   border: 1px solid var(--border);
   border-radius: 10px;
   touch-action: none;
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
 }
 .current-char {
   min-width: 90px;
@@ -302,9 +301,6 @@ input[type="text"], input:not([type]) {
   border: 1px solid var(--border);
   border-radius: 10px;
   touch-action: none; /* kein Scrollen/Zoomen beim Schreiben */
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
 }
 .box-actions { display: flex; gap: 8px; margin-top: 6px; }
 .box-actions button { flex: 1; padding: 0 8px; }
