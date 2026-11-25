@@ -71,14 +71,36 @@ function sizeClass(ch) {
 }
 const topOf = strokes => -Math.min(...strokes.flat().map(p => p[1]));
 
-// Gibt die geänderten Zeichen zurück (verändert das Profil an Ort und Stelle).
-export function equalize(profile) {
+const median = a => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+
+// Höhen über der Grundlinie aller Varianten, nach Zeichengruppe.
+function classTops(profile) {
   const tops = {};
   for (const [ch, variants] of Object.entries(profile.glyphs)) {
     const c = sizeClass(ch);
     if (c) for (const v of variants) if (v.length && topOf(v) > 0.1) (tops[c] ||= []).push(topOf(v));
   }
-  const median = a => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  return tops;
+}
+
+// Deine typische x-Höhe in Einheiten der Hilfslinien (1 = genau bis zur x-Höhe-Linie), null bei zu wenig Daten.
+export function typicalXHeight(profile) {
+  const t = classTops(profile).x || [];
+  return t.length >= 4 ? median(t) : null;
+}
+
+// Alle Aufnahmen gleichmäßig skalieren (um die Grundlinie) und wieder mittig ausrichten.
+export function scaleAll(profile, f) {
+  for (const variants of Object.values(profile.glyphs)) for (const v of variants) for (const s of v) for (const p of s) {
+    p[0] = Math.round(p[0] * f * 1000) / 1000;
+    p[1] = Math.round(p[1] * f * 1000) / 1000;
+  }
+  alignAll(profile);
+}
+
+// Gibt die geänderten Zeichen zurück (verändert das Profil an Ort und Stelle).
+export function equalize(profile) {
+  const tops = classTops(profile);
   const changed = new Set();
   for (const [ch, variants] of Object.entries(profile.glyphs)) {
     const c = sizeClass(ch);

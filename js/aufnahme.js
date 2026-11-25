@@ -1,5 +1,5 @@
 // Modul 1: Handschrift-Aufnahme.
-import { VARIANTS, groupsFor, variantsOf, recordedCount, progress, checkPair, label, boxWidth, align } from './profile.js';
+import { VARIANTS, groupsFor, variantsOf, recordedCount, progress, checkPair, label, boxWidth, align, alignAll, typicalXHeight, scaleAll } from './profile.js';
 import { saveProfile, getSettings, setSetting } from './storage.js';
 import { fillStrokes } from './ink.js';
 import { drawGhost } from './ghost.js';
@@ -23,7 +23,7 @@ const GAP = 16;
 
 export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. (Maus/Finger lassen sich im Profil-Tab als Testmodus erlauben.)';
 
-export function initAufnahme(profile) {
+export function initAufnahme(profile, onScaled = () => {}) {
   const $ = id => document.getElementById(id);
   const groupsEl = $('char-groups'), boxesEl = $('boxes'), hintEl = $('recorder-hint');
   let current = getSettings().aufnahmeChar;
@@ -98,7 +98,7 @@ export function initAufnahme(profile) {
       const u = Math.min((ah - rows * (ACTIONS_H + GAP)) / (rows * HEIGHT), (aw - (c - 1) * GAP) / (c * w), 110);
       if (u > unit) { unit = u; cols = c; }
     }
-    unit = Math.max(unit, 30);
+    unit = Math.max(unit * (getSettings().boxScale || 1), 24); // kleiner, wenn an die eigene Schrift angepasst
     boxesEl.style.gridTemplateColumns = `repeat(${cols}, auto)`;
 
     boxesEl.innerHTML = '';
@@ -243,6 +243,28 @@ export function initAufnahme(profile) {
     current = allChars()[0];
     renderList();
     select(current);
+  });
+
+  // Kästchen an die eigene Schrift anpassen: Die Hilfslinien werden so groß wie deine typische Schrift,
+  // die Aufnahmen werden passend umgerechnet (gleiche Größe auf dem Bildschirm, x-Höhe danach = 1),
+  // und die Schriftgröße im Schreiben-Tab wird ausgeglichen, damit das PDF gleich groß bleibt.
+  $('fit-boxes').addEventListener('click', () => {
+    if (alignAll(profile)) saveProfile(profile);
+    const m = typicalXHeight(profile);
+    if (!m) return alert('Dafür braucht es zuerst ein paar Kleinbuchstaben wie a, e, n, o (mindestens 4 Varianten).');
+    const s = getSettings(), old = s.boxScale || 1;
+    const next = Math.min(1, old * m); // größer als der Platz erlaubt geht nicht
+    const f = next / old;               // tatsächliche Änderung der Kästchen
+    if (Math.abs(f - 1) < 0.05) return alert('Die Kästchen passen schon zu deiner Schrift.');
+    if (!confirm(`Deine Kleinbuchstaben sind im Schnitt ${Math.round(m * 100)} % so hoch wie die x-Höhe-Linie.\n` +
+      `Die Kästchen werden ${f < 1 ? 'kleiner' : 'größer'}, deine Aufnahmen bleiben gleich groß, das PDF auch.\n\nAnpassen?`)) return;
+    scaleAll(profile, 1 / f); // gleiche Größe auf dem Bildschirm trotz kleinerer Hilfslinien
+    setSetting('boxScale', Math.round(next * 1000) / 1000);
+    setSetting('xHeight', Math.round(Math.min(6, Math.max(1.5, (s.xHeight ?? 3) * f)) * 10) / 10);
+    saveProfile(profile);
+    onScaled();
+    renderList();
+    renderBoxes();
   });
 
   // Bei Drehung/Größenänderung neu aufbauen (Daten sind normiert, nichts geht verloren).

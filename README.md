@@ -51,6 +51,7 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Verbundene Paare** (ch, sch, ei …): so schreiben, wie du sie wirklich verbindest. Eigene Paare fügst du unten links hinzu.
 - Farben in der Liste: weiß = fehlt, gelb = 1–2 Varianten, grün = fertig.
 - **Nächstes fehlendes ⏭** springt zum nächsten unvollständigen Zeichen.
+- **📐 Kästchen an meine Schrift anpassen** (links oben): Misst, wie groß du Kleinbuchstaben wirklich schreibst, und verkleinert Kästchen und Hilfslinien passend. Deine Aufnahmen bleiben gleich groß und das PDF auch (die Schriftgröße im Schreiben-Tab wird ausgeglichen). Gilt auch für die Aufnahme als Text.
 - Nur der Apple Pencil zeichnet. Finger und Handballen werden ignoriert, damit du die Hand ablegen kannst.
 
 - Unter den Kästchen zeigt **„So sieht es im Text aus“** Beispielwörter mit dem aktuellen Zeichen in deiner Schrift. So fällt ein zu großer oder schiefer Buchstabe sofort auf.
@@ -127,7 +128,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v17';` hochzählen (z. B. auf `'v18'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v18';` hochzählen (z. B. auf `'v19'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen

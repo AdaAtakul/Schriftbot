@@ -36,9 +36,10 @@ try {
     '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, im Profil-Tab ein Backup importieren.');
   throw err;
 }
-const aufnahme = initAufnahme(profile);
+let schreiben;
+const aufnahme = initAufnahme(profile, () => schreiben.sync()); // Schriftgröße im Schreiben-Tab nachziehen
 initTextAufnahme(profile, aufnahme.refresh);
-initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
+schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
 initKi(profile);
 

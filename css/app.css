@@ -311,6 +311,7 @@ input[type="text"], input:not([type]) {
   border-radius: 10px;
   touch-action: none; /* kein Scrollen/Zoomen beim Schreiben */
 }
+.fit-boxes { width: 100%; margin: 4px 0 8px; padding: 0 10px; }
 .char-preview { flex-shrink: 0; margin-top: 10px; }
 #char-preview { display: block; width: 100%; height: 96px; margin-top: 4px; background: #fff; border: 1px solid var(--border); border-radius: 10px; }
 .box-actions { display: flex; gap: 8px; margin-top: 6px; }

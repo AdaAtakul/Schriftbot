@@ -241,5 +241,5 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   });
 
   syncControls();
-  return { render, getSeed: () => seed, getText: () => input.value };
+  return { render, sync: () => { syncControls(); render(); }, getSeed: () => seed, getText: () => input.value };
 }

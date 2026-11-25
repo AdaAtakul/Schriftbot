@@ -1,6 +1,6 @@
 // Selbsttest für das Profil-Modell: node tests/profile.test.mjs
 import assert from 'node:assert/strict';
-import { emptyProfile, variantsOf, progress, checkPair, parseProfile, GROUPS, align, alignAll, equalize } from '../js/profile.js';
+import { emptyProfile, variantsOf, progress, checkPair, parseProfile, GROUPS, align, alignAll, equalize, typicalXHeight, scaleAll } from '../js/profile.js';
 
 const p = emptyProfile();
 const total = progress(p).total;
@@ -70,4 +70,19 @@ assert.ok(Math.abs(-Math.min(...e.glyphs.h[0].flat().map(p => p[1])) - 1.75) < 0
 assert.equal(e.glyphs.m[0][0][0][1], 0, 'bleibt auf der Grundlinie');
 assert.equal(JSON.stringify(e.glyphs['.']), dot, 'Satzzeichen unberührt');
 assert.deepEqual(equalize(e), [], 'zweiter Durchlauf ändert nichts');
+
+// Kästchen an die eigene Schrift anpassen: typische x-Höhe messen, alles auf 1 skalieren
+const s = emptyProfile();
+for (const ch of 'naoe') s.glyphs[ch] = [bump(0.6), bump(0.62), bump(0.65)];
+s.glyphs.h = [bump(1.1), [], []];
+s.glyphs[' '] = [[[[0, 0, .5, 0], [0.9, 0, .5, 9]]], [], []];
+assert.equal(typicalXHeight(emptyProfile()), null, 'ohne Daten keine Messung');
+const m = typicalXHeight(s);
+assert.equal(m, 0.62);
+scaleAll(s, 1 / m);
+assert.ok(Math.abs(typicalXHeight(s) - 1) < 0.01, 'danach typische x-Höhe 1');
+assert.ok(Math.abs(-Math.min(...s.glyphs.h[0].flat().map(p => p[1])) - 1.1 / 0.62) < 0.01, 'Verhältnisse bleiben');
+assert.ok(Math.abs(s.glyphs[' '][0][0][1][0] - s.glyphs[' '][0][0][0][0] - 0.9 / 0.62) < 0.01, 'Wortabstand wächst mit');
+const cx = s.glyphs.n[0].flat().map(p => p[0]);
+assert.ok(Math.abs((Math.min(...cx) + Math.max(...cx)) / 2 - 1.5) < 0.01, 'wieder mittig im Kästchen');
 console.log('OK – Gesamtzahl Zeichen:', total);

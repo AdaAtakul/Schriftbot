@@ -27,7 +27,8 @@ export function initTextAufnahme(profile, onSaved) {
 
   // Wörter auf Zeilen und Zeilen auf Seiten verteilen, passend zur Bildschirmbreite.
   function layoutPages() {
-    unit = Math.max(32, Math.min(48, wrap.clientWidth / 24)); // x-Höhe ≈ 6–9 mm auf dem iPad
+    // x-Höhe ≈ 6–9 mm auf dem iPad, kleiner wenn die Kästchen an die eigene Schrift angepasst sind
+    unit = Math.max(20, Math.min(48, wrap.clientWidth / 24) * (getSettings().boxScale || 1));
     const cols = wrap.clientWidth / unit;
     const rowsPerPage = Math.max(1, Math.floor(wrap.clientHeight / (PITCH * unit)));
     const rows = [];
