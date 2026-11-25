@@ -63,6 +63,51 @@ export function bounds(strokes) {
   return { minX, maxX };
 }
 
+// Optischer Abstand: Für jedes Höhenband merken, wo die Tinte links und rechts endet.
+// So rückt z. B. ein o unter das Dach eines T, und schräge Schrift wird nicht zu breit.
+const BAND = 0.25, B0 = -3, NB = 20; // Bänder von 3 x-Höhen über bis 2 unter der Grundlinie
+const KERN = 0.8;                    // Anteil der Lücke, der geschlossen wird
+const MAX_KERN = 0.6;                // höchstens so viel näher (x-Höhen)
+const profiles = new WeakMap();      // je Variante nur einmal berechnen
+
+function profileOf(strokes) {
+  if (profiles.has(strokes)) return profiles.get(strokes);
+  const lo = Array(NB).fill(Infinity), hi = Array(NB).fill(-Infinity);
+  const add = (x, y) => {
+    const b = Math.floor((y - B0) / BAND);
+    if (b < 0 || b >= NB) return;
+    if (x < lo[b]) lo[b] = x;
+    if (x > hi[b]) hi[b] = x;
+  };
+  for (const s of strokes) {
+    s.forEach(([x, y], i) => {
+      if (i) { // Zwischenpunkte, damit schnelle Striche kein Band überspringen
+        const [px, py] = s[i - 1];
+        const n = Math.ceil(Math.hypot(x - px, y - py) / 0.1);
+        for (let k = 1; k < n; k++) add(px + (x - px) * k / n, py + (y - py) * k / n);
+      }
+      add(x, y);
+    });
+  }
+  const prof = { lo, hi };
+  profiles.set(strokes, prof);
+  return prof;
+}
+
+// Wie viel näher (in x-Höhen) darf R an L rücken? Kleinste Lücke über alle Bänder (±1 Band Toleranz).
+function kerning(L, R) {
+  const a = profileOf(L.strokes), b = profileOf(R.strokes);
+  let free = Infinity;
+  for (let i = 0; i < NB; i++) {
+    if (a.hi[i] === -Infinity) continue;
+    for (let j = Math.max(0, i - 1); j <= Math.min(NB - 1, i + 1); j++) {
+      if (b.lo[j] === Infinity) continue;
+      free = Math.min(free, (L.maxX - a.hi[i]) * L.sc + (b.lo[j] - R.minX) * R.sc);
+    }
+  }
+  return free === Infinity ? 0 : Math.min(free * KERN, MAX_KERN); // keine gemeinsame Höhe (z. B. ' und s) → normaler Abstand
+}
+
 export function layout(text, profile, options = {}, seed = 1) {
   const o = { ...DEFAULTS, ...options };
   // Getrennte Zufallsquellen: Regler verschieben so nicht die Variantenwahl.
@@ -102,7 +147,7 @@ export function layout(text, profile, options = {}, seed = 1) {
     const pad = PEN_SIZE / 2;
     const sc = 1 + jitter(CHAOS.size);
     return {
-      strokes, sc,
+      strokes, sc, minX: b.minX, maxX: b.maxX,
       dx: (pad - b.minX) * unit * sc,
       w: (b.maxX - b.minX + 2 * pad) * unit * sc,
       gap: (o.spacing + jitter(CHAOS.gap)) * unit,
@@ -129,6 +174,10 @@ export function layout(text, profile, options = {}, seed = 1) {
         glyphs.push({ missing: chars[i], w: MISSING_W * unit, gap: o.spacing * unit });
       }
       i++;
+    }
+    // Abstand zum Vorgänger um die optische Lücke verkleinern
+    for (let k = 1; k < glyphs.length; k++) {
+      if (!glyphs[k].missing && !glyphs[k - 1].missing) glyphs[k].gap -= kerning(glyphs[k - 1], glyphs[k]) * unit;
     }
     return glyphs;
   }

@@ -4,6 +4,18 @@ import { saveProfile, getSettings, setSetting } from './storage.js';
 import { fillStrokes } from './ink.js';
 import { drawGhost } from './ghost.js';
 import { attachPen } from './pen.js';
+import { layout } from './layout.js';
+import { drawPage } from './render.js';
+import { current as writeSettings, INKS } from './schreiben.js';
+
+// Beispielwörter für die Vorschau (Buchstabieralphabet + Alltagswörter, deckt alle Pflichtzeichen ab).
+const SAMPLES = ('Anna Berta Clara Dora Emil Fritz Gustav Heinrich Ida Julius Kaufmann Ludwig Martha Nordpol Otto Paula ' +
+  'Quelle Richard Samuel Theodor Ulrich Viktor Wilhelm Xaver Ypsilon Zacharias Ärger Ökonom Übel Köln Straße ' +
+  'Brücke Löwe Quark Joghurt Yacht Boxer Wasser schnell dick Lied nie Ende sehr Fisch unten Mitte Liebe Augen ' +
+  'Feuer Kind Ding Abend allen Butter Sonne essen Summe Gegend Eule 2025 1987 0634 100% Ja! Wie? Zeit: Hund, ' +
+  'Katze; Ende. Mo-Fr 1/2 a+b=c (so) „gut“ ‚klein‘ "Hi" Peter\'s').split(' ');
+const previewText = ch => ch === ' ' ? 'Hund Katze Maus'
+  : (SAMPLES.filter(w => w.includes(ch)).slice(0, 3).join(' ') || `n${ch}n`);
 
 // Kästchen-Geometrie in x-Höhen: oben 2,5 über, unten 1,5 unter der Grundlinie.
 const TOP = -2.5, BOTTOM = 1.5, HEIGHT = BOTTOM - TOP;
@@ -135,6 +147,7 @@ export function initAufnahme(profile) {
       draw(box);
       return box;
     });
+    drawPreview();
   }
 
   function button(text, onClick) {
@@ -148,6 +161,28 @@ export function initAufnahme(profile) {
     draw(box);
     updateChip(current);
     saveProfile(profile);
+    drawPreview();
+  }
+
+  // Beispielwörter mit dem aktuellen Zeichen in der eigenen Handschrift, so wie „Schreiben“ sie setzt.
+  function drawPreview() {
+    const canvas = $('char-preview');
+    const cssW = canvas.clientWidth, cssH = canvas.clientHeight;
+    if (!cssW) return;
+    // Aktuelles Zeichen schon so ausgerichtet zeigen, wie es beim Verlassen gespeichert wird.
+    const variants = variantsOf(profile, current).map(v => { const c = structuredClone(v); align(current, c); return c; });
+    const p = { ...profile, glyphs: { ...profile.glyphs, [current]: variants } };
+    const s = writeSettings();
+    const u = cssH / 4; // Pixel je x-Höhe: Platz für Ober- und Unterlänge
+    const result = layout(previewText(current), p, {
+      xHeight: 1, margin: 0.5, pageW: cssW / u, pageH: 1e6, ruled: false, connect: s.connect / 100, chaos: s.chaos / 100,
+    });
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
+    drawPage(ctx, result.pages[0], (INKS[s.ink] || INKS.blau).color);
   }
 
   function draw({ ctx, strokes, unit, w, live }) {

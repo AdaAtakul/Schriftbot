@@ -76,4 +76,22 @@ assert.equal(lm.lines, 2);
 assert.equal(lm.step, 17.6);
 assert.ok(lm.first >= DEFAULTS.margin + 2 * ruled.xHeight);
 assert.equal(lineMetrics({ ...ruled, lineTop: 50 }).first, 50, 'nie oberhalb der ersten Linie');
+
+// Optischer Abstand: o rückt unter das Dach des T, ohne den Stamm zu berühren
+const k = emptyProfile();
+variantsOf(k, 'T')[0].push([[0, -1.8, .5, 0], [1.6, -1.8, .5, 9]], [[0.8, -1.8, .5, 0], [0.8, 0, .5, 9]]);
+const ring = Array.from({ length: 25 }, (_, i) => [0.5 + 0.5 * Math.cos(i / 24 * 2 * Math.PI), -0.5 + 0.5 * Math.sin(i / 24 * 2 * Math.PI), .5, i]);
+variantsOf(k, 'o')[0].push(ring);
+variantsOf(k, 'l')[0].push([[0.5, -2, .5, 0], [0.5, 0, .5, 9]]);
+variantsOf(k, "'")[0].push([[0.5, -2, .5, 0], [0.5, -1.6, .5, 9]]);
+const inkX = (it, f) => f(...it.strokes.flat().map(p => it.x + p[0] * it.s));
+const [T, o] = layout('To', k).pages[0].items;
+const bboxGap = inkX(o, Math.min) - inkX(T, Math.max);
+assert.ok(bboxGap < 0, `o steht unter dem T-Dach (${bboxGap.toFixed(2)} mm)`);
+assert.ok(inkX(o, Math.min) > T.x + 0.8 * T.s + 0.2, 'o berührt den Stamm nicht');
+// Gerade Striche (l l) und Zeichen ohne gemeinsame Höhe (' o) behalten den normalen Abstand
+const gapOf = s => { const [a, b] = layout(s, k).pages[0].items; return inkX(b, Math.min) - inkX(a, Math.max); };
+const normal = (DEFAULTS.spacing + 0.13) * DEFAULTS.xHeight; // Abstand + Strichbreite
+assert.ok(Math.abs(gapOf('ll') - normal) < 1e-9, 'll unverändert');
+assert.ok(Math.abs(gapOf("'o") - normal) < 1e-9, "' o unverändert");
 console.log('OK – Layout');

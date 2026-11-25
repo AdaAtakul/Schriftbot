@@ -53,6 +53,9 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Nächstes fehlendes ⏭** springt zum nächsten unvollständigen Zeichen.
 - Nur der Apple Pencil zeichnet. Finger und Handballen werden ignoriert, damit du die Hand ablegen kannst.
 
+- Unter den Kästchen zeigt **„So sieht es im Text aus“** Beispielwörter mit dem aktuellen Zeichen in deiner Schrift. So fällt ein zu großer oder schiefer Buchstabe sofort auf.
+- Beim Wechsel zum nächsten Zeichen rückt die App jede Variante mittig unter die Vorlage. Liegt ein Buchstabe nur knapp neben der Grundlinie, setzt sie ihn genau darauf.
+
 Tipp: Schreib in normaler Größe und Geschwindigkeit, nicht „schön“. Je natürlicher die Aufnahme, desto echter das Ergebnis.
 
 ### Schneller: als Text aufnehmen
@@ -74,6 +77,23 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - **Schriftgröße, Zeilenabstand, Rand, Tintenfarbe** nach Geschmack.
 - **🎲 Neu würfeln**: andere Mischung der Varianten.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
+- Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
+
+### KI-Assistent (Claude oder eine andere KI)
+
+Im Tab **Schreiben** unter **✨ KI-Assistent** schreibst du einen Auftrag, z. B. „Fasse die Photosynthese in 5 Sätzen zusammen“. Die Antwort ersetzt den Text im Textfeld und erscheint sofort in deiner Handschrift. **Korrigieren**, **Kürzen** und **Stichpunkte** bearbeiten den vorhandenen Text. **↶ Vorherigen Text zurückholen** macht die letzte Änderung rückgängig.
+
+Einrichten im Tab **Profil → KI-Assistent**:
+
+- **Claude**: Unter [console.anthropic.com](https://console.anthropic.com) → *API Keys* einen Schlüssel anlegen und Guthaben aufladen, dann den Schlüssel einfügen. Voreingestellt ist `claude-opus-5-5`; `claude-haiku-5-5` ist deutlich günstiger.
+- **Andere KI**: „Andere KI (OpenAI-kompatibel)“ wählen und Adresse, Modellname und Schlüssel des Anbieters eintragen (z. B. OpenAI `https://api.openai.com/v1`, OpenRouter `https://openrouter.ai/api/v1`). Manche Anbieter erlauben keinen Zugriff direkt aus dem Browser. Dann erscheint „Keine Verbindung“.
+
+Gut zu wissen:
+
+- Der Schlüssel bleibt nur auf diesem iPad und kommt nicht ins Profil-Backup.
+- Auftrag und Text gehen an den gewählten Anbieter, der die Kosten direkt mit dir abrechnet.
+- Die KI bekommt die Liste deiner aufgenommenen Zeichen und benutzt nur diese, damit nichts rot markiert wird.
+- Der Assistent braucht Internet. Der Rest der App läuft weiter offline.
 
 ### Nach GoodNotes exportieren
 
@@ -100,7 +120,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v14';` hochzählen (z. B. auf `'v15'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v15';` hochzählen (z. B. auf `'v16'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -130,6 +150,8 @@ js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Tab Profil: Backup, Testmodus
 js/storage.js           IndexedDB und Einstellungen
+js/ki.js                KI-Aufruf: Claude (Messages-API) oder OpenAI-kompatibel
+js/kiui.js              KI-Assistent: Einstellungen und Aufträge
 sw.js                   Service Worker (Offline-Cache)
 vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT-Lizenz)
 tests/                  Selbsttests
@@ -143,6 +165,8 @@ Selbsttests (Node.js ≥ 18):
 node tests/profile.test.mjs
 node tests/layout.test.mjs
 node tests/export.test.mjs
+node tests/textplan.test.mjs
+node tests/ki.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):
