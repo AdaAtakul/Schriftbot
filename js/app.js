@@ -52,7 +52,12 @@ if ('serviceWorker' in navigator) {
 
   navigator.serviceWorker.register('sw.js')
     .then(() => navigator.serviceWorker.ready)
-    .then(() => { offlineStatus.textContent = '✅ Offline-Modus bereit'; })
+    .then(() => caches.keys())
+    .then(keys => {
+      // Version anzeigen, damit man nach einem Update prüfen kann, ob es angekommen ist.
+      const v = Math.max(...keys.map(k => +(k.match(/^handschrift-v(\d+)$/)?.[1] || 0)));
+      offlineStatus.textContent = `✅ Offline-Modus bereit · Version v${v}`;
+    })
     .catch(err => { offlineStatus.textContent = '⚠️ Offline-Modus nicht verfügbar: ' + err.message; });
 } else {
   offlineStatus.textContent = '⚠️ Dieser Browser unterstützt keinen Offline-Modus.';

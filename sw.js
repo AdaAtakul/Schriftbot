@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v13';
+const VERSION = 'v14';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',
@@ -28,7 +28,11 @@ const FILES = [
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' am Browser-Cache vorbei: GitHub Pages lässt Dateien 10 Minuten cachen,
+  // sonst landet in der neuen Version womöglich der alte Code.
+  e.waitUntil(caches.open(CACHE)
+    .then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
