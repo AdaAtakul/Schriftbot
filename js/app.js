@@ -38,7 +38,7 @@ try {
 }
 const aufnahme = initAufnahme(profile);
 initTextAufnahme(profile, aufnahme.refresh);
-initSchreiben(profile); // rendert neu, sobald der Tab sichtbar wird
+initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
 initKi(profile);
 

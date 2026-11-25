@@ -34,3 +34,12 @@ export function plan(profile) {
   if (group.length) extra.push(group);
   return [...words, ...extra];
 }
+
+// Beispielwörter für die Vorschau (Buchstabieralphabet + Alltagswörter, deckt alle Pflichtzeichen ab).
+export const SAMPLES = ('Anna Berta Clara Dora Emil Fritz Gustav Heinrich Ida Julius Kaufmann Ludwig Martha Nordpol Otto Paula ' +
+  'Quelle Richard Samuel Theodor Ulrich Viktor Wilhelm Xaver Ypsilon Zacharias Ärger Ökonom Übel Köln Straße ' +
+  'Brücke Löwe Quark Joghurt Yacht Boxer Wasser schnell dick Lied nie Ende sehr Fisch unten Mitte Liebe Augen ' +
+  'Feuer Kind Ding Abend allen Butter Sonne essen Summe Gegend Eule 2025 1987 0634 100% Ja! Wie? Zeit: Hund, ' +
+  'Aquarium Handy Projekt Linie Fenster Mädchen Katze; Ende. Mo-Fr 1/2 a+b=c (so) „gut“ ‚klein‘ "Hi" Peter\'s').split(' ');
+export const previewText = ch => ch === ' ' ? 'Hund Katze Maus'
+  : (SAMPLES.filter(w => w.includes(ch)).slice(0, 3).join(' ') || `n${ch}n`);

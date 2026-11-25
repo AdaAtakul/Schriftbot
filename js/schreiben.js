@@ -1,7 +1,8 @@
 // Modul 2: Text → Handschrift mit Live-Vorschau.
 import { layout, lineMetrics, DEFAULTS } from './layout.js';
 import { drawPage, drawPaper } from './render.js';
-import { getSettings, setSetting } from './storage.js';
+import { getSettings, setSetting, saveProfile } from './storage.js';
+import { equalize } from './profile.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 
 // Linienabstände der GoodNotes-Vorlagen sind nicht offiziell dokumentiert (Nutzerangaben),
@@ -55,7 +56,7 @@ export function options(s = current()) {
   };
 }
 
-export function initSchreiben(profile) {
+export function initSchreiben(profile, onProfileChanged = () => {}) {
   const $ = id => document.getElementById(id);
   const input = $('text-input'), pagesEl = $('pages'), statusEl = $('schreiben-status');
   input.value = getSettings().text || '';
@@ -168,6 +169,30 @@ export function initSchreiben(profile) {
     render();
   });
   new ResizeObserver(() => render()).observe(pagesEl);
+
+  // Zu kleine/große Buchstaben an die eigene typische Größe angleichen; rückgängig bis zum Schließen der App.
+  let before = null;
+  const replaceGlyphs = glyphs => {
+    profile.glyphs = glyphs;
+    saveProfile(profile);
+    onProfileChanged(); // Aufnahme-Kästchen zeigen sonst noch die alten Striche
+    render();
+  };
+  $('equalize').addEventListener('click', () => {
+    const trial = structuredClone(profile.glyphs);
+    const changed = equalize({ ...profile, glyphs: trial });
+    if (!changed.length) return alert('Alle Buchstaben haben schon eine passende Größe.');
+    if (!confirm(`Diese Zeichen werden in der Größe an deine übrigen angepasst:\n${changed.join(' ')}\n\nÜbernehmen? Rückgängig geht, bis du die App schließt.`)) return;
+    before = profile.glyphs;
+    replaceGlyphs(trial);
+    $('equalize-undo').hidden = false;
+  });
+  $('equalize-undo').addEventListener('click', () => {
+    if (!before) return;
+    replaceGlyphs(before);
+    before = null;
+    $('equalize-undo').hidden = true;
+  });
 
   // ---------- Export ----------
   const paperBox = $('export-paper'), shareAgain = $('share-again');

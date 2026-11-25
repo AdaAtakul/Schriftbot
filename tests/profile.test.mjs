@@ -1,6 +1,6 @@
 // Selbsttest für das Profil-Modell: node tests/profile.test.mjs
 import assert from 'node:assert/strict';
-import { emptyProfile, variantsOf, progress, checkPair, parseProfile, GROUPS, align, alignAll } from '../js/profile.js';
+import { emptyProfile, variantsOf, progress, checkPair, parseProfile, GROUPS, align, alignAll, equalize } from '../js/profile.js';
 
 const p = emptyProfile();
 const total = progress(p).total;
@@ -54,4 +54,20 @@ assert.equal(alignAll(q), true);
 assert.equal(q.glyphs.ei[0][0][1][1], 0);
 assert.equal(q.glyphs.ng[0][0][1][1], 0.2);
 assert.equal(alignAll(q), false);
+
+// Größen angleichen: zu kleines m und zu kleines h werden auf die eigene typische Höhe gebracht
+const e = emptyProfile();
+const bump = (top, w = 1) => [[[1, 0, .5, 0], [1 + w / 2, -top, .5, 5], [1 + w, 0, .5, 9]]];
+for (const ch of 'nao') e.glyphs[ch] = [bump(0.9), bump(1), bump(1.1)];
+e.glyphs.m = [bump(0.45, 1.2), bump(1, 1.2), []];
+for (const ch of 'bdl') e.glyphs[ch] = [bump(1.8), bump(1.7), bump(1.75)];
+e.glyphs.h = [bump(0.8), bump(1.75), []];
+e.glyphs['.'] = [[[[1, 0, .5, 0], [1.05, -0.05, .5, 5]]], [], []];
+const dot = JSON.stringify(e.glyphs['.']);
+assert.deepEqual(equalize(e).sort(), ['h', 'm']);
+assert.ok(Math.abs(-Math.min(...e.glyphs.m[0].flat().map(p => p[1])) - 1) < 0.01, 'm auf x-Höhe');
+assert.ok(Math.abs(-Math.min(...e.glyphs.h[0].flat().map(p => p[1])) - 1.75) < 0.01, 'h auf Oberlänge');
+assert.equal(e.glyphs.m[0][0][0][1], 0, 'bleibt auf der Grundlinie');
+assert.equal(JSON.stringify(e.glyphs['.']), dot, 'Satzzeichen unberührt');
+assert.deepEqual(equalize(e), [], 'zweiter Durchlauf ändert nichts');
 console.log('OK – Gesamtzahl Zeichen:', total);

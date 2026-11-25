@@ -1,7 +1,7 @@
 // Selbsttest für den Aufnahmetext: node tests/textplan.test.mjs
 import assert from 'node:assert/strict';
 import { emptyProfile, GROUPS } from '../js/profile.js';
-import { SENTENCES, parse, plan } from '../js/textplan.js';
+import { SENTENCES, parse, plan, previewText } from '../js/textplan.js';
 
 assert.deepEqual(parse('D[ei][ch].'), [['D', 'ei', 'ch', '.']]);
 assert.deepEqual(parse('[sch]wimmt Elsa'), [['sch', 'w', 'i', 'm', 'm', 't'], ['E', 'l', 's', 'a']]);
@@ -22,4 +22,7 @@ const required = GROUPS.filter(g => !g.optional).flatMap(g => g.chars).filter(k 
 for (const k of [...required, 'ft']) assert.ok(keys.has(k), `Plan fehlt: ${k}`);
 
 const slots = plan(p).flat().length;
+
+// Vorschau im Aufnahme-Tab: für jedes Pflichtzeichen ein echtes Beispielwort (kein „n?n“-Notbehelf)
+for (const k of required) assert.ok(!previewText(k).startsWith('n' + k + 'n'), `kein Beispielwort für ${k}`);
 console.log(`OK – Aufnahmetext: ${plan(p).length} Wörter, ${slots} Felder für ${required.length + 1} Zeichen`);

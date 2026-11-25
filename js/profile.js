@@ -52,6 +52,56 @@ export function align(ch, strokes) {
   return true;
 }
 
+// Größen angleichen: Jede Variante wird mit der typischen Höhe ihrer Zeichengruppe in DEINER Schrift verglichen
+// (Median, Höhe über der Grundlinie). Weicht sie um mehr als 15 % ab, wird sie um Grundlinie und Mitte skaliert.
+// So bleiben die eigenen Proportionen (z. B. kurze Oberlängen) erhalten, nur Ausreißer werden korrigiert.
+const SIZE_CLASS = {};
+for (const c of 'acemnorsuvwxzgpqy') SIZE_CLASS[c] = 'x';   // x-Höhe (Unterlängen zählen nicht, gemessen wird nach oben)
+for (const c of 'bdfhklß') SIZE_CLASS[c] = 'asc';           // Oberlänge
+for (const c of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') SIZE_CLASS[c] = 'cap';
+for (const c of '0123456789') SIZE_CLASS[c] = 'digit';
+// i, j, t, Umlaute und Satzzeichen bleiben unberührt: Punkte und Querstriche machen ihre Höhe unzuverlässig.
+const TOLERANCE = 1.15, MIN_K = 0.5, MAX_K = 2.5;
+
+function sizeClass(ch) {
+  const cls = [...ch].map(c => SIZE_CLASS[c]);
+  if (cls.length === 1) return cls[0] || null;
+  if (!cls.every(c => c === 'x' || c === 'asc')) return null; // Paar mit i, t …
+  return cls.includes('asc') ? 'asc' : 'x';
+}
+const topOf = strokes => -Math.min(...strokes.flat().map(p => p[1]));
+
+// Gibt die geänderten Zeichen zurück (verändert das Profil an Ort und Stelle).
+export function equalize(profile) {
+  const tops = {};
+  for (const [ch, variants] of Object.entries(profile.glyphs)) {
+    const c = sizeClass(ch);
+    if (c) for (const v of variants) if (v.length && topOf(v) > 0.1) (tops[c] ||= []).push(topOf(v));
+  }
+  const median = a => { const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const changed = new Set();
+  for (const [ch, variants] of Object.entries(profile.glyphs)) {
+    const c = sizeClass(ch);
+    if (!c || (tops[c] || []).length < 4) continue; // zu wenig Vergleich
+    const target = median(tops[c]);
+    for (const v of variants) {
+      if (!v.length) continue;
+      const top = topOf(v);
+      if (top <= 0.1) continue;
+      const k = Math.min(MAX_K, Math.max(MIN_K, target / top));
+      if (k < TOLERANCE && k > 1 / TOLERANCE) continue;
+      const xs = v.flat().map(p => p[0]);
+      const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+      for (const s of v) for (const p of s) {
+        p[0] = Math.round((cx + (p[0] - cx) * k) * 1000) / 1000;
+        p[1] = Math.round(p[1] * k * 1000) / 1000;
+      }
+      changed.add(ch);
+    }
+  }
+  return [...changed];
+}
+
 // Alle Aufnahmen ausrichten (für Aufnahmen von vor dieser Funktion). Gibt zurück, ob sich etwas geändert hat.
 export function alignAll(profile) {
   let changed = false;
