@@ -43,7 +43,7 @@ export function initBlatt(profile) {
       clean = await Promise.all(sheet.pages.map((_, i) => compose(i)));
       build();
     } catch (err) {
-      statusEl.textContent = '⚠️ Gespeichertes Blatt konnte nicht geladen werden: ' + err.message;
+      statusEl.textContent = 'Gespeichertes Blatt konnte nicht geladen werden: ' + err.message;
     }
   }
 
@@ -73,7 +73,7 @@ export function initBlatt(profile) {
     const file = fileInput.files[0];
     fileInput.value = '';
     if (!file) return;
-    if (sheet && !await ask('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?')) return;
+    if (sheet && !await ask('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?', { ok: 'Ersetzen' })) return;
     const pages = [], found = [], canvases = [];
     setBusy(true);
     try {
@@ -99,11 +99,11 @@ export function initBlatt(profile) {
       const note = total > pages.length ? ` (nur die ersten ${pages.length} von ${total} Seiten)` : '';
       const empty = found.filter(f => !f.text).length;
       statusEl.textContent = found.length
-        ? `✅ ${found.length} blaue ${found.length === 1 ? 'Antwort' : 'Antworten'} gefunden und in Handschrift gesetzt${note}.` +
+        ? `${found.length} blaue ${found.length === 1 ? 'Antwort' : 'Antworten'} gefunden und in Handschrift gesetzt${note}.` +
           (empty ? ` ${empty} ohne lesbaren Text (z. B. Foto): Feld antippen und Text eintragen.` : '')
-        : `Keine blauen Antworten gefunden${note}. Mit „＋ Textfeld“ ein Feld aufziehen.`;
+        : `Keine blauen Antworten gefunden${note}. Mit „Textfeld“ ein Feld aufziehen.`;
     } catch (err) {
-      statusEl.textContent = '⚠️ Datei konnte nicht gelesen werden: ' + err.message;
+      statusEl.textContent = 'Datei konnte nicht gelesen werden: ' + err.message;
     } finally {
       setBusy(false);
     }
@@ -205,8 +205,8 @@ export function initBlatt(profile) {
       if (r.overflow) over.push(n + 1);
     });
     const notes = [];
-    if (miss.size) notes.push(`⚠️ Fehlende Zeichen: ${[...miss].join(' ')}`);
-    if (over.length) notes.push(`⚠️ Zu viel Text für Feld ${over.join(', ')} – Feld größer ziehen`);
+    if (miss.size) notes.push(`Noch nicht aufgenommen: ${[...miss].join(' ')}`);
+    if (over.length) notes.push(`Zu viel Text für Feld ${over.join(', ')} – Feld größer ziehen`);
     $('sheet-warn').textContent = notes.join(' · ');
   }
 
@@ -362,7 +362,7 @@ export function initBlatt(profile) {
     if (!sheet) return showInfo('Bitte zuerst ein Arbeitsblatt öffnen.');
     const s = current(), o = options(s), color = inkColor(s);
     const miss = new Set(fields.flatMap(f => layoutOf(f).missing).filter(c => c !== ' '));
-    if (miss.size && !await ask(`Es fehlen Zeichen: ${[...miss].join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
+    if (miss.size && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${[...miss].join(' ')}\n\nSie erscheinen im Export als rote Kästchen.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren' })) return;
     const labels = exportButtons.map(b => b.innerHTML);
     exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
     shareAgain.hidden = true;

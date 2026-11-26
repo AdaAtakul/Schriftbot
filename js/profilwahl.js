@@ -51,7 +51,7 @@ export function initProfilwahl() {
         if (n) { renameProfile(p.id, n); render(); }
       });
       button('Löschen', async () => {
-        if (!await ask(`Profil „${p.name}“ löschen?` + (p.from ? '' : '\nSeine aufgenommene Schrift wird dabei gelöscht – vorher ein Backup exportieren!'))) return;
+        if (!await ask(`Profil „${p.name}“ löschen?` + (p.from ? '' : '\nSeine aufgenommene Schrift wird dabei gelöscht – vorher sichern!'), { ok: 'Löschen', danger: true })) return;
         const err = await deleteProfile(p.id);
         if (err) return showInfo(err);
         if (p.id === active.id) location.reload(); else render();

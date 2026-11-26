@@ -1,8 +1,11 @@
-# Handschrift-Tool
+# Schriftbot
 
-Eine Web-App für das iPad: Sie nimmt deine eigene Handschrift mit dem Apple Pencil auf und verwandelt getippten Text in diese Handschrift – als eigene Seiten oder direkt auf einem Arbeitsblatt. Das Ergebnis gibst du als GoodNotes-Notizbuch, PDF oder PNG über das Teilen-Menü weiter.
+**Getippten Text in deine eigene Handschrift verwandeln.** Schriftbot nimmt deine Handschrift einmal mit dem Apple Pencil (oder Finger/Maus) auf und schreibt danach jeden Text darin – als eigene Seiten oder direkt in ein Formular. Das Ergebnis gibst du als GoodNotes-Datei, PDF oder PNG weiter.
 
-- Läuft im Safari auf dem iPad, optimiert fürs Querformat
+**Ausprobieren:** https://bambuseleitung.github.io/Schriftbot/ · [Anleitung & häufige Fragen](https://bambuseleitung.github.io/Schriftbot/anleitung.html)
+
+- Kostenlos, ohne Anmeldung, ohne Cookies und Tracking
+- Optimiert für Safari auf dem iPad, läuft in jedem aktuellen Browser (Handy unten mit Tab-Leiste, heller und dunkler Modus)
 - Funktioniert nach dem ersten Öffnen komplett offline
 - Reines HTML/CSS/JavaScript, ohne Build-Schritt
 - Deine Daten bleiben auf deinem iPad (es gibt keinen Server)
@@ -19,9 +22,15 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 4. Alle Dateien und Ordner dieses Projekts hineinziehen:
    ```
    index.html
+   anleitung.html
+   datenschutz.html
    manifest.webmanifest
    sw.js
+   sitemap.xml
+   llms.txt
+   LICENSE
    README.md
+   demo/         (optional, die Demo-Schrift)
    css/
    icons/
    js/
@@ -34,6 +43,19 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 7. Nach etwa einer Minute steht oben auf der Seite die Adresse, z. B.
    `https://DEIN-NAME.github.io/handschrift-tool/`
 
+## 1b. Vor dem Veröffentlichen
+
+- **Demo-Schrift** (empfohlen): Damit Besucher Schriftbot sofort ausprobieren können, legst du eine Beispiel-Schrift bei.
+  1. In Schriftbot ein Profil mit der Demo-Schrift aufnehmen (alle Zeichen, auch „ “ und Satzzeichen) und die Stil-Vorlage wählen, die Besucher zuerst sehen sollen.
+  2. **Profil → Profil teilen** und die Datei sichern.
+  3. Sie im Repo als **`demo/demo-schrift.json`** hochladen und `VERSION` in `sw.js` hochzählen.
+
+  Neue Besucher bekommen dann beim ersten Öffnen ein Profil „Demo-Schrift“ und starten im Tab „Schreiben“ mit einem Beispieltext. Im Tab „Aufnahme“ steht stattdessen „Eigene Schrift aufnehmen“. Fehlt die Datei, startet Schriftbot wie bisher in der Aufnahme.
+- **Vorschaubild**: `icons/og.png` (1200 × 630) erscheint, wenn jemand den Link teilt. Sobald die Demo-Schrift da ist, lohnt sich ein echtes Bild mit Handschrift.
+- **Datenschutz**: `datenschutz.html` nennt als Kontakt GitHub Issues. Je nach Lage kann eine Anschrift nötig sein – im Zweifel rechtlich prüfen lassen.
+- **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. Eine `robots.txt` wirkt bei GitHub-Projektseiten nicht (sie müsste unter `bambuseleitung.github.io/robots.txt` liegen); Suchmaschinen dürfen ohne sie alles lesen.
+- **Eigene Adresse**: Zieht die Seite um (eigene Domain, anderer Repo-Name), die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml` und `llms.txt` ersetzen.
+
 ## 2. Auf dem iPad installieren
 
 1. Die Adresse in **Safari** öffnen (nicht in Chrome – nur Safari kann Apps zum Home-Bildschirm hinzufügen).
@@ -42,6 +64,8 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 4. Im Tab **Profil** sollte unter „Status“ „✅ Offline-Modus bereit“ stehen.
 
 ## 2b. Als iPad-App mit Claude (optional)
+
+> Nur für dich selbst: Die App wird per Sideloading installiert. Für den App Store bräuchte es ein Apple-Entwicklerkonto, und eine Hülle um eine Webseite lehnt Apple meist ab (Richtlinie 4.2).
 
 Im Ordner `ios/` liegt eine richtige iPad-App: links deine Handschrift-App, im Tab **Claude** das echte claude.ai mit deinem normalen Login (Dateien anhängen, Projekte, Verlauf – alles wie gewohnt). Tippst du unter einer Claude-Antwort auf Claudes **Kopieren**-Knopf, fragt die App: **In deine Handschrift übernehmen?** → **Text ersetzen** oder **Anhängen**, und springt in den Tab „Schreiben“. Exporte gehen über das Teilen-Menü an GoodNotes.
 
@@ -70,9 +94,9 @@ Gut zu wissen:
 - **Leerzeichen**: einen waagerechten Strich ziehen, so lang wie dein normaler Wortabstand.
 - **Verbundene Paare** (ch, sch, ei …): so schreiben, wie du sie wirklich verbindest. Eigene Paare fügst du unten links hinzu.
 - Farben in der Liste: weiß = fehlt, gelb = 1–2 Varianten, grün = fertig.
-- **Nächstes fehlendes ⏭** springt zum nächsten unvollständigen Zeichen.
+- **Nächstes fehlendes** springt zum nächsten unvollständigen Zeichen.
 - **Kästchen an meine Schrift anpassen** (links oben): Misst, wie groß du Kleinbuchstaben wirklich schreibst, und verkleinert Kästchen und Hilfslinien passend. Deine Aufnahmen bleiben gleich groß und das PDF auch (die Schriftgröße im Schreiben-Tab wird ausgeglichen). Gilt auch für die Aufnahme als Text.
-- Nur der Apple Pencil zeichnet. Finger und Handballen werden ignoriert, damit du die Hand ablegen kannst.
+- Ohne Apple Pencil zeichnen Finger und Maus. Sobald du einmal mit dem Pencil schreibst, zählt nur noch er – Finger und Handballen werden dann ignoriert, damit du die Hand ablegen kannst. Umstellen: **Profil → Eingabe & Speicher**.
 
 - Unter den Kästchen zeigt **„So sieht es im Text aus“** Beispielwörter mit dem aktuellen Zeichen in deiner Schrift. So fällt ein zu großer oder schiefer Buchstabe sofort auf.
 - Beim Wechsel zum nächsten Zeichen rückt die App jede Variante mittig unter die Vorlage. Liegt ein Buchstabe nur knapp neben der Grundlinie, setzt sie ihn genau darauf.
@@ -85,7 +109,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 
 - Buchstaben **einzeln** schreiben, nur **gelb hinterlegte Gruppen verbunden**.
 - Die Strichfarbe wechselt je Zeichen – so siehst du, welchem Zeichen ein Strich zugeordnet wird.
-- **✓ Übernehmen** speichert die Seite und blättert weiter. Gespeichert wird immer in eine freie Variante; vorhandene Aufnahmen werden nie überschrieben.
+- **Übernehmen** speichert die Seite und blättert weiter. Gespeichert wird immer in eine freie Variante; vorhandene Aufnahmen werden nie überschrieben.
 - Die Abstände zwischen deinen Wörtern werden automatisch als Leerzeichen übernommen.
 - Text dreimal schreiben = drei Varianten für jedes Zeichen. Einzelne Zeichen kannst du jederzeit unter **Einzeln** nachbessern.
 
@@ -94,28 +118,28 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
 - **Roter Papierkorb** oben rechts im Textfeld: löscht den ganzen Text nach einer Rückfrage. Direkt danach holt **Gelöschten Text wiederherstellen** ihn zurück (bis du neu tippst).
 - **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
-- **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Die Vorlage stellt die Stil-Regler darunter ein. Jeden Regler kannst du ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
-- Stil-Regler (gehören zur gewählten Vorlage):
-  - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
-  - **Unordnung** (bis 150 %): kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage.
-  - **Durchstreichen**: wie oft ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben wird. „aus“ = nie; bei 100 % etwa alle paar Sätze mehrmals. Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener, radierbarer Strich.
-  - **Korrekturen**: Ab und zu wird ein Buchstabe nachgezogen, oder ein Wort wird erst vergessen und dann klein über der Zeile mit einem **^** eingefügt.
-  - **Müdigkeit zum Textende**: Je weiter der Text, desto größer, schräger, weiter und unordentlicher wird die Schrift – wie am Ende einer langen Klausur.
-  - **Zeilen & Druck**: Zeilen schwanken leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende nach.
-  - **Ränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
+- **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Unter **Feineinstellungen der Vorlage** lässt sich jeder Wert ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
+- Feineinstellungen (gehören zur gewählten Vorlage):
+  - **Buchstaben verbinden**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
+  - **Unregelmäßigkeit** (bis 150 %): kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage.
+  - **Durchgestrichene Wörter**: wie oft ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben wird. „aus“ = nie; bei 100 % etwa alle paar Sätze mehrmals. Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener, radierbarer Strich.
+  - **Kleine Korrekturen**: Ab und zu wird ein Buchstabe nachgezogen, oder ein Wort wird erst vergessen und dann klein über der Zeile mit einem **^** eingefügt.
+  - **Nachlassen zum Ende**: Je weiter der Text, desto größer, schräger, weiter und unordentlicher wird die Schrift – wie am Ende eines langen Briefs.
+  - **Wellige Zeilen**: Zeilen schwanken leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende nach.
+  - **Unruhige Zeilenränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
   - **Strichdicke**: dünner oder kräftiger (40–250 %), gilt für Vorschau und alle Exporte.
 - **Tintenfarbe**: feste Farben oder der Regenbogen-Knopf mit dem **Farbton**-Regler für jede beliebige Tintenfarbe.
 - **Schriftgröße, Zeilenabstand, Rand** nach Geschmack.
 - **Neu würfeln**: andere Mischung der Varianten.
-- **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **↶ Angleichen rückgängig** geht, bis du die App schließt.
+- **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **Angleichen rückgängig** geht, bis du die App schließt.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
 - Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
 
 ### KI-Tab (Claude über dein Abo, ohne API-Schlüssel)
 
-Der Tab **KI** ist ein Chat mit Claude. Er funktioniert in der **claude.ai-Version** der App: https://claude.ai/artifact/TuYxD4Q6AKc8VLQQU1K5eY – dieselbe App, nur auf claude.ai, wo sie Claude über dein normales Abo fragen darf. (In der GitHub-Version zeigt der Tab einen Link dorthin. claude.ai lässt sich nicht in andere Seiten einbetten, deshalb geht es nur so.)
+Der Tab **KI** ist ein Chat mit Claude. Er erscheint nur in der **claude.ai-Version** der App: https://claude.ai/artifact/TuYxD4Q6AKc8VLQQU1K5eY – dieselbe App, nur auf claude.ai, wo sie Claude über dein normales Abo fragen darf. In der öffentlichen GitHub-Version ist der Tab ausgeblendet. (claude.ai lässt sich nicht in andere Seiten einbetten, deshalb geht es nur so.)
 
-- Nachricht schreiben, mit der **Büroklammer** Dateien anhängen: **Fotos** (z. B. ein Foto der Aufgabe), **PDFs** (Text wird gelesen, gescannte Seiten gehen als Foto mit) und **Textdateien**. Bilder lassen sich auch einfügen oder hineinziehen. Word-Dateien vorher als PDF exportieren.
+- Nachricht schreiben, mit der **Büroklammer** Dateien anhängen: **Fotos**, **PDFs** (Text wird gelesen, gescannte Seiten gehen als Foto mit) und **Textdateien**. Bilder lassen sich auch einfügen oder hineinziehen. Word-Dateien vorher als PDF exportieren.
 - **Schnell / Normal / Gründlich** wählt, wie lange Claude nachdenkt.
 - **Meinen Text aus „Schreiben“ mitschicken**, z. B. zum Korrigieren.
 - Unter jeder Antwort: **In Handschrift übernehmen** → Vorschau → **Text ersetzen**, **Anhängen** oder **In Feld N (Blatt)**, wenn im Blatt-Tab ein Feld gewählt ist. Die App springt danach in den passenden Tab; **Vorherigen Text wiederherstellen** macht es rückgängig. Außerdem **Kopieren** und **Neu schreiben**.
@@ -129,9 +153,9 @@ Gut zu wissen über die claude.ai-Version:
 - Exporte speichert sie über claude.ai. Die GoodNotes-Datei heißt dort **…goodnotes.zip**: in der Dateien-App „.zip“ aus dem Namen löschen, dann in GoodNotes öffnen.
 - Sie ist privat: nur du kannst sie öffnen, bis du sie auf claude.ai über „Teilen“ freigibst.
 
-### Arbeitsblatt ausfüllen (Tab „Blatt“)
+### Formular ausfüllen (Tab „Blatt“)
 
-Du hast ein Arbeitsblatt als PDF, in das die Antworten blau hineingetippt sind? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
+Du hast ein Formular oder Blatt als PDF, in das du deine Einträge blau hineingetippt hast? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
 
 1. **PDF oder Foto öffnen** antippen und das Arbeitsblatt wählen (aus Dateien, iCloud Drive …).
 2. Die App findet jede **blaue Antwort**, entfernt sie vom Blatt und schreibt denselben Text an dieselbe Stelle in deiner Handschrift. Das Feld reicht nach unten bis kurz vor die nächste Aufgabe, so ist Platz für die größere Handschrift.
@@ -202,12 +226,13 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 - **Profil teilen** schickt das aktive Profil (Schrift und Stil) als Datei, z. B. per AirDrop oder Nachricht. Benutzt das Profil die Schrift eines anderen, kommt diese Schrift mit.
 - **Importieren** liest eine solche Datei ein. Die Profile kommen als **neue Profile** dazu, vorhandene bleiben unangetastet (gleiche Namen werden durchnummeriert). Auf einem neuen Gerät ersetzt der Import das leere Start-Profil. Alte Backups mit nur einer Schrift ersetzen wie früher die Schrift des aktiven Profils.
 - In der Datei stehen nur Schriften und Stil-Einstellungen – keine Texte und keine Geräte-Einstellungen.
-- Ein **roter Punkt am Profil-Tab** erinnert dich, wenn das letzte Backup älter als 7 Tage ist.
+- Ein **roter Punkt am Profil-Tab** und ein Hinweis oben erinnern dich, wenn das letzte Backup älter als 7 Tage ist.
+- Auf iPad/iPhone erscheint außerdem der Hinweis **„Zum Home-Bildschirm hinzufügen“**: In Safari darf eine normale Website ihre Daten nach 7 Tagen ohne Nutzung verlieren, als Home-Bildschirm-App nicht. Die Home-Bildschirm-App hat einen eigenen Speicher – vorher sichern, dort importieren.
 
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v28';` hochzählen (z. B. auf `'v29'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v29';` hochzählen (z. B. auf `'v30'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ### claude.ai-Version aktualisieren
@@ -218,7 +243,8 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 
 | Problem | Lösung |
 |---|---|
-| Pencil schreibt nicht | Mit dem Pencil direkt ins Kästchen schreiben. Zum Testen ohne Pencil: Profil → „Maus und Finger zum Zeichnen erlauben“. |
+| Pencil schreibt nicht | Mit dem Pencil direkt ins Kästchen schreiben. |
+| Finger zeichnet nicht mehr | Nach dem ersten Pencil-Strich zählt nur noch der Pencil. Profil → Eingabe & Speicher → „Finger und Maus zum Schreiben erlauben“. |
 | Alte Version wird angezeigt | App ganz schließen (von unten wischen) und neu öffnen, ggf. zweimal. |
 | Teilen-Menü zeigt GoodNotes nicht | Im Teilen-Menü ganz nach rechts wischen → „Mehr“ → GoodNotes aktivieren. |
 | Zeichen fehlen rot im PDF | Die markierten Zeichen im Tab „Aufnahme“ nachtragen. |
@@ -229,9 +255,17 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 Projektstruktur:
 
 ```
-index.html              Oberfläche (vier Tabs), Icons
-css/app.css             Gestaltung, Touch-Größen
-js/app.js               Start, Navigation, Offline/Updates
+index.html              Oberfläche (Tabs, auf dem Handy unten), Icons, Meta-Daten und strukturierte Daten (JSON-LD)
+anleitung.html          Anleitung, Vergleich, häufige Fragen (HowTo/FAQ als JSON-LD) – für Menschen und Suchmaschinen
+datenschutz.html        Datenschutz, Marken, Lizenzen
+css/app.css             Gestaltung, Touch-Größen, heller und dunkler Modus
+css/seite.css           Gestaltung der Textseiten
+sitemap.xml, llms.txt   für Suchmaschinen und KI-Suchen
+icons/og.png            Vorschaubild für geteilte Links
+demo/demo-schrift.json  (optional) Demo-Schrift für den ersten Start, siehe 1b
+js/app.js               Start, Navigation, Offline/Updates, Hinweise (Home-Bildschirm, Sicherung)
+js/demo.js              Demo-Schrift beim ersten Start anlegen
+js/tutorial.js          Kurze Einführung (erster Start und ?-Knopf)
 js/aufnahme.js          Modul 1: Pencil-Aufnahme
 js/schreiben.js         Modul 2: Textfeld, Vorschau, Einstellungen, Export-Knöpfe
 js/blatt.js             Arbeitsblatt: blaue Antworten finden/entfernen, Felder, Einpassen
@@ -251,13 +285,14 @@ js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
-js/profil.js            Tab Profil: Backup, Testmodus
+js/profil.js            Tab Profil: Backup, Eingabe (Finger/Maus)
 js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
 ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen
 .github/workflows/ios.yml  baut die iPad-App als .ipa (GitHub Actions, macOS)
 tools/build-artifact.mjs   baut die claude.ai-Version
-vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0)
+vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0, wird erst beim ersten Blatt geladen), Feather-Lizenz
+LICENSE                 MIT
 tests/                  Selbsttests
 ```
 

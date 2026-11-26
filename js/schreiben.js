@@ -9,6 +9,7 @@ import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
 import { PRESETS, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
 import { ask, info } from './dialog.js';
+import { isDemo } from './demo.js';
 
 // Papier wie in GoodNotes (Maße in js/paper.js); Zeilen stehen genau auf Linien, Karos bzw. Punktreihen.
 export const PAPERS = PAPER_KINDS;
@@ -31,15 +32,16 @@ const STANDARD = {
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
 const pct = v => v + ' %';
 // Stil-Regler: gelten für die gewählte Vorlage (Anpassungen werden je Vorlage gemerkt)
+const off = v => (v ? pct(v) : 'aus');
 const STYLE_SLIDERS = [
-  { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'chaos', label: 'Unordnung', min: 0, max: 150, step: 5, fmt: pct },
-  { key: 'strike', label: 'Durchstreichen', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
-  { key: 'fix', label: 'Korrekturen (^ und nachgezogen)', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
-  { key: 'fatigue', label: 'Müdigkeit zum Textende', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
-  { key: 'wobble', label: 'Zeilen & Druck', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'edges', label: 'Ränder', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: pct },
+  { key: 'connect', label: 'Buchstaben verbinden', desc: 'Wie oft Buchstaben ineinander übergehen', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'chaos', label: 'Unregelmäßigkeit', desc: 'Schwankungen in Größe, Neigung und Abstand', min: 0, max: 150, step: 5, fmt: pct },
+  { key: 'strike', label: 'Durchgestrichene Wörter', desc: 'Ab und zu ein Wort falsch begonnen, durchgestrichen und neu geschrieben', min: 0, max: 100, step: 5, fmt: off },
+  { key: 'fix', label: 'Kleine Korrekturen', desc: 'Vergessene Buchstaben mit ^ eingefügt, Buchstaben nachgezogen', min: 0, max: 100, step: 5, fmt: off },
+  { key: 'fatigue', label: 'Nachlassen zum Ende', desc: 'Lange Texte werden zum Ende hin größer und krakeliger', min: 0, max: 100, step: 5, fmt: off },
+  { key: 'wobble', label: 'Wellige Zeilen', desc: 'Zeilen laufen leicht auf und ab, der Druck schwankt', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'edges', label: 'Unruhige Zeilenränder', desc: 'Zeilen beginnen und enden nicht ganz bündig', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'weight', label: 'Strichdicke', desc: '100 % = so dick wie aufgenommen', min: 40, max: 250, step: 5, fmt: pct },
 ];
 const SLIDERS = [
   { key: 'xHeight', label: 'Schriftgröße (x-Höhe)', min: 1.5, max: 6, step: 0.1, fmt: mm },
@@ -136,7 +138,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   const makeSlider = (spec, parent, style) => {
     const label = document.createElement('label');
     label.className = 'slider';
-    label.innerHTML = `${spec.label} <output></output><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}">`;
+    label.innerHTML = `${spec.label} <output></output>${spec.desc ? `<small class="slider-desc">${spec.desc}</small>` : ''}<input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}">`;
     const range = label.querySelector('input');
     range.addEventListener('input', () => {
       if (style) setSetting('styles', withStyleValue(current(), spec.key, Number(range.value)));
@@ -163,6 +165,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     hue.value = s.inkHue;
     $('ink-hue-out').textContent = s.ink === 'eigen' ? `${s.inkHue}°` : 'aus';
     styleSel.value = PRESETS[s.style] ? s.style : 'normal';
+    $('style-desc').textContent = PRESETS[styleSel.value].desc;
     const modified = isModified(s);
     $('style-reset').hidden = !modified;
     $('style-note').textContent = modified ? 'Angepasst – deine Werte für diese Vorlage bleiben gespeichert.' : '';
@@ -199,8 +202,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
     const notes = [`${result.pages.length} ${result.pages.length === 1 ? 'Seite' : 'Seiten'}`];
     const shown = result.missing.filter(ch => ch !== ' ');
-    if (shown.length) notes.push(`⚠️ Fehlende Zeichen: ${shown.join(' ')}`);
-    if (result.spaceMissing) notes.push('ℹ️ Leerzeichen nicht aufgenommen – Standardabstand');
+    if (shown.length) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
+    if (isDemo()) notes.push('Demo-Schrift – deine eigene nimmst du im Tab „Aufnahme“ auf');
     statusEl.textContent = notes.join(' · ');
     statusEl.classList.toggle('warn', shown.length > 0);
   }
@@ -220,7 +223,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   del.addEventListener('click', async () => {
     if (!input.value.trim()) return;
     const n = input.value.trim().split(/\s+/).length;
-    if (!await ask(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`)) return;
+    if (!await ask(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`, { ok: 'Löschen', danger: true })) return;
     keepPrevious('Gelöschten Text wiederherstellen');
     setText('');
   });
@@ -244,7 +247,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
   $('reset-settings').addEventListener('click', async () => {
-    if (!await ask('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?')) return;
+    if (!await ask('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
     setSetting('style', 'normal');
     setSetting('styles', {});
@@ -266,7 +269,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const trial = structuredClone(profile.glyphs);
     const changed = equalize({ ...profile, glyphs: trial });
     if (!changed.length) return info('Alle Buchstaben haben schon eine passende Größe.');
-    if (!await ask(`Diese Zeichen werden in der Größe an deine übrigen angepasst:\n${changed.join(' ')}\n\nÜbernehmen? Rückgängig geht, bis du die App schließt.`)) return;
+    if (!await ask(`Diese Zeichen werden in der Größe an deine übrigen angepasst:\n${changed.join(' ')}\n\nÜbernehmen? Rückgängig geht, bis du die App schließt.`, { ok: 'Angleichen' })) return;
     before = profile.glyphs;
     replaceGlyphs(trial);
     $('equalize-undo').hidden = false;
@@ -290,12 +293,12 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
     const miss = result.missing.filter(ch => ch !== ' ');
-    if (miss.length && !await ask(`Es fehlen Zeichen: ${miss.join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
+    if (miss.length && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${miss.join(' ')}\n\nSie erscheinen im Export als rote Kästchen. Nimm sie am besten erst im Tab „Aufnahme“ auf.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren', cancel: 'Abbrechen' })) return;
 
     const color = inkColor(s);
     const date = new Date().toISOString().slice(0, 10);
     const labels = exportButtons.map(b => b.innerHTML);
-    exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
+    exportButtons.forEach(b => { b.disabled = true; b.textContent = 'Erstelle …'; });
     shareAgain.hidden = true;
     try {
       let files;

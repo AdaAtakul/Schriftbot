@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v28';
+const VERSION = 'v29';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',
@@ -16,6 +16,8 @@ const FILES = [
   'js/einfuegen.js',
   'js/dialog.js',
   'js/ki.js',
+  'js/demo.js',
+  'js/tutorial.js',
   'js/kiui.js',
   'js/aufnahme.js',
   'js/export.js',
@@ -33,22 +35,6 @@ const FILES = [
   'js/storage.js',
   'vendor/perfect-freehand.mjs',
   'vendor/jspdf.umd.min.js',
-  'vendor/pdfjs/pdf.min.mjs',
-  'vendor/pdfjs/pdf.worker.min.mjs',
-  'vendor/pdfjs/standard_fonts/FoxitDingbats.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitFixed.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitFixedBold.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitFixedBoldItalic.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitFixedItalic.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitSerif.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitSerifBold.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitSerifBoldItalic.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitSerifItalic.pfb',
-  'vendor/pdfjs/standard_fonts/FoxitSymbol.pfb',
-  'vendor/pdfjs/standard_fonts/LiberationSans-Bold.ttf',
-  'vendor/pdfjs/standard_fonts/LiberationSans-BoldItalic.ttf',
-  'vendor/pdfjs/standard_fonts/LiberationSans-Italic.ttf',
-  'vendor/pdfjs/standard_fonts/LiberationSans-Regular.ttf',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -71,8 +57,25 @@ self.addEventListener('activate', e => {
   );
 });
 
+// Erst bei Bedarf geladen und dann für offline gemerkt: pdf.js (3 MB, nur fürs Blatt) und die Seiten
+// Anleitung/Datenschutz. Die Demo-Schrift kommt immer frisch, wenn online (sie wird nur beim ersten Start gebraucht).
+const LAZY = /\/(vendor\/pdfjs\/|anleitung\.html$|datenschutz\.html$|css\/seite\.css$|icons\/)/;
+const FRESH = /\/demo\//;
+
 // Cache zuerst, damit die App offline sofort startet.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request)));
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+  if (FRESH.test(url.pathname)) {
+    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    return;
+  }
+  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
+    if (res.ok && LAZY.test(url.pathname)) {
+      const copy = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, copy));
+    }
+    return res;
+  })));
 });

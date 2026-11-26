@@ -2,6 +2,11 @@
 // x ab dem linken Rand, y ab dem oberen Rand plus `top` (z. B. −2,5, damit y = 0 die Grundlinie ist).
 import { getSettings } from './storage.js';
 
+// Finger/Maus erlaubt? Ausdrücklich eingestellt, sonst automatisch: erlaubt, bis zum ersten Mal ein Pencil schreibt.
+const PEN_SEEN = 'pencil-gesehen';
+export const penSeen = () => { try { return !!localStorage.getItem(PEN_SEEN); } catch { return false; } };
+export const nonPenAllowed = () => getSettings().allowNonPen ?? !penSeen();
+
 const round = (n, d) => Math.round(n * d) / d;
 
 export function attachPen(canvas, { unit, top = 0, onLive, onStroke, onReject }) {
@@ -21,7 +26,8 @@ export function attachPen(canvas, { unit, top = 0, onLive, onStroke, onReject })
   const show = () => { if (!frame) frame = requestAnimationFrame(() => { frame = 0; onLive(live); }); };
 
   canvas.addEventListener('pointerdown', e => {
-    if (e.pointerType !== 'pen' && !getSettings().allowNonPen) return onReject?.();
+    if (e.pointerType === 'pen' && !penSeen()) { try { localStorage.setItem(PEN_SEEN, '1'); } catch {} }
+    if (e.pointerType !== 'pen' && !nonPenAllowed()) return onReject?.();
     if (pointerId !== null) {
       // Es gibt nur einen Pencil: setzt er neu an, ist der alte Strich vorbei, auch wenn Safari kein pointerup geschickt hat.
       // Sonst bliebe die Fläche für immer gesperrt.

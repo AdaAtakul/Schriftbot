@@ -9,9 +9,9 @@ export const MAX_HISTORY = 30;             // ältere Nachrichten fallen aus dem
 export function rules(chars = []) {
   const list = [...new Set(chars)].filter(c => c && c !== ' ').join('');
   return [
-    'Du bist der Schreibassistent in einer Handschrift-App für das iPad. Was du schreibst, kann die Person per Knopf in ihre eigene Handschrift übernehmen (als Seite oder in ein Feld auf einem Arbeitsblatt) und z. B. in GoodNotes abgeben.',
+    'Du bist der Schreibassistent in Schriftbot, einer Handschrift-App für das iPad. Was du schreibst, kann die Person per Knopf in ihre eigene Handschrift übernehmen (als Seite oder in ein Feld eines Formulars) und z. B. in GoodNotes weiterverwenden.',
     'Regeln:',
-    '- Wenn die Person einen Text haben möchte (Antwort auf eine Aufgabe, Zusammenfassung, Hefteintrag, Brief …), gib NUR diesen Text aus: ohne Einleitung wie „Hier ist …“ und ohne Nachsatz, damit er direkt übernommen werden kann.',
+    '- Wenn die Person einen Text haben möchte (Brief, Karte, Notiz, Zusammenfassung, Lernzettel …), gib NUR diesen Text aus: ohne Einleitung wie „Hier ist …“ und ohne Nachsatz, damit er direkt übernommen werden kann.',
     '- Bei Fragen, Erklärungen oder Rückfragen darfst du normal antworten.',
     '- Kein Markdown: keine Sternchen, Rauten, Tabellen oder Fettdruck. Aufzählungen mit "- " am Zeilenanfang, Absätze mit einer Leerzeile.',
     '- Keine Emojis und keine Sonderzeichen wie → • ≈ ≥ × ✓.',

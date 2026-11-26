@@ -44,10 +44,10 @@ export const glyphOwner = (p = activeProfile(), m = profilesMeta()) => (p.from &
 const dataKey = id => (id === 'p1' ? 'profile' : 'profile:' + id);
 const settingsKey = id => (id === 'p1' ? 'settings' : 'settings:' + id);
 
-export function createProfile({ name, from = null }) {
+export function createProfile({ name, from = null, demo = false }) {
   const m = profilesMeta();
   const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  m.list.push({ id, name, from });
+  m.list.push(demo ? { id, name, from, demo: true } : { id, name, from });
   saveMeta(m);
   return id;
 }

@@ -3,17 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Handschrift-Tool</title>
-  <meta name="theme-color" content="#0e0f13">
-  <meta name="color-scheme" content="dark">
+  <title>Schriftbot – getippten Text in deine eigene Handschrift verwandeln</title>
+  <meta name="description" content="Schriftbot verwandelt getippten Text in deine eigene Handschrift: einmal mit Apple Pencil oder Finger aufnehmen, dann als PDF, PNG oder GoodNotes-Datei exportieren. Kostenlos, ohne Anmeldung, alles bleibt auf deinem Gerät.">
+  <link rel="canonical" href="https://bambuseleitung.github.io/Schriftbot/">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="bambuseleitung">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:site_name" content="Schriftbot">
+  <meta property="og:title" content="Schriftbot – Text in deine eigene Handschrift">
+  <meta property="og:description" content="Einmal deine Handschrift aufnehmen, dann jeden Text darin schreiben lassen – als PDF, PNG oder für GoodNotes. Kostenlos und ohne Anmeldung.">
+  <meta property="og:url" content="https://bambuseleitung.github.io/Schriftbot/">
+  <meta property="og:image" content="https://bambuseleitung.github.io/Schriftbot/icons/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Schriftbot: getippter Text wird zu Handschrift auf liniertem Papier">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0e0f13" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f4f5f9" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Handschrift">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Schriftbot">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" href="icons/icon-192.png">
+  <link rel="help" href="anleitung.html">
   <link rel="stylesheet" href="css/app.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://bambuseleitung.github.io/Schriftbot/#app",
+        "name": "Schriftbot",
+        "alternateName": "Handschrift-Tool",
+        "url": "https://bambuseleitung.github.io/Schriftbot/",
+        "description": "Web-App, die getippten Text in die eigene, vorher aufgenommene Handschrift umwandelt und als PDF, PNG oder GoodNotes-Datei exportiert. Läuft im Browser, offline nutzbar, ohne Konto; alle Daten bleiben auf dem Gerät.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "iPadOS, iOS, Android, Windows, macOS (Browser)",
+        "browserRequirements": "Aktueller Browser mit JavaScript; empfohlen: Safari auf dem iPad mit Apple Pencil",
+        "inLanguage": "de",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "featureList": [
+          "Eigene Handschrift mit Apple Pencil, Finger oder Maus aufnehmen",
+          "Text in der eigenen Handschrift setzen, mit natürlichen Abweichungen",
+          "Stil-Vorlagen von sehr ordentlich bis sehr unordentlich",
+          "Papier wie in GoodNotes: liniert, kariert, gepunktet, blanko",
+          "Export als PDF, PNG und GoodNotes-Datei",
+          "Formulare und Arbeitsblätter (PDF oder Foto) in Handschrift ausfüllen",
+          "Mehrere Profile, Backup und Teilen",
+          "Offline nutzbar, keine Anmeldung, keine Datenübertragung"
+        ],
+        "screenshot": "https://bambuseleitung.github.io/Schriftbot/icons/og.png",
+        "author": { "@id": "https://bambuseleitung.github.io/Schriftbot/#autor" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://bambuseleitung.github.io/Schriftbot/#autor",
+        "name": "bambuseleitung",
+        "url": "https://github.com/bambuseleitung",
+        "sameAs": ["https://github.com/bambuseleitung", "https://github.com/bambuseleitung/schriftbot"]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <!-- Linien-Icons (nach Feather Icons, MIT) -->
@@ -38,34 +95,58 @@
       <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></symbol>
       <symbol id="i-ruler" viewBox="0 0 24 24"><path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2"/><path d="M10 10l2 2"/><path d="M13 7l2 2"/></symbol>
       <symbol id="i-reset" viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
+      <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4z"/><path d="M19 5v14"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
     </defs>
   </svg>
 
   <header class="topbar">
-    <div class="brand">
-      <svg class="icon brand-icon"><use href="#i-nib"/></svg>
-      <span>Handschrift</span>
-    </div>
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-view="aufnahme" aria-selected="true"><svg class="icon"><use href="#i-nib"/></svg><span>Aufnahme</span></button>
-      <button role="tab" data-view="schreiben" aria-selected="false"><svg class="icon"><use href="#i-edit"/></svg><span>Schreiben</span></button>
-      <button role="tab" data-view="blatt" aria-selected="false"><svg class="icon"><use href="#i-sheet"/></svg><span>Blatt</span></button>
-      <button role="tab" data-view="ki" aria-selected="false"><svg class="icon"><use href="#i-spark"/></svg><span>KI</span></button>
-      <button role="tab" data-view="profil" aria-selected="false"><svg class="icon"><use href="#i-user"/></svg><span>Profil</span></button>
+    <h1 class="brand">
+      <svg class="icon brand-icon" aria-hidden="true"><use href="#i-nib"/></svg>
+      <span>Schriftbot</span>
+    </h1>
+    <nav class="tabs" role="tablist" aria-label="Bereiche">
+      <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span>Aufnahme</span></button>
+      <button role="tab" id="tab-schreiben" data-view="schreiben" aria-controls="view-schreiben" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span>Schreiben</span></button>
+      <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span>Blatt</span></button>
+      <button role="tab" id="tab-ki" data-view="ki" aria-controls="view-ki" aria-selected="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>KI</span></button>
+      <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span>Profil</span></button>
     </nav>
     <div class="topbar-end">
-      <label class="profile-switch"><svg class="icon"><use href="#i-user"/></svg><select id="profile-switch" aria-label="Profil wechseln"></select></label>
+      <label class="profile-switch"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><select id="profile-switch" aria-label="Profil wechseln"></select></label>
+      <button id="help-btn" class="icon-btn" aria-label="Kurze Anleitung zeigen" title="Kurze Anleitung"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
     </div>
   </header>
+  <div id="safety-banner" class="banner safety" role="status" hidden>
+    <svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>
+    <span id="safety-text"></span>
+    <button id="safety-action" class="primary"></button>
+    <button id="safety-close" class="icon-btn ghost" aria-label="Hinweis ausblenden"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+  </div>
 
   <div id="update-banner" class="banner" role="status" hidden>
     <span>Eine neue Version ist bereit.</span>
     <button id="update-reload" class="primary">Neu laden</button>
   </div>
 
+  <noscript><p class="noscript">Schriftbot verwandelt getippten Text in deine eigene Handschrift. Die App braucht JavaScript. <a href="anleitung.html">Zur Anleitung</a></p></noscript>
+
   <main>
-    <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel">
-      <aside class="panel charlist">
+    <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel" aria-labelledby="tab-aufnahme">
+      <div id="demo-note" class="demo-note" hidden>
+        <svg class="icon empty-icon" aria-hidden="true"><use href="#i-nib"/></svg>
+        <h2>Das ist die Demo-Schrift</h2>
+        <p>Mit ihr kannst du Schriftbot sofort ausprobieren. Für deine eigene Handschrift wechselst du in dein eigenes Profil und nimmst dort jedes Zeichen auf.</p>
+        <button id="demo-own" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg>Eigene Schrift aufnehmen</button>
+      </div>
+      <aside class="panel charlist" aria-labelledby="charlist-title">
+        <h2 id="charlist-title" class="visually-hidden">Zeichen aufnehmen</h2>
         <div class="mode-switch" role="group" aria-label="Art der Aufnahme">
           <button data-mode="einzeln" aria-pressed="true">Einzeln</button>
           <button data-mode="text" aria-pressed="false">Als Text</button>
@@ -79,27 +160,27 @@
         <form id="pair-form" class="pair-form">
           <h3>Eigenes Paar</h3>
           <input id="pair-input" placeholder="z. B. ft" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="4">
-          <button type="submit">＋ Hinzufügen</button>
+          <button type="submit"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Hinzufügen</button>
         </form>
       </aside>
       <div id="text-recorder" class="recorder" hidden>
         <div class="recorder-head">
-          <button id="text-prev" aria-label="Vorherige Seite">◀</button>
+          <button id="text-prev" class="icon-btn" aria-label="Vorherige Seite"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
           <div id="text-info" class="text-info"></div>
-          <button id="text-next" aria-label="Nächste Seite">▶</button>
-          <button id="text-undo">↶ Rückgängig</button>
+          <button id="text-next" class="icon-btn" aria-label="Nächste Seite"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <button id="text-undo"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Rückgängig</button>
           <button id="text-clear"><svg class="icon"><use href="#i-trash"/></svg>Leeren</button>
-          <button id="text-commit" class="primary">✓ Übernehmen</button>
+          <button id="text-commit" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Übernehmen</button>
         </div>
         <p id="text-hint" class="hint"></p>
         <div id="text-page-wrap" class="text-page-wrap"><canvas id="text-page"></canvas></div>
       </div>
       <div id="single-recorder" class="recorder">
         <div class="recorder-head">
-          <button id="prev-char" aria-label="Vorheriges Zeichen">◀</button>
+          <button id="prev-char" class="icon-btn" aria-label="Vorheriges Zeichen"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
           <div id="current-char" class="current-char"></div>
-          <button id="next-char" aria-label="Nächstes Zeichen">▶</button>
-          <button id="next-missing">Nächstes fehlendes ⏭</button>
+          <button id="next-char" class="icon-btn" aria-label="Nächstes Zeichen"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <button id="next-missing">Nächstes fehlendes<svg class="icon" aria-hidden="true"><use href="#i-skip"/></svg></button>
           <button id="remove-pair" hidden>Paar entfernen</button>
         </div>
         <p id="recorder-hint" class="hint"></p>
@@ -111,7 +192,7 @@
       </div>
     </section>
 
-    <section id="view-schreiben" class="view view-schreiben" role="tabpanel" hidden>
+    <section id="view-schreiben" class="view view-schreiben" role="tabpanel" aria-labelledby="tab-schreiben" hidden>
       <div class="panel editor">
         <div class="text-wrap">
           <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
@@ -124,7 +205,11 @@
           <label class="field">Stil-Vorlage
             <select id="style"></select>
           </label>
-          <div id="style-controls" class="group"></div>
+          <p id="style-desc" class="hint small"></p>
+          <details class="fine" id="style-fine">
+            <summary>Feineinstellungen der Vorlage</summary>
+            <div id="style-controls" class="group"></div>
+          </details>
           <p id="style-note" class="hint small"></p>
           <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
           <label class="field">Papier
@@ -146,31 +231,31 @@
           </div>
           <div class="row">
             <button id="equalize"><svg class="icon"><use href="#i-ruler"/></svg>Größen angleichen</button>
-            <button id="equalize-undo" hidden>↶ Angleichen rückgängig</button>
+            <button id="equalize-undo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Angleichen rückgängig</button>
           </div>
         </details>
       </div>
       <div class="stage">
-        <div id="pages" class="pages" aria-label="Vorschau"></div>
+        <div id="pages" class="pages" role="region" aria-label="Vorschau der Seiten" tabindex="0"></div>
         <div class="floatbar export" role="toolbar" aria-label="Exportieren">
           <button id="export-goodnotes" class="primary"><svg class="icon"><use href="#i-book"/></svg>GoodNotes</button>
           <button id="export-pdf"><svg class="icon"><use href="#i-file"/></svg>PDF</button>
           <button id="export-png"><svg class="icon"><use href="#i-image"/></svg>PNG</button>
           <button id="share-again" class="primary" hidden><svg class="icon"><use href="#i-share"/></svg>Jetzt teilen</button>
           <span class="floatbar-sep"></span>
-          <label class="check" title="Papier (Linien, Karos, Punkte, Farbe) mit ins PDF/PNG"><input type="checkbox" id="export-paper"> Papier</label>
+          <label class="check" title="Linien, Karos oder Punkte und die Papierfarbe mit ins PDF/PNG übernehmen"><input type="checkbox" id="export-paper"> Mit Papier</label>
         </div>
       </div>
     </section>
 
-    <section id="view-blatt" class="view view-blatt" role="tabpanel" hidden>
+    <section id="view-blatt" class="view view-blatt" role="tabpanel" aria-labelledby="tab-blatt" hidden>
       <div class="panel inspector">
         <div class="panel-head">
-          <h2>Arbeitsblatt</h2>
-          <p id="sheet-info" class="hint">Antworten in deiner Handschrift direkt aufs Blatt.</p>
+          <h2>Formular &amp; Blatt</h2>
+          <p id="sheet-info" class="hint">Formulare und Arbeitsblätter in deiner Handschrift ausfüllen.</p>
         </div>
         <button id="sheet-open" class="primary wide"><svg class="icon"><use href="#i-upload"/></svg>PDF oder Foto öffnen</button>
-        <input type="file" id="sheet-file" accept="application/pdf,.pdf,image/*" class="visually-hidden">
+        <input type="file" id="sheet-file" accept="application/pdf,.pdf,image/*" class="visually-hidden" aria-label="PDF oder Foto auswählen" tabindex="-1">
         <p id="sheet-status" class="status"></p>
         <p id="sheet-warn" class="status warn"></p>
         <div class="row needs-sheet">
@@ -190,13 +275,13 @@
             <button id="field-delete" class="danger"><svg class="icon"><use href="#i-trash"/></svg>Feld löschen</button>
           </div>
         </div>
-        <p class="hint small">Tinte, Strichdicke, Unordnung und Schreibfehler stellst du im Tab „Schreiben“ ein. Löschst du ein erkanntes Feld, erscheint der blaue Text wieder.</p>
+        <p class="hint small">Tinte, Strichdicke und Stil stellst du im Tab „Schreiben“ ein. Löschst du ein erkanntes Feld, erscheint der blaue Text wieder.</p>
       </div>
       <div class="stage">
         <div id="sheet-empty" class="empty">
           <svg class="icon empty-icon"><use href="#i-sheet"/></svg>
-          <h2>Arbeitsblatt öffnen</h2>
-          <p>Öffne ein PDF oder Foto. Blaue, getippte Antworten werden erkannt, vom Blatt entfernt und an derselben Stelle in deiner Handschrift eingesetzt.</p>
+          <h2>Formular oder Blatt öffnen</h2>
+          <p>Öffne ein PDF oder Foto. Text, den du vorher in <strong>Blau</strong> eingetippt hast, wird erkannt, vom Blatt entfernt und an derselben Stelle in deiner Handschrift eingesetzt. Eigene Textfelder ziehst du mit „Textfeld“ auf.</p>
           <button id="sheet-open-empty" class="primary"><svg class="icon"><use href="#i-upload"/></svg>PDF oder Foto öffnen</button>
         </div>
         <div id="sheet-pages" class="pages sheet-pages" hidden></div>
@@ -209,7 +294,7 @@
       </div>
     </section>
 
-    <section id="view-ki" class="view view-ki" role="tabpanel" hidden>
+    <section id="view-ki" class="view view-ki" role="tabpanel" aria-labelledby="tab-ki" hidden>
       <div class="ki-shell">
         <div class="ki-top">
           <div class="seg" id="ki-tier" role="group" aria-label="Modell"></div>
@@ -232,7 +317,7 @@
           <textarea id="ki-input" rows="1" placeholder="Schreib Claude eine Nachricht …" aria-label="Nachricht an Claude" lang="de"></textarea>
           <div class="ki-bar">
             <button type="button" id="ki-attach" class="ki-icon-btn" aria-label="Datei anhängen" title="Foto, PDF oder Textdatei anhängen"><svg class="icon"><use href="#i-clip"/></svg></button>
-            <input type="file" id="ki-file" multiple class="visually-hidden">
+            <input type="file" id="ki-file" multiple class="visually-hidden" aria-label="Dateien anhängen" tabindex="-1">
             <label class="ki-ctx-toggle"><input type="checkbox" id="ki-context"> Meinen Text aus „Schreiben“ mitschicken</label>
             <button type="button" id="ki-stop" class="ki-stop" hidden aria-label="Antwort stoppen"><span></span></button>
             <button type="submit" id="ki-send" class="ki-send" aria-label="Senden" disabled><svg class="icon"><use href="#i-up"/></svg></button>
@@ -241,7 +326,7 @@
       </div>
     </section>
 
-    <section id="view-profil" class="view view-profil" role="tabpanel" hidden>
+    <section id="view-profil" class="view view-profil" role="tabpanel" aria-labelledby="tab-profil" hidden>
       <h2>Profil &amp; Backup</h2>
       <div class="cards">
         <div class="card card-wide" id="profiles-card">
@@ -264,20 +349,22 @@
             <button id="export-btn"><svg class="icon"><use href="#i-download"/></svg>Alle Profile sichern</button>
             <button id="share-profile-btn"><svg class="icon"><use href="#i-share"/></svg>Profil teilen</button>
             <button id="import-btn"><svg class="icon"><use href="#i-upload"/></svg>Importieren</button>
-            <input type="file" id="import-file" accept=".json,application/json" class="visually-hidden">
+            <input type="file" id="import-file" accept=".json,application/json" class="visually-hidden" aria-label="Backup-Datei auswählen" tabindex="-1">
           </div>
         </div>
-        <div class="card">
-          <h3>Testmodus</h3>
-          <label class="check"><input type="checkbox" id="allow-non-pen"> Maus und Finger zum Zeichnen erlauben</label>
-          <p class="hint">Normalerweise zählt beim Aufnehmen nur der Apple Pencil, damit der Handballen nichts verschmiert.</p>
-        </div>
-        <div class="card">
-          <h3>Status</h3>
+        <details class="card card-wide more">
+          <summary><h3>Eingabe &amp; Speicher</h3></summary>
+          <label class="check"><input type="checkbox" id="allow-non-pen"> Finger und Maus zum Schreiben erlauben</label>
+          <p class="hint">Ohne Apple Pencil ist das automatisch an. Sobald du einmal mit dem Pencil schreibst, zählt nur noch er, damit der Handballen nichts verschmiert.</p>
           <p id="status-offline" class="status"></p>
           <p id="status-storage" class="status"></p>
-        </div>
+        </details>
       </div>
+      <footer class="app-footer">
+        <a href="anleitung.html">Anleitung &amp; häufige Fragen</a>
+        <a href="datenschutz.html">Datenschutz &amp; Lizenzen</a>
+        <a href="https://github.com/bambuseleitung/schriftbot" rel="noopener">Quellcode auf GitHub</a>
+      </footer>
     </section>
   </main>
 

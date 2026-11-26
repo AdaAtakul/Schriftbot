@@ -159,7 +159,7 @@ export function initTextAufnahme(profile, onSaved) {
     saveProfile(profile);
     onSaved();
     strokes = [];
-    const notes = [`✓ ${saved} Zeichen übernommen`];
+    const notes = [`${saved} Zeichen übernommen`];
     if (empty.length) notes.push(`leer gelassen: ${[...new Set(empty)].map(label).join(' ')}`);
     if (full.size) notes.push(`hatten schon 3 Varianten: ${[...full].map(label).join(' ')}`);
     if (page < pages.length - 1) page++;
@@ -172,7 +172,7 @@ export function initTextAufnahme(profile, onSaved) {
   async function go(dir) {
     const next = page + dir;
     if (next < 0 || next >= pages.length) return;
-    if (strokes.length && !await ask('Die Striche auf dieser Seite sind noch nicht übernommen. Verwerfen?')) return;
+    if (strokes.length && !await ask('Die Striche auf dieser Seite sind noch nicht übernommen. Verwerfen?', { ok: 'Verwerfen', danger: true })) return;
     strokes = [];
     page = next;
     setSetting('textPage', page);
@@ -184,7 +184,7 @@ export function initTextAufnahme(profile, onSaved) {
   $('text-next').addEventListener('click', () => go(1));
   $('text-undo').addEventListener('click', () => { strokes.pop(); draw(); });
   $('text-clear').addEventListener('click', async () => {
-    if (strokes.length && await ask('Alle Striche auf dieser Seite löschen?')) { strokes = []; draw(); }
+    if (strokes.length && await ask('Alle Striche auf dieser Seite löschen?', { ok: 'Löschen', danger: true })) { strokes = []; draw(); }
   });
   $('text-commit').addEventListener('click', commit);
 

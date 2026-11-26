@@ -10,10 +10,10 @@ export const CLAUDE_APP_URL = 'https://claude.ai/artifact/TuYxD4Q6AKc8VLQQU1K5eY
 const CHAT_KEY = 'ki-chat', TIER_KEY = 'ki-tier';
 const TIERS = [['quick', 'Schnell'], ['default', 'Normal'], ['complex', 'Gründlich']];
 const SUGGESTIONS = [
-  { label: 'Aufgabe vom Foto beantworten', text: 'Beantworte die Aufgabe auf dem Foto vollständig in ganzen Sätzen.', attach: true },
+  { label: 'Brief oder Karte schreiben', text: 'Schreibe einen kurzen, persönlichen Brief an ' },
   { label: 'Meinen Text korrigieren', text: 'Korrigiere Rechtschreibung, Grammatik und Zeichensetzung in meinem Text. Ändere sonst nichts.', context: true },
   { label: 'Zusammenfassen', text: 'Fasse den Anhang in eigenen Worten zusammen, etwa 120 Wörter.', attach: true },
-  { label: 'Hefteintrag schreiben', text: 'Schreibe einen Hefteintrag zum Thema ' },
+  { label: 'Lernzettel erstellen', text: 'Mach aus dem Anhang einen übersichtlichen Lernzettel mit den wichtigsten Punkten.', attach: true },
 ];
 const ERRORS = {
   not_granted: 'Du hast der App den Zugriff auf Claude nicht erlaubt. Lade die Seite neu, um noch einmal gefragt zu werden.',

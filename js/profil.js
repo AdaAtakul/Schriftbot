@@ -1,4 +1,4 @@
-// Profil-Tab: Backup aller Profile, ein Profil teilen, Importieren, Testmodus.
+// Profil-Tab: Backup aller Profile, ein Profil teilen, Importieren, Eingabe (Finger/Maus).
 import { parseProfile, progress } from './profile.js';
 import {
   saveProfile, getSettings, setSetting, activeProfile, glyphOwner, profilesMeta, profileSettings, seedSettings,
@@ -7,6 +7,8 @@ import {
 import { buildCollection, isCollection, parseCollection, uniqueName } from './sammlung.js';
 import { shareFiles } from './export.js';
 import { ask, info } from './dialog.js';
+import { nonPenAllowed } from './pen.js';
+import { isDemo } from './demo.js';
 
 const fileName = name => name.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'profil';
 const jsonFile = (data, name) => new File([JSON.stringify(data)], name, { type: 'application/json' });
@@ -17,12 +19,14 @@ export function initProfil(profile) {
   function showBackupStatus() {
     const last = getSettings().lastBackup;
     const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
-    $('backup-status').textContent = last == null
-      ? '⚠️ Noch nie ein Backup gesichert.'
-      : days === 0 ? '✅ Letztes Backup: heute'
-      : `${days > 7 ? '⚠️' : '✅'} Letztes Backup: vor ${days} ${days === 1 ? 'Tag' : 'Tagen'}`;
+    const el = $('backup-status');
+    el.textContent = last == null
+      ? 'Noch nie gesichert.'
+      : days === 0 ? 'Zuletzt gesichert: heute'
+      : `Zuletzt gesichert: vor ${days} ${days === 1 ? 'Tag' : 'Tagen'}`;
+    el.className = 'status ' + (last == null || days > 7 ? 'warn' : 'ok');
     // Roter Punkt am Profil-Tab, wenn Aufnahmen existieren, aber kein aktuelles Backup.
-    const overdue = progress(profile).done > 0 && (last == null || days > 7);
+    const overdue = !isDemo() && progress(profile).done > 0 && (last == null || days > 7);
     document.querySelector('.tabs [data-view="profil"]').classList.toggle('badge', overdue);
   }
 
@@ -78,9 +82,10 @@ export function initProfil(profile) {
   async function importCollection(entries) {
     const meta = profilesMeta();
     const summary = entries.map(e => `• ${e.name}${e.from != null ? ` (Schrift von „${entries[e.from].name}“)` : ` – ${progress(e.handwriting).done} Zeichen`}`).join('\n');
-    if (!await ask(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`)) return;
+    if (!await ask(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`, { ok: 'Hinzufügen' })) return;
     // Nur das leere Start-Profil eines neuen Geräts wird ersetzt
-    const lone = meta.list.length === 1 && !meta.list[0].from && progress(await loadGlyphs(meta.list[0].id)).done === 0 ? meta.list[0] : null;
+    const own = meta.list.filter(p => !p.demo);
+    const lone = own.length === 1 && !own[0].from && progress(await loadGlyphs(own[0].id)).done === 0 ? own[0] : null;
     const taken = meta.list.filter(p => p !== lone).map(p => p.name); // der Name des ersetzten Start-Profils ist frei
     const ids = [];
     for (const pass of [false, true]) { // erst eigene Schriften, dann die Profile, die sie mitbenutzen
@@ -105,13 +110,13 @@ export function initProfil(profile) {
     const p = progress(imported), owner = glyphOwner();
     const msg = `Schrift mit ${p.done} von ${p.total} Zeichen importieren?`
       + (progress(profile).done ? `\n\nDie Schrift von „${owner.name}“ wird dabei ersetzt` + (owner.id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
-    if (!await ask(msg)) return;
+    if (!await ask(msg, { ok: 'Importieren' })) return;
     await saveProfile(imported);
     location.reload();
   }
 
   const allow = $('allow-non-pen');
-  allow.checked = !!getSettings().allowNonPen;
+  allow.checked = nonPenAllowed();
   allow.addEventListener('change', () => setSetting('allowNonPen', allow.checked));
 
   showBackupStatus();
