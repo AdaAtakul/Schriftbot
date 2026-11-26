@@ -8,6 +8,7 @@ import { layout } from './layout.js';
 import { drawPage } from './render.js';
 import { current as writeSettings, options as writeOptions, inkColor } from './schreiben.js';
 import { previewText } from './textplan.js';
+import { ask, info } from './dialog.js';
 
 
 // Kästchen-Geometrie in x-Höhen: oben 2,5 über, unten 1,5 unter der Grundlinie.
@@ -121,8 +122,8 @@ export function initAufnahme(profile, onScaled = () => {}) {
         strokes.pop();
         changed(box);
       });
-      const clear = button('🗑 Löschen', () => {
-        if (strokes.length && confirm(`Variante ${i + 1} von „${label(current)}“ löschen?`)) {
+      const clear = button('🗑 Löschen', async () => {
+        if (strokes.length && await ask(`Variante ${i + 1} von „${label(current)}“ löschen?`)) {
           strokes.length = 0;
           changed(box);
         }
@@ -225,7 +226,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
     e.preventDefault();
     const input = $('pair-input');
     const error = checkPair(profile, input.value);
-    if (error) return alert(error);
+    if (error) return info(error);
     profile.customPairs.push(input.value.trim());
     saveProfile(profile);
     current = input.value.trim();
@@ -235,8 +236,8 @@ export function initAufnahme(profile, onScaled = () => {}) {
     select(current);
   });
 
-  $('remove-pair').addEventListener('click', () => {
-    if (!confirm(`Eigenes Paar „${current}“ samt Aufnahmen entfernen?`)) return;
+  $('remove-pair').addEventListener('click', async () => {
+    if (!await ask(`Eigenes Paar „${current}“ samt Aufnahmen entfernen?`)) return;
     profile.customPairs = profile.customPairs.filter(p => p !== current);
     delete profile.glyphs[current];
     saveProfile(profile);
@@ -248,15 +249,15 @@ export function initAufnahme(profile, onScaled = () => {}) {
   // Kästchen an die eigene Schrift anpassen: Die Hilfslinien werden so groß wie deine typische Schrift,
   // die Aufnahmen werden passend umgerechnet (gleiche Größe auf dem Bildschirm, x-Höhe danach = 1),
   // und die Schriftgröße im Schreiben-Tab wird ausgeglichen, damit das PDF gleich groß bleibt.
-  $('fit-boxes').addEventListener('click', () => {
+  $('fit-boxes').addEventListener('click', async () => {
     if (alignAll(profile)) saveProfile(profile);
     const m = typicalXHeight(profile);
-    if (!m) return alert('Dafür braucht es zuerst ein paar Kleinbuchstaben wie a, e, n, o (mindestens 4 Varianten).');
+    if (!m) return info('Dafür braucht es zuerst ein paar Kleinbuchstaben wie a, e, n, o (mindestens 4 Varianten).');
     const s = getSettings(), old = s.boxScale || 1;
     const next = Math.min(1, old * m); // größer als der Platz erlaubt geht nicht
     const f = next / old;               // tatsächliche Änderung der Kästchen
-    if (Math.abs(f - 1) < 0.05) return alert('Die Kästchen passen schon zu deiner Schrift.');
-    if (!confirm(`Deine Kleinbuchstaben sind im Schnitt ${Math.round(m * 100)} % so hoch wie die x-Höhe-Linie.\n` +
+    if (Math.abs(f - 1) < 0.05) return info('Die Kästchen passen schon zu deiner Schrift.');
+    if (!await ask(`Deine Kleinbuchstaben sind im Schnitt ${Math.round(m * 100)} % so hoch wie die x-Höhe-Linie.\n` +
       `Die Kästchen werden ${f < 1 ? 'kleiner' : 'größer'}, deine Aufnahmen bleiben gleich groß, das PDF auch.\n\nAnpassen?`)) return;
     scaleAll(profile, 1 / f); // gleiche Größe auf dem Bildschirm trotz kleinerer Hilfslinien
     setSetting('boxScale', Math.round(next * 1000) / 1000);

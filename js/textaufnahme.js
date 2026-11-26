@@ -8,6 +8,7 @@ import { fillStrokes } from './ink.js';
 import { drawGhost, ghostWidth } from './ghost.js';
 import { attachPen } from './pen.js';
 import { PEN_ONLY } from './aufnahme.js';
+import { ask, info } from './dialog.js';
 
 const PITCH = 3.5;     // Zeilenhöhe in x-Höhen
 const BASE = 2.3;      // Grundlinie unterhalb der Zeilenoberkante
@@ -124,7 +125,7 @@ export function initTextAufnahme(profile, onSaved) {
 
   // Striche der Seite den Feldern zuordnen und in freie Varianten speichern.
   function commit() {
-    if (!strokes.length) return alert('Auf dieser Seite ist noch nichts geschrieben.');
+    if (!strokes.length) return info('Auf dieser Seite ist noch nichts geschrieben.');
     const rows = pages[page];
     const bySlot = new Map();
     for (const st of strokes) {
@@ -168,10 +169,10 @@ export function initTextAufnahme(profile, onSaved) {
     hint.textContent = notes.join(' · ');
   }
 
-  function go(dir) {
+  async function go(dir) {
     const next = page + dir;
     if (next < 0 || next >= pages.length) return;
-    if (strokes.length && !confirm('Die Striche auf dieser Seite sind noch nicht übernommen. Verwerfen?')) return;
+    if (strokes.length && !await ask('Die Striche auf dieser Seite sind noch nicht übernommen. Verwerfen?')) return;
     strokes = [];
     page = next;
     setSetting('textPage', page);
@@ -182,8 +183,8 @@ export function initTextAufnahme(profile, onSaved) {
   $('text-prev').addEventListener('click', () => go(-1));
   $('text-next').addEventListener('click', () => go(1));
   $('text-undo').addEventListener('click', () => { strokes.pop(); draw(); });
-  $('text-clear').addEventListener('click', () => {
-    if (strokes.length && confirm('Alle Striche auf dieser Seite löschen?')) { strokes = []; draw(); }
+  $('text-clear').addEventListener('click', async () => {
+    if (strokes.length && await ask('Alle Striche auf dieser Seite löschen?')) { strokes = []; draw(); }
   });
   $('text-commit').addEventListener('click', commit);
 

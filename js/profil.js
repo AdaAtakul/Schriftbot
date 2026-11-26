@@ -6,6 +6,7 @@ import {
 } from './storage.js';
 import { buildCollection, isCollection, parseCollection, uniqueName } from './sammlung.js';
 import { shareFiles } from './export.js';
+import { ask, info } from './dialog.js';
 
 const fileName = name => name.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'profil';
 const jsonFile = (data, name) => new File([JSON.stringify(data)], name, { type: 'application/json' });
@@ -28,10 +29,10 @@ export function initProfil(profile) {
   async function send(file) {
     try {
       // Safari verlangt fürs Teilen einen frischen Tipp; dauert das Zusammenstellen zu lange, noch einmal tippen lassen
-      if (!await shareFiles([file])) alert('Bitte noch einmal tippen, um die Datei zu teilen.');
+      if (!await shareFiles([file])) info('Bitte noch einmal tippen, um die Datei zu teilen.');
       return true;
     } catch (err) {
-      alert('Teilen fehlgeschlagen: ' + err.message);
+      info('Teilen fehlgeschlagen: ' + err.message);
       return false;
     }
   }
@@ -69,7 +70,7 @@ export function initProfil(profile) {
       if (isCollection(text)) await importCollection(parseCollection(text));
       else await importSingle(parseProfile(text));
     } catch (err) {
-      alert('Import fehlgeschlagen: ' + err.message);
+      info('Import fehlgeschlagen: ' + err.message);
     }
   });
 
@@ -77,7 +78,7 @@ export function initProfil(profile) {
   async function importCollection(entries) {
     const meta = profilesMeta();
     const summary = entries.map(e => `• ${e.name}${e.from != null ? ` (Schrift von „${entries[e.from].name}“)` : ` – ${progress(e.handwriting).done} Zeichen`}`).join('\n');
-    if (!confirm(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`)) return;
+    if (!await ask(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`)) return;
     // Nur das leere Start-Profil eines neuen Geräts wird ersetzt
     const lone = meta.list.length === 1 && !meta.list[0].from && progress(await loadGlyphs(meta.list[0].id)).done === 0 ? meta.list[0] : null;
     const taken = meta.list.filter(p => p !== lone).map(p => p.name); // der Name des ersetzten Start-Profils ist frei
@@ -104,7 +105,7 @@ export function initProfil(profile) {
     const p = progress(imported), owner = glyphOwner();
     const msg = `Schrift mit ${p.done} von ${p.total} Zeichen importieren?`
       + (progress(profile).done ? `\n\nDie Schrift von „${owner.name}“ wird dabei ersetzt` + (owner.id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
-    if (!confirm(msg)) return;
+    if (!await ask(msg)) return;
     await saveProfile(imported);
     location.reload();
   }

@@ -7,7 +7,7 @@ import { drawPage } from './render.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { loadKey, saveKey } from './storage.js';
-import { ASSISTANT_URL, openAssistant, pasteFromClaude } from './claude.js';
+import { ask, info as showInfo } from './dialog.js';
 
 const MIN_W = 12, MIN_H = 6; // kleinstes Feld in mm
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
@@ -73,7 +73,7 @@ export function initBlatt(profile) {
     const file = fileInput.files[0];
     fileInput.value = '';
     if (!file) return;
-    if (sheet && !confirm('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?')) return;
+    if (sheet && !await ask('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?')) return;
     const pages = [], found = [], canvases = [];
     setBusy(true);
     try {
@@ -255,19 +255,6 @@ export function initBlatt(profile) {
     changed(f);
     syncEditor();
   });
-  // Claude-Antwort ins gewählte Feld (über den Schriftbot-Assistenten)
-  $('field-claude-open').href = ASSISTANT_URL;
-  $('field-claude-open').addEventListener('click', () => openAssistant(sel()?.text || ''));
-  $('field-claude-paste').addEventListener('click', async () => {
-    const f = sel();
-    if (!f) return;
-    const res = await pasteFromClaude({ current: f.text || '', target: `in Feld ${fields.indexOf(f) + 1} übernehmen` });
-    if (!res) return;
-    f.text = res.text;
-    textEl.value = res.text;
-    changed(f);
-    syncEditor();
-  });
   $('field-delete').addEventListener('click', async () => {
     const f = sel();
     if (!f) return;
@@ -372,10 +359,10 @@ export function initBlatt(profile) {
     .then(b => b.arrayBuffer()).then(b => new Uint8Array(b));
 
   async function doExport(kind) {
-    if (!sheet) return alert('Bitte zuerst ein Arbeitsblatt öffnen.');
+    if (!sheet) return showInfo('Bitte zuerst ein Arbeitsblatt öffnen.');
     const s = current(), o = options(s), color = inkColor(s);
     const miss = new Set(fields.flatMap(f => layoutOf(f).missing).filter(c => c !== ' '));
-    if (miss.size && !confirm(`Es fehlen Zeichen: ${[...miss].join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
+    if (miss.size && !await ask(`Es fehlen Zeichen: ${[...miss].join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
     const labels = exportButtons.map(b => b.innerHTML);
     exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
     shareAgain.hidden = true;
@@ -407,7 +394,7 @@ export function initBlatt(profile) {
       }
       if (!await shareFiles(files)) { pending = files; shareAgain.hidden = false; }
     } catch (err) {
-      alert('Export fehlgeschlagen: ' + err.message);
+      showInfo('Export fehlgeschlagen: ' + err.message);
     } finally {
       exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
@@ -417,11 +404,22 @@ export function initBlatt(profile) {
   $('sheet-png').addEventListener('click', () => doExport('png'));
   shareAgain.addEventListener('click', async () => {
     shareAgain.hidden = true;
-    try { await shareFiles(pending); } catch (err) { alert('Teilen fehlgeschlagen: ' + err.message); }
+    try { await shareFiles(pending); } catch (err) { showInfo('Teilen fehlgeschlagen: ' + err.message); }
     pending = null;
   });
 
   restore();
   // Schreib-Einstellungen (Tinte, Unordnung …) können sich im anderen Tab geändert haben
-  return { render: () => { cache.clear(); renderAll(); syncEditor(); } };
+  // Text von außen ins gewählte Feld (KI-Tab). Gibt false zurück, wenn kein Feld gewählt ist.
+  function insertIntoField(text, mode = 'replace') {
+    const f = sel();
+    if (!f) return false;
+    f.text = mode === 'append' && f.text?.trim() ? f.text.replace(/\s+$/, '') + '\n\n' + text : text;
+    textEl.value = f.text;
+    changed(f);
+    syncEditor();
+    return true;
+  }
+  const selectedField = () => { const f = sel(); return f ? { number: fields.indexOf(f) + 1, page: f.page + 1, text: f.text || '' } : null; };
+  return { render: () => { cache.clear(); renderAll(); syncEditor(); }, insertIntoField, selectedField };
 }

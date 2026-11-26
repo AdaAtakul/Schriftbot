@@ -7,8 +7,8 @@ import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
-import { ASSISTANT_URL, openAssistant, pasteFromClaude, isPending, clearPending } from './claude.js';
 import { PRESETS, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
+import { ask, info } from './dialog.js';
 
 // Papier wie in GoodNotes (Maße in js/paper.js); Zeilen stehen genau auf Linien, Karos bzw. Punktreihen.
 export const PAPERS = PAPER_KINDS;
@@ -217,10 +217,10 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     restore.lastChild.textContent = label;
     restore.hidden = false;
   };
-  del.addEventListener('click', () => {
+  del.addEventListener('click', async () => {
     if (!input.value.trim()) return;
     const n = input.value.trim().split(/\s+/).length;
-    if (!confirm(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`)) return;
+    if (!await ask(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`)) return;
     keepPrevious('Gelöschten Text wiederherstellen');
     setText('');
   });
@@ -231,27 +231,6 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     restore.hidden = true;
   });
   syncDelete();
-
-  // ---------- Claude (Schriftbot-Assistent) ----------
-  const banner = $('claude-banner');
-  const showBanner = () => { banner.hidden = !isPending(); };
-  $('claude-open').href = ASSISTANT_URL;
-  $('claude-open').addEventListener('click', () => { openAssistant(input.value); setTimeout(showBanner, 500); });
-  async function insertFromClaude() {
-    const res = await pasteFromClaude({ current: input.value, target: 'übernehmen' });
-    if (!res) return;
-    if (input.value.trim()) keepPrevious('Vorherigen Text wiederherstellen');
-    setText(res.text);
-    banner.hidden = true;
-    statusEl.textContent = res.mode === 'append' ? 'Claude-Antwort angehängt.' : 'Claude-Antwort eingefügt.';
-  }
-  $('claude-paste').addEventListener('click', insertFromClaude);
-  $('claude-banner-paste').addEventListener('click', insertFromClaude);
-  $('claude-banner-close').addEventListener('click', () => { clearPending(); banner.hidden = true; });
-  // Zurück aus dem Assistenten: an die Antwort erinnern
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') showBanner(); });
-  window.addEventListener('focus', showBanner);
-  showBanner();
 
   input.addEventListener('input', () => {
     syncDelete();
@@ -264,8 +243,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     setSetting('seed', seed);
     render();
   });
-  $('reset-settings').addEventListener('click', () => {
-    if (!confirm('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?')) return;
+  $('reset-settings').addEventListener('click', async () => {
+    if (!await ask('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?')) return;
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
     setSetting('style', 'normal');
     setSetting('styles', {});
@@ -283,11 +262,11 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     onProfileChanged(); // Aufnahme-Kästchen zeigen sonst noch die alten Striche
     render();
   };
-  $('equalize').addEventListener('click', () => {
+  $('equalize').addEventListener('click', async () => {
     const trial = structuredClone(profile.glyphs);
     const changed = equalize({ ...profile, glyphs: trial });
-    if (!changed.length) return alert('Alle Buchstaben haben schon eine passende Größe.');
-    if (!confirm(`Diese Zeichen werden in der Größe an deine übrigen angepasst:\n${changed.join(' ')}\n\nÜbernehmen? Rückgängig geht, bis du die App schließt.`)) return;
+    if (!changed.length) return info('Alle Buchstaben haben schon eine passende Größe.');
+    if (!await ask(`Diese Zeichen werden in der Größe an deine übrigen angepasst:\n${changed.join(' ')}\n\nÜbernehmen? Rückgängig geht, bis du die App schließt.`)) return;
     before = profile.glyphs;
     replaceGlyphs(trial);
     $('equalize-undo').hidden = false;
@@ -307,11 +286,11 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   let pending = null;
 
   async function doExport(kind) {
-    if (!input.value.trim()) return alert('Bitte zuerst Text eingeben.');
+    if (!input.value.trim()) return info('Bitte zuerst Text eingeben.');
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
     const miss = result.missing.filter(ch => ch !== ' ');
-    if (miss.length && !confirm(`Es fehlen Zeichen: ${miss.join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
+    if (miss.length && !await ask(`Es fehlen Zeichen: ${miss.join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
 
     const color = inkColor(s);
     const date = new Date().toISOString().slice(0, 10);
@@ -336,7 +315,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       // Safari verlangt fürs Teilen einen frischen Tipp, wenn das Erzeugen länger gedauert hat.
       if (!await shareFiles(files)) { pending = files; shareAgain.hidden = false; }
     } catch (err) {
-      alert('Export fehlgeschlagen: ' + err.message);
+      info('Export fehlgeschlagen: ' + err.message);
     } finally {
       exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
@@ -346,10 +325,15 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   $('export-png').addEventListener('click', () => doExport('png'));
   shareAgain.addEventListener('click', async () => {
     shareAgain.hidden = true;
-    try { await shareFiles(pending); } catch (err) { alert('Teilen fehlgeschlagen: ' + err.message); }
+    try { await shareFiles(pending); } catch (err) { info('Teilen fehlgeschlagen: ' + err.message); }
     pending = null;
   });
 
   syncControls();
-  return { render, sync: () => { syncControls(); render(); }, getSeed: () => seed, getText: () => input.value };
+  // Text von außen einsetzen (KI-Tab): ersetzen oder anhängen, der vorherige Text bleibt wiederherstellbar
+  function insertText(text, mode = 'replace') {
+    if (input.value.trim()) keepPrevious('Vorherigen Text wiederherstellen');
+    setText(mode === 'append' && input.value.trim() ? input.value.replace(/\s+$/, '') + '\n\n' + text : text);
+  }
+  return { render, sync: () => { syncControls(); render(); }, getSeed: () => seed, getText: () => input.value, insertText };
 }

@@ -4,6 +4,7 @@ import {
   profilesMeta, activeProfile, createProfile, renameProfile, setActiveProfile, deleteProfile, seedSettings, profileSettings,
 } from './storage.js';
 import { PRESETS, DEFAULT_STYLE } from './stil.js';
+import { ask, info as showInfo, askText } from './dialog.js';
 
 export function initProfilwahl() {
   const $ = id => document.getElementById(id);
@@ -45,14 +46,14 @@ export function initProfilwahl() {
         badge.textContent = 'Aktiv';
         actions.append(badge);
       } else button('Wechseln', () => switchTo(p.id), 'primary');
-      button('Umbenennen', () => {
-        const n = prompt('Neuer Name für das Profil:', p.name)?.trim();
+      button('Umbenennen', async () => {
+        const n = (await askText('Neuer Name für das Profil', p.name))?.trim();
         if (n) { renameProfile(p.id, n); render(); }
       });
       button('Löschen', async () => {
-        if (!confirm(`Profil „${p.name}“ löschen?` + (p.from ? '' : '\nSeine aufgenommene Schrift wird dabei gelöscht – vorher ein Backup exportieren!'))) return;
+        if (!await ask(`Profil „${p.name}“ löschen?` + (p.from ? '' : '\nSeine aufgenommene Schrift wird dabei gelöscht – vorher ein Backup exportieren!'))) return;
         const err = await deleteProfile(p.id);
-        if (err) return alert(err);
+        if (err) return showInfo(err);
         if (p.id === active.id) location.reload(); else render();
       }, 'danger');
       li.append(info, actions);
@@ -69,7 +70,7 @@ export function initProfilwahl() {
   for (const [key, p] of Object.entries(PRESETS)) styleSel.add(new Option(p.label, key));
   styleSel.value = 'unordentlich';
 
-  $('profile-new').addEventListener('submit', e => {
+  $('profile-new').addEventListener('submit', async e => {
     e.preventDefault();
     const name = nameInput.value.trim();
     if (!name) return nameInput.focus();
@@ -80,7 +81,7 @@ export function initProfilwahl() {
     const keys = ['paper', 'paperColor', 'ink', 'inkHue', 'lineHeight', 'margin', ...(fromSel.value ? ['xHeight'] : [])];
     for (const k of keys) if (k in cur) keep[k] = cur[k];
     seedSettings(id, { ...keep, style: styleSel.value, styles: {} });
-    if (!fromSel.value) alert(`Profil „${name}“ ist angelegt. Nimm jetzt im Tab „Aufnahme“ die neue Schrift auf.`);
+    if (!fromSel.value) await showInfo(`Profil „${name}“ ist angelegt. Nimm jetzt im Tab „Aufnahme“ die neue Schrift auf.`);
     switchTo(id);
   });
 

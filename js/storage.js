@@ -1,5 +1,6 @@
 // Profil in IndexedDB, kleine Einstellungen in localStorage.
 import { emptyProfile } from './profile.js';
+import { info } from './dialog.js';
 
 let dbPromise;
 function db() {
@@ -88,7 +89,7 @@ export async function loadProfile() {
 // Fehler beim Speichern sichtbar machen, sonst geht Aufgenommenes unbemerkt verloren.
 export function saveProfile(profile) {
   return tx('readwrite', s => s.put(profile, dataKey(glyphOwner().id))).catch(err => {
-    alert('Speichern fehlgeschlagen: ' + err.message + '\nBitte ein Backup exportieren.');
+    info('Speichern fehlgeschlagen: ' + err.message + '\nBitte ein Backup exportieren.');
     throw err;
   });
 }

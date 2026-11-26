@@ -91,19 +91,23 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
 - Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
 
-### Mit Claude schreiben (ohne API-Schlüssel)
+### KI-Tab (Claude über dein Abo, ohne API-Schlüssel)
 
-Claude schreibt dir Antworten, Zusammenfassungen oder Hefteinträge über dein normales Claude-Abo – mit dem **Schriftbot-Assistenten**, einer kleinen Seite auf claude.ai.
+Der Tab **KI** ist ein Chat mit Claude. Er funktioniert in der **claude.ai-Version** der App: https://claude.ai/artifact/TuYxD4Q6AKc8VLQQU1K5eY – dieselbe App, nur auf claude.ai, wo sie Claude über dein normales Abo fragen darf. (In der GitHub-Version zeigt der Tab einen Link dorthin. claude.ai lässt sich nicht in andere Seiten einbetten, deshalb geht es nur so.)
 
-1. Im Tab **Schreiben** auf **Mit Claude schreiben** tippen. Der Assistent öffnet sich (beim ersten Mal fragt claude.ai, ob die Seite Claude benutzen darf). Steht schon Text im Feld, ist er kopiert – im Assistenten einfach einfügen.
-2. Im Assistenten wählen: **Aufgabe beantworten**, Zusammenfassen, Korrigieren, Stichpunkte, Hefteintrag oder ein freier Auftrag. Aufgabe einfügen oder **fotografieren**, Länge und Schreibstil wählen, **Text schreiben lassen**. Mit **Kürzer**, **Einfacher**, **Ausführlicher** nachbessern oder den Text direkt ändern.
-3. **In die Handschrift-App übernehmen** → **Ja, kopieren**.
-4. Zurück in der Handschrift-App erscheint **„Antwort von Claude da?“** → **Einfügen** (Safari fragt einmal mit „Einfügen“) → Vorschau → **Text ersetzen** oder **Anhängen**. **Vorherigen Text wiederherstellen** macht es rückgängig.
+- Nachricht schreiben, mit der **Büroklammer** Dateien anhängen: **Fotos** (z. B. ein Foto der Aufgabe), **PDFs** (Text wird gelesen, gescannte Seiten gehen als Foto mit) und **Textdateien**. Bilder lassen sich auch einfügen oder hineinziehen. Word-Dateien vorher als PDF exportieren.
+- **Schnell / Normal / Gründlich** wählt, wie lange Claude nachdenkt.
+- **Meinen Text aus „Schreiben“ mitschicken**, z. B. zum Korrigieren.
+- Unter jeder Antwort: **In Handschrift übernehmen** → Vorschau → **Text ersetzen**, **Anhängen** oder **In Feld N (Blatt)**, wenn im Blatt-Tab ein Feld gewählt ist. Die App springt danach in den passenden Tab; **Vorherigen Text wiederherstellen** macht es rückgängig. Außerdem **Kopieren** und **Neu schreiben**.
+- Claude bekommt die Liste deiner aufgenommenen Zeichen und schreibt ohne Formatierung, damit nichts rot markiert wird.
+- Beim ersten Mal fragt claude.ai, ob die App Claude benutzen darf. Anfragen zählen zu deinem normalen Claude-Nutzungslimit.
 
-- Auch im Tab **Blatt** hat jedes Feld **Mit Claude** und **Antwort einfügen**.
-- Der Assistent sorgt für schlichten Text ohne Formatierung und Sonderzeichen; beim Einfügen werden Reste (Sternchen, Pfeile, Emojis) entfernt, damit nichts rot markiert wird.
-- Der Assistent braucht Internet und dein Claude-Konto. Er ist privat: nur du kannst ihn öffnen, bis du ihn auf claude.ai über „Teilen“ freigibst.
-- Erlaubt Safari das Lesen der Zwischenablage nicht, erscheint ein Feld zum Einfügen von Hand.
+Gut zu wissen über die claude.ai-Version:
+
+- Sie braucht Internet und eine Anmeldung bei claude.ai (Safari oder Claude-App). Offline und vom Home-Bildschirm läuft weiter die GitHub-Version.
+- Sie hat **ihren eigenen Speicher**: Profile einmal mit **Profil → Alle Profile sichern** (GitHub-Version) und **Importieren** (claude.ai-Version) übertragen.
+- Exporte speichert sie über claude.ai. Die GoodNotes-Datei heißt dort **…goodnotes.zip**: in der Dateien-App „.zip“ aus dem Namen löschen, dann in GoodNotes öffnen.
+- Sie ist privat: nur du kannst sie öffnen, bis du sie auf claude.ai über „Teilen“ freigibst.
 
 ### Arbeitsblatt ausfüllen (Tab „Blatt“)
 
@@ -183,8 +187,12 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v26';` hochzählen (z. B. auf `'v27'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v27';` hochzählen (z. B. auf `'v28'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
+
+### claude.ai-Version aktualisieren
+
+`node tools/build-artifact.mjs` baut sie nach `dist-artifact/` (ohne Service Worker; Steuerzeichen in den Bibliotheken werden maskiert, weil claude.ai sie nicht annimmt). Den Ordner dann mit Claude Code als Artifact veröffentlichen (Fähigkeiten `sample` mit Bildern und `downloads`) – an dieselbe Adresse, damit der Link gleich bleibt.
 
 ## 6. Probleme lösen
 
@@ -215,7 +223,9 @@ js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
 js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
 js/sammlung.js          Datei mit mehreren Profilen: Backup aller Profile, Profil teilen
-js/claude.js            Schriftbot-Assistent öffnen, Antwort einfügen (Vorschau, Ersetzen/Anhängen)
+js/ki.js                KI-Tab: Regeln, Gespräch, Anhänge (ohne DOM)
+js/kiui.js              KI-Tab: Chat-Oberfläche, Dateien, Übernehmen in die Handschrift
+js/dialog.js            Eigene Dialoge (Bestätigen, Hinweis, Eingabe, Auswahl)
 js/einfuegen.js         Eingefügten Text bereinigen und einsetzen
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
@@ -244,6 +254,7 @@ node tests/stil.test.mjs
 node tests/storage.test.mjs
 node tests/sammlung.test.mjs
 node tests/einfuegen.test.mjs
+node tests/ki.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):

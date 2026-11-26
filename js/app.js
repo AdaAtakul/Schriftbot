@@ -6,6 +6,11 @@ import { initProfil } from './profil.js';
 import { initSchreiben } from './schreiben.js';
 import { initBlatt } from './blattui.js';
 import { initProfilwahl } from './profilwahl.js';
+import { info } from './dialog.js';
+import { initKiTab } from './kiui.js';
+
+// Läuft die App als Artifact auf claude.ai? Dort gibt es Claude (KI-Tab), aber keinen Service Worker.
+const inClaude = typeof window.claude?.use === 'function';
 
 // Navigation zwischen den Modulen; letzter Tab wird gemerkt.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -33,7 +38,7 @@ try {
   profile = await loadProfile();
   if (alignAll(profile)) saveProfile(profile); // ältere Aufnahmen nachträglich ausrichten
 } catch (err) {
-  alert('Das Handschrift-Profil konnte nicht geladen werden: ' + err.message +
+  info('Das Handschrift-Profil konnte nicht geladen werden: ' + err.message +
     '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, im Profil-Tab ein Backup importieren.');
   throw err;
 }
@@ -42,14 +47,17 @@ const aufnahme = initAufnahme(profile, () => schreiben.sync()); // Schriftgröß
 initTextAufnahme(profile, aufnahme.refresh);
 schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
-// Die KI-Funktion wurde entfernt: einen früher gespeicherten API-Schlüssel vom Gerät löschen.
+// Früher gab es eine KI mit API-Schlüssel: einen gespeicherten Schlüssel vom Gerät löschen.
 try { localStorage.removeItem('ki'); } catch {}
-initBlatt(profile);
+const blatt = initBlatt(profile);
 initProfilwahl();
+initKiTab(profile, { schreiben, blatt, goTo: showView });
 
 // PWA: Service Worker für Offline-Betrieb.
 const offlineStatus = document.getElementById('status-offline');
-if ('serviceWorker' in navigator) {
+if (inClaude) {
+  offlineStatus.textContent = '✨ Läuft auf claude.ai: KI-Tab aktiv, braucht Internet. Daten liegen getrennt von der GitHub-Version.';
+} else if ('serviceWorker' in navigator) {
   // Neue Version installiert → Hinweis statt automatischem Neuladen (könnte mitten im Schreiben stören).
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {
