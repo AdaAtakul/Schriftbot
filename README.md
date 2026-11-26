@@ -28,7 +28,6 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
    sw.js
    sitemap.xml
    robots.txt
-   CNAME
    llms.txt
    LICENSE
    README.md
@@ -56,8 +55,20 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Vorschaubild**: `icons/og.png` (1200 × 630) erscheint, wenn jemand den Link teilt. Sobald die Demo-Schrift da ist, lohnt sich ein echtes Bild mit Handschrift.
 - **Datenschutz**: `datenschutz.html` nennt als Kontakt GitHub Issues. Je nach Lage kann eine Anschrift nötig sein – im Zweifel rechtlich prüfen lassen.
 - **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. `robots.txt` liegt im Hauptordner und wirkt, weil die Seite auf der eigenen Domain im Wurzelverzeichnis läuft.
-- **Eigene Domain (`deineschrift.de`)**: Die Datei `CNAME` im Hauptordner muss erhalten bleiben. Bei der Domain (DNS) vier A-Einträge `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` für `@`, optional vier AAAA-Einträge `2606:50c0:8000::153` bis `8003::153`, und ein CNAME `www` auf `adaatakul.github.io`. Dann im Repo **Settings → Pages → Custom domain** `deineschrift.de` eintragen und **Enforce HTTPS** anhaken. **Reihenfolge:** Erst DNS und GitHub-Einstellung, dann mergen – sonst ist die Seite kurz nicht erreichbar.
+- **Hosting (Cloudflare Pages)**: Siehe Abschnitt 1c. Die Domain `deineschrift.de` bleibt bei GoDaddy registriert (Cloudflare nimmt keine .de-Domains zur Übertragung an), nur die DNS-Verwaltung liegt bei Cloudflare.
 - **Umzug**: Unter der neuen Adresse ist der Browser-Speicher leer. Vorher **Alle Profile sichern**, danach **Importieren**. Zieht die Seite erneut um, die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `CNAME` und `ios/` ersetzen.
+
+## 1c. Auf Cloudflare Pages veröffentlichen (statt GitHub Pages)
+
+Die Seite besteht nur aus fertigen Dateien, jeder Dateihoster reicht. Mit Cloudflare Pages ist das kostenlos:
+
+1. **Konto** auf [cloudflare.com](https://dash.cloudflare.com/sign-up) anlegen, **Domain hinzufügen** → `deineschrift.de` → Free-Plan. Cloudflare nennt zwei Nameserver.
+2. Bei GoDaddy (Domain → DNS → Nameserver → „Eigene Nameserver verwenden“) diese beiden eintragen. Die Domain bleibt dort registriert, nur die DNS-Verwaltung zieht um.
+3. In Cloudflare **Workers & Pages → Pages → Upload assets**: Projektname z. B. `schriftbot`, die Datei `schriftbot-site.zip` hochladen (Ordnerinhalt: `index.html`, `css/`, `js/`, `vendor/`, `icons/` …), **Deploy**.
+4. Im Projekt **Custom domains** → `deineschrift.de` (und `www.deineschrift.de`) hinzufügen. Die DNS-Einträge legt Cloudflare selbst an, das Zertifikat kommt automatisch.
+5. Bei einem Update: neues Zip erzeugen und im Projekt **Create deployment** hochladen. `VERSION` in `sw.js` vorher hochzählen.
+
+Nicht ins Zip gehören `tests/`, `tools/`, `ios/`, `.github/`, `README.md`. Ein Projekt, das per Direct Upload angelegt wurde, lässt sich später nicht auf Git umstellen.
 
 ## 2. Auf dem iPad installieren
 
@@ -83,7 +94,7 @@ Im Ordner `ios/` liegt eine richtige iPad-App: links deine Handschrift-App, im T
 
 Gut zu wissen:
 
-- Die App lädt die Handschrift-App von GitHub Pages: beim ersten Start braucht sie Internet, danach geht sie offline; Updates kommen automatisch mit.
+- Die App lädt die Handschrift-App von deineschrift.de: beim ersten Start braucht sie Internet, danach geht sie offline; Updates kommen automatisch mit.
 - Bei Claude mit **E-Mail-Code** anmelden. Die Google-Anmeldung blockiert Google in Apps.
 - Die App hat ihren eigenen Speicher (getrennt von Safari): Profile einmal per **Alle Profile sichern** / **Importieren** übertragen.
 - Die App liest nur die Zwischenablage, wenn du in Claude etwas kopierst – nicht den Chat selbst.
