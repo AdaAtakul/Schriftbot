@@ -19,4 +19,4 @@ Wichtige Fakten:
 
 ## Optional
 
-- [Quellcode auf GitHub](https://github.com/bambuseleitung/schriftbot)
+- [Quellcode auf GitHub](https://github.com/adaatakul/schriftbot)
