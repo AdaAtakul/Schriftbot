@@ -64,11 +64,11 @@ Die Seite besteht nur aus fertigen Dateien, jeder Dateihoster reicht. Bei Cloudf
 
 1. **Konto** auf [cloudflare.com](https://dash.cloudflare.com/sign-up) anlegen, **Domain hinzufügen** → `deineschrift.de` → Free-Plan. Cloudflare nennt zwei Nameserver.
 2. Bei GoDaddy (Domain → DNS → Nameserver → „Eigene Nameserver verwenden“) diese beiden eintragen. Die Domain bleibt dort registriert (Cloudflare nimmt keine .de-Domains zur Übertragung an), nur die DNS-Verwaltung zieht um.
-3. In Cloudflare unter **Workers & Pages** ein Projekt anlegen und `schriftbot-site.zip` hochladen (Inhalt: `index.html`, `css/`, `js/`, `vendor/`, `icons/`, `_headers` …).
+3. **Code automatisch von GitHub holen** (empfohlen): Beim Worker `deineschrift` unter **Settings → Builds → Connect** das Repo wählen (Cloudflare-GitHub-App erlauben), **Production branch** `main`, **Build command** leer, **Deploy command** `npx wrangler deploy`. Die Dateien `wrangler.jsonc` und `.assetsignore` im Repo sagen, was veröffentlicht wird. Danach veröffentlicht jeder Push auf `main` die Seite neu. (Alternative ohne Git: `schriftbot-site.zip` im Dashboard hochladen.)
 4. Beim Worker unter **Settings → Domains & Routes → Add → Custom domain** `deineschrift.de` und `www.deineschrift.de` eintragen. Bestehende alte DNS-Einträge (GitHub) vorher in der Cloudflare-DNS-Liste löschen.
-5. **Update:** neues Zip erzeugen und hochladen (**Deployments**). `VERSION` in `sw.js` vorher hochzählen.
+5. **Update:** `VERSION` in `sw.js` hochzählen und nach `main` pushen, fertig.
 
-Cloudflare entfernt `.html` aus Adressen: `anleitung.html` wird zu `/anleitung`. Die Seiten verweisen deshalb ohne Endung. Die Datei `_headers` (Sicherheits-Header) gehört ins Zip; `tests/`, `tools/`, `ios/`, `.github/` und `README.md` nicht.
+Cloudflare entfernt `.html` aus Adressen: `anleitung.html` wird zu `/anleitung`. Die Seiten verweisen deshalb ohne Endung. Die Datei `_headers` (Sicherheits-Header) wird mit veröffentlicht; `tests/`, `tools/`, `ios/`, `.github/` und `README.md` nicht (siehe `.assetsignore`).
 
 ## 2. Auf dem iPad installieren
 

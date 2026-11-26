@@ -1,0 +1,13 @@
+# Diese Dateien werden nicht veröffentlicht
+.git
+.github
+.gitignore
+.assetsignore
+wrangler.jsonc
+ios
+tests
+tools
+dist-artifact
+node_modules
+README.md
+schriftbot-site.zip

@@ -1,0 +1,7 @@
+{
+  // Cloudflare-Worker, der nur die fertigen Dateien dieses Ordners ausliefert (keine Build-Schritte).
+  // Der Name muss zum Worker im Cloudflare-Dashboard passen.
+  "name": "deineschrift",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./" }
+}
