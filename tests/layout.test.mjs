@@ -194,3 +194,27 @@ const slips = o2 => layout(essay, w, o2, 5).pages.flatMap(pg => pg.items).filter
 assert.ok(slips({ strike: 1, fix: 1 }) > 0);
 
 console.log('OK – Layout');
+
+// Zeilen versetzen: jede Zeile rückt für sich, bleibt aber auf dem Blatt (mind. 4 mm Abstand zur Kante)
+{
+  const many = Array(200).fill('abba').join(' ');
+  const shifted = layout(many, p, { lineShift: 1, margin: 6 }, 3).pages.flatMap(pg => pg.items);
+  const starts = new Map();
+  for (const it of shifted) {
+    const b = bounds(it.strokes);
+    assert.ok(it.x + b.minX * it.s >= 4 - 0.01 && it.x + b.maxX * it.s <= DEFAULTS.pageW - 4 + 0.01, 'versetzte Zeile bleibt auf dem Blatt');
+    starts.set(it.y, Math.min(starts.get(it.y) ?? Infinity, it.x));
+  }
+  assert.ok(new Set([...starts.values()].map(x => x.toFixed(1))).size > 3, 'Zeilen beginnen an verschiedenen Stellen');
+  const plain = layout(many, p, { lineShift: 0 }, 3).pages[0].items;
+  assert.ok(new Set(plain.filter((it, i, a) => i === 0 || a[i - 1].y !== it.y).map(it => it.x.toFixed(2))).size === 1, 'ohne Versatz gleicher Zeilenanfang');
+}
+
+// Fehlt ß, wird „ss“ geschrieben (statt rotem Kästchen), sofern s aufgenommen ist
+{
+  const q = emptyProfile();
+  variantsOf(q, 's').forEach(v => v.push(...line(0.3, 1.2)));
+  const r = layout('ß', q);
+  assert.deepEqual(r.missing, []);
+  assert.equal(r.pages[0].items.length, 2);
+}

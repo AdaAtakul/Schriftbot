@@ -13,6 +13,7 @@ export const DEFAULTS = {
   connect: 0,       // Verbindungen 0..1: Anteil der Stellen, an denen ein Paar genutzt wird
   chaos: 0,         // Unordnung 0..1
   edges: 0,         // Ränder 0..1: Zeilenanfänge und -enden wandern links und rechts
+  lineShift: 0,     // Zeilen versetzen 0..1: jede Zeile als Ganzes etwas nach links oder rechts (bis LINE_SHIFT mm)
   fatigue: 0,       // Müdigkeit 0..1: zum Textende hin größer, schräger, weiter und unordentlicher
   fix: 0,           // Korrekturen 0..1: nachgezogene Buchstaben, vergessene Wörter mit ^ eingefügt
   // strike 0..1: Durchstreichen – wie oft ein Wort erst falsch geschrieben und durchgestrichen wird
@@ -86,11 +87,14 @@ export function caretStrokes(r, pressure = 0.5) {
 
 // Ränder bei 100 % (in x-Höhen): Zeilenanfang rückt bis zu so weit ein, Zeile bricht bis zu so viel früher um.
 const EDGES = { left: 1.2, right: 4 };
+const LINE_SHIFT = 8; // mm bei 100 %: so weit wandert eine Zeile höchstens nach links oder rechts
+const PAGE_EDGE = 4;  // mm: näher an die Blattkante rückt keine Zeile
 
 // Ersatzzeichen, falls ein Zeichen nicht aufgenommen ist (z. B. typografische Zeichen der iPad-Tastatur).
 const ALIASES = {
   '’': ["'", '‘'], '‘': ["'"], '‚': [','], '”': ['“', '"'], '“': ['"'], '„': ['"'],
   '–': ['-'], '—': ['–', '-'], '…': ['...'], '\t': [' '], ' ': [' '],
+  'ß': ['ss'], // fehlt das ß (z. B. in mitgelieferten Schriften), dann „ss“
 };
 
 const MISSING_W = 1; // Breite einer Fehlmarkierung in x-Höhen
@@ -219,7 +223,7 @@ export function layout(text, profile, options = {}, seed = 1) {
   const jitter = (amount, r = jitterRandom) => (r() * 2 - 1) * amount * (o.chaos + tired * FATIGUE.chaos);
   const strike = o.strike ?? o.mistakes ?? 0, wobble = o.wobble ?? o.mistakes ?? 0, edges = o.edges || 0;
   const slipGap = Math.round(MISTAKES.gap[0] + (MISTAKES.gap[1] - MISTAKES.gap[0]) * strike);
-  const edgeRandom = rng(seed + 5);
+  const edgeRandom = rng(seed + 5), shiftRandom = rng(seed + 7);
   const fatigue = o.fatigue || 0, fix = o.fix || 0;
   const totalChars = Math.max(1, text.replace(/\s/g, '').length);
   let tired = 0, done = 0; // Müdigkeit an der aktuellen Stelle: 0 am Anfang, fatigue am Ende
@@ -306,6 +310,11 @@ export function layout(text, profile, options = {}, seed = 1) {
     indent = (indent + edgeRandom()) / 2;
     lineStart = left + indent * EDGES.left * edges * unit;
     lineRight = right - edgeRandom() * EDGES.right * edges * unit;
+    // Zeilen versetzen: die ganze Zeile rückt um einen eigenen Betrag nach links oder rechts (Breite bleibt)
+    const shift = (shiftRandom() * 2 - 1) * LINE_SHIFT * (o.lineShift || 0);
+    const room = Math.max(0, Math.min(shift < 0 ? lineStart - PAGE_EDGE : o.pageW - PAGE_EDGE - lineRight, Math.abs(shift)));
+    lineStart += Math.sign(shift) * room;
+    lineRight += Math.sign(shift) * room;
     x = lineStart;
     lineAngle = jitter(CHAOS.slant);
     // Sanfte Welle: Wellenlänge 60–140 mm, Höhe bis ±MISTAKES.wave x-Höhen

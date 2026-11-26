@@ -24,3 +24,34 @@ export function fillStrokes(ctx, strokes, size = PEN_SIZE) {
     ctx.fill();
   }
 }
+
+// Für die Vorschau: Umrisse je Strich zwischenspeichern (Path2D), damit Regler flüssig laufen.
+// Gilt nur für fertige Striche; eine Änderung der Punkte (Länge, Anfang, Ende) macht den Eintrag ungültig.
+const pathCache = new WeakMap();
+const sig = st => `${st.length}|${st[0]?.[0]}|${st[0]?.[1]}|${st[st.length - 1]?.[0]}|${st[st.length - 1]?.[1]}`;
+function pathOf(st, size) {
+  let e = pathCache.get(st);
+  const k = sig(st);
+  if (!e || e.k !== k) pathCache.set(st, e = { k, sizes: new Map() });
+  const key = Math.round(size * 1e4);
+  let path = e.sizes.get(key);
+  if (path === undefined) {
+    const poly = outline(st, size);
+    path = null;
+    if (poly.length) {
+      path = new Path2D();
+      path.moveTo(poly[0][0], poly[0][1]);
+      for (let i = 1; i < poly.length; i++) path.lineTo(poly[i][0], poly[i][1]);
+      path.closePath();
+    }
+    e.sizes.set(key, path);
+  }
+  return path;
+}
+export function fillStrokesCached(ctx, strokes, size = PEN_SIZE) {
+  if (typeof Path2D === 'undefined') return fillStrokes(ctx, strokes, size);
+  for (const st of strokes) {
+    const path = pathOf(st, size);
+    if (path) ctx.fill(path);
+  }
+}

@@ -27,7 +27,7 @@ export const INKS = {
 export const inkColor = s => (s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.schwarz).color);
 
 const STANDARD = {
-  paper: 'liniert-breit', ink: 'schwarz', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
+  paper: 'liniert-breit', ink: 'schwarz', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, lineShift: 20, paperColor: 'weiss',
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
@@ -50,7 +50,8 @@ const SLIDERS = [
     const lm = lineMetrics(options(s));
     return lm.lines ? `${mm(lm.step)} (${lm.lines} ${lm.lines === 1 ? 'Linie' : 'Linien'})` : mm(v);
   } },
-  { key: 'margin', label: 'Rand', min: 5, max: 40, step: 1, fmt: mm },
+  { key: 'margin', label: 'Rand', desc: 'Abstand des ganzen Textes zur Blattkante', min: 5, max: 40, step: 1, fmt: mm },
+  { key: 'lineShift', label: 'Zeilen versetzen', desc: 'Jede Zeile rückt für sich etwas nach links oder rechts', min: 0, max: 100, step: 5, fmt: off },
 ];
 
 // Aktuelle Einstellungen: Standard, gespeicherte Werte, darüber die Werte der Stil-Vorlage.
@@ -64,7 +65,7 @@ export function current() {
 export function options(s = current()) {
   const paper = PAPERS[s.paper] ? s.paper : STANDARD.paper;
   return {
-    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
+    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, lineShift: (+s.lineShift || 0) / 100, penSize: PEN_SIZE * s.weight / 100,
     connect: s.connect / 100, chaos: s.chaos / 100, strike: s.strike / 100, wobble: s.wobble / 100, edges: s.edges / 100,
     fix: s.fix / 100, fatigue: s.fatigue / 100,
     paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
@@ -210,7 +211,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       if (style) setSetting('styles', withStyleValue(current(), spec.key, Number(range.value)));
       else setSetting(spec.key, Number(range.value));
       syncControls();
-      render();
+      renderSoon(); // flüssig: höchstens einmal pro Bild, erst die sichtbare Seite
     });
     parent.append(label);
     return { spec, label, range, out: label.querySelector('output') };
@@ -248,12 +249,31 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   }
 
   // ---------- Vorschau ----------
-  function render() {
+  // Beim Ziehen eines Reglers: höchstens ein Neuzeichnen pro Bild und nur die sichtbaren Seiten;
+  // die übrigen Seiten folgen, sobald der Regler kurz still steht.
+  let rafId = 0, fullTimer = 0;
+  function renderSoon() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = 0;
+      render({ quick: true });
+      clearTimeout(fullTimer);
+      fullTimer = setTimeout(() => render(), 220);
+    });
+  }
+  const isVisible = el => {
+    const r = el.getBoundingClientRect(), c = pagesEl.getBoundingClientRect();
+    return r.bottom > Math.max(0, c.top) && r.top < Math.min(innerHeight, c.bottom) && r.right > c.left && r.left < c.right;
+  };
+
+  function render({ quick = false } = {}) {
+    if (!quick) clearTimeout(fullTimer);
     if (!pagesEl.clientWidth) return; // Tab nicht sichtbar
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
     const color = inkColor(s);
-    const dpr = window.devicePixelRatio || 1;
+    // Beim Ziehen eines Reglers in einfacher Auflösung zeichnen (4× weniger Pixel am iPad), danach scharf
+    const dpr = quick ? 1 : (window.devicePixelRatio || 1);
     const cssW = pageWidth(o);
     const pxPerMm = cssW / o.pageW;
 
@@ -265,8 +285,11 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       canvas.className = 'page';
       canvas.style.width = cssW + 'px';
       canvas.style.height = cssW * o.pageH / o.pageW + 'px';
-      canvas.width = Math.round(cssW * dpr);
-      canvas.height = Math.round(cssW * dpr * o.pageH / o.pageW);
+      if (quick && !isVisible(canvas)) return; // unsichtbare Seiten beim Ziehen auslassen
+      // Größe nur bei Bedarf setzen: das Neu-Anlegen des Speichers kostet bei jedem Schritt Zeit
+      const w = Math.round(cssW * dpr), h = Math.round(cssW * dpr * o.pageH / o.pageW);
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
       const ctx = canvas.getContext('2d');
       const withPaper = exportPaper();
       canvas.classList.toggle('transparent', !withPaper);
