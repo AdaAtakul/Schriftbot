@@ -6,8 +6,9 @@ import { drawGhost } from './ghost.js';
 import { attachPen } from './pen.js';
 import { layout } from './layout.js';
 import { drawPage } from './render.js';
-import { current as writeSettings, options as writeOptions, INKS } from './schreiben.js';
+import { current as writeSettings, options as writeOptions, inkColor } from './schreiben.js';
 import { previewText } from './textplan.js';
+import { ask, info } from './dialog.js';
 
 
 // Kästchen-Geometrie in x-Höhen: oben 2,5 über, unten 1,5 unter der Grundlinie.
@@ -21,7 +22,7 @@ const GUIDES = [
 const ACTIONS_H = 60; // Platz für die Knöpfe unter jedem Kästchen (px)
 const GAP = 16;
 
-export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. (Maus/Finger lassen sich im Profil-Tab als Testmodus erlauben.)';
+export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. Finger und Maus kannst du unter „Profil“ → „Eingabe & Speicher“ erlauben.';
 
 export function initAufnahme(profile, onScaled = () => {}) {
   const $ = id => document.getElementById(id);
@@ -117,16 +118,16 @@ export function initAufnahme(profile, onScaled = () => {}) {
 
       const actions = document.createElement('div');
       actions.className = 'box-actions';
-      const undo = button('↶ Rückgängig', () => {
+      const undo = button('Rückgängig', () => {
         strokes.pop();
         changed(box);
-      });
-      const clear = button('🗑 Löschen', () => {
-        if (strokes.length && confirm(`Variante ${i + 1} von „${label(current)}“ löschen?`)) {
+      }, 'i-undo');
+      const clear = button('Löschen', async () => {
+        if (strokes.length && await ask(`Variante ${i + 1} von „${label(current)}“ löschen?`, { ok: 'Löschen', danger: true })) {
           strokes.length = 0;
           changed(box);
         }
-      });
+      }, 'i-trash');
       actions.append(undo, clear);
       wrap.append(canvas, actions);
       boxesEl.append(wrap);
@@ -143,9 +144,10 @@ export function initAufnahme(profile, onScaled = () => {}) {
     drawPreview();
   }
 
-  function button(text, onClick) {
+  function button(text, onClick, icon) {
     const b = document.createElement('button');
-    b.textContent = text;
+    if (icon) b.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#${icon}"/></svg>`;
+    b.append(text);
     b.addEventListener('click', onClick);
     return b;
   }
@@ -175,7 +177,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
     canvas.height = Math.round(cssH * dpr);
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
-    drawPage(ctx, result.pages[0], (INKS[s.ink] || INKS.blau).color, writeOptions(s).penSize);
+    drawPage(ctx, result.pages[0], inkColor(s), writeOptions(s).penSize);
   }
 
   function draw({ ctx, strokes, unit, w, live }) {
@@ -225,7 +227,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
     e.preventDefault();
     const input = $('pair-input');
     const error = checkPair(profile, input.value);
-    if (error) return alert(error);
+    if (error) return info(error);
     profile.customPairs.push(input.value.trim());
     saveProfile(profile);
     current = input.value.trim();
@@ -235,8 +237,8 @@ export function initAufnahme(profile, onScaled = () => {}) {
     select(current);
   });
 
-  $('remove-pair').addEventListener('click', () => {
-    if (!confirm(`Eigenes Paar „${current}“ samt Aufnahmen entfernen?`)) return;
+  $('remove-pair').addEventListener('click', async () => {
+    if (!await ask(`Eigenes Paar „${current}“ samt Aufnahmen entfernen?`, { ok: 'Entfernen', danger: true })) return;
     profile.customPairs = profile.customPairs.filter(p => p !== current);
     delete profile.glyphs[current];
     saveProfile(profile);
@@ -248,16 +250,16 @@ export function initAufnahme(profile, onScaled = () => {}) {
   // Kästchen an die eigene Schrift anpassen: Die Hilfslinien werden so groß wie deine typische Schrift,
   // die Aufnahmen werden passend umgerechnet (gleiche Größe auf dem Bildschirm, x-Höhe danach = 1),
   // und die Schriftgröße im Schreiben-Tab wird ausgeglichen, damit das PDF gleich groß bleibt.
-  $('fit-boxes').addEventListener('click', () => {
+  $('fit-boxes').addEventListener('click', async () => {
     if (alignAll(profile)) saveProfile(profile);
     const m = typicalXHeight(profile);
-    if (!m) return alert('Dafür braucht es zuerst ein paar Kleinbuchstaben wie a, e, n, o (mindestens 4 Varianten).');
+    if (!m) return info('Dafür braucht es zuerst ein paar Kleinbuchstaben wie a, e, n, o (mindestens 4 Varianten).');
     const s = getSettings(), old = s.boxScale || 1;
     const next = Math.min(1, old * m); // größer als der Platz erlaubt geht nicht
     const f = next / old;               // tatsächliche Änderung der Kästchen
-    if (Math.abs(f - 1) < 0.05) return alert('Die Kästchen passen schon zu deiner Schrift.');
-    if (!confirm(`Deine Kleinbuchstaben sind im Schnitt ${Math.round(m * 100)} % so hoch wie die x-Höhe-Linie.\n` +
-      `Die Kästchen werden ${f < 1 ? 'kleiner' : 'größer'}, deine Aufnahmen bleiben gleich groß, das PDF auch.\n\nAnpassen?`)) return;
+    if (Math.abs(f - 1) < 0.05) return info('Die Kästchen passen schon zu deiner Schrift.');
+    if (!await ask(`Deine Kleinbuchstaben sind im Schnitt ${Math.round(m * 100)} % so hoch wie die x-Höhe-Linie.\n` +
+      `Die Kästchen werden ${f < 1 ? 'kleiner' : 'größer'}, deine Aufnahmen bleiben gleich groß, das PDF auch.\n\nAnpassen?`, { ok: 'Anpassen' })) return;
     scaleAll(profile, 1 / f); // gleiche Größe auf dem Bildschirm trotz kleinerer Hilfslinien
     setSetting('boxScale', Math.round(next * 1000) / 1000);
     setSetting('xHeight', Math.round(Math.min(6, Math.max(1.5, (s.xHeight ?? 3) * f)) * 10) / 10);

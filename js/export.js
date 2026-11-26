@@ -1,9 +1,9 @@
 // Modul 3: Export als PDF (Vektor) und PNG, Weitergabe über das Teilen-Menü (z. B. an GoodNotes).
 import { outline, PEN_SIZE } from './ink.js';
 import { drawPage, drawPaper, MISSING_COLOR } from './render.js';
+import { paperShapes } from './paper.js';
 
 const PNG_DPI = 300;
-const PAPER_LINE = '#b8c7dc';
 
 // Umrisse eines Glyph-Items in Seitenkoordinaten (mm): Drehung und Skalierung schon angewendet.
 export function itemPolygons(it, size = PEN_SIZE) {
@@ -49,11 +49,13 @@ export function buildPdf(result, o, color, withPaper) {
     const [w, h] = pageSize(page, o);
     if (i) doc.addPage([w, h], w > h ? 'l' : 'p');
     if (page.background) doc.addImage(page.background, 'JPEG', 0, 0, w, h, undefined, 'FAST');
-    else if (withPaper && o.ruled) {
-      doc.setDrawColor(PAPER_LINE);
-      doc.setLineWidth(0.2);
-      for (let y = o.lineTop; y <= o.pageH; y += o.lineSpacing) doc.line(0, y, o.pageW, y);
-      if (o.grid) for (let x = (o.pageW % o.lineSpacing) / 2; x <= o.pageW; x += o.lineSpacing) doc.line(x, o.lineTop, x, o.pageH);
+    else if (withPaper) {
+      // GoodNotes-Papier als Vektor: Farbe, Linien/Karos als 0,5-pt-Balken, Punkte
+      const p = paperShapes(o.paper, o.paperColor, w, h);
+      if (p.fill.toLowerCase() !== '#ffffff') { doc.setFillColor(p.fill); doc.rect(0, 0, w, h, 'F'); }
+      doc.setFillColor(p.color);
+      for (const [x, y, rw, rh] of p.rects) doc.rect(x, y, rw, rh, 'F');
+      for (const [x, y, r] of p.dots) doc.circle(x, y, r, 'F');
     }
     for (const it of page.items) {
       if (it.missing) {
@@ -89,13 +91,13 @@ export function buildPng(page, o, color, withPaper) {
   canvas.width = Math.round(w * pxPerMm);
   canvas.height = Math.round(h * pxPerMm);
   const ctx = canvas.getContext('2d');
-  if (withPaper || page.backgroundImage) {
+  if (page.backgroundImage) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
   if (page.backgroundImage) ctx.drawImage(page.backgroundImage, 0, 0, canvas.width, canvas.height);
   ctx.setTransform(pxPerMm, 0, 0, pxPerMm, 0, 0);
-  if (withPaper && !page.backgroundImage) drawPaper(ctx, o);
+  if (withPaper && !page.backgroundImage) drawPaper(ctx, { ...o, pageW: w, pageH: h });
   drawPage(ctx, page, color, o.penSize);
   return new Promise((resolve, reject) => canvas.toBlob(blob => {
     canvas.width = canvas.height = 0; // Speicher auf dem iPad sofort freigeben
@@ -106,6 +108,33 @@ export function buildPng(page, o, color, withPaper) {
 // Über das Teilen-Menü weitergeben; ohne Teilen-Funktion (z. B. am PC) herunterladen.
 // Gibt false zurück, wenn Safari einen erneuten Tipp verlangt (Erzeugen hat zu lange gedauert).
 export async function shareFiles(files) {
+  // In der iPad-App (Handschrift mit Claude): Dateien an das native Teilen-Menü geben
+  const native = window.webkit?.messageHandlers?.schriftbot;
+  if (native && window.schriftbotNative) {
+    const toBase64 = async file => {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    };
+    native.postMessage({ action: 'share', files: await Promise.all(files.map(async f => ({ name: f.name, data: await toBase64(f) }))) });
+    return true;
+  }
+  // In der claude.ai-Version: Teilen und Downloads sind dort gesperrt, nur claude.ai's eigene Speichern-Funktion geht.
+  if (typeof window.claude?.use === 'function') {
+    const dl = await window.claude.use('downloads').catch(() => null);
+    if (dl) {
+      for (const file of files) {
+        // .goodnotes ist dort nicht erlaubt: als .zip speichern (vor dem Import in GoodNotes „.zip“ entfernen)
+        const filename = file.name.endsWith('.goodnotes') ? file.name + '.zip' : file.name;
+        try { await dl.save({ filename, data: file }); } catch (e) {
+          if (e?.code === 'declined') return true;
+          throw new Error(e?.code === 'host_unavailable' ? 'Diese App kann hier keine Dateien speichern. Öffne claude.ai im Browser.' : (e?.message || 'Speichern nicht möglich.'));
+        }
+      }
+      return true;
+    }
+  }
   if (navigator.canShare?.({ files })) {
     try {
       await navigator.share({ files });

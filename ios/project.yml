@@ -1,0 +1,23 @@
+# Xcode-Projekt für die iPad-App, erzeugt mit XcodeGen (brew install xcodegen; xcodegen generate)
+name: Schriftbot
+options:
+  bundleIdPrefix: io.github.schriftbot
+  deploymentTarget:
+    iOS: "16.0"
+targets:
+  Schriftbot:
+    type: application
+    platform: iOS
+    sources:
+      - Schriftbot
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.schriftbot.app
+        PRODUCT_NAME: Schriftbot
+        INFOPLIST_FILE: Schriftbot/Info.plist
+        TARGETED_DEVICE_FAMILY: "2"
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: NO

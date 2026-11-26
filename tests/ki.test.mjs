@@ -1,47 +1,37 @@
-// Selbsttest für die KI-Anbindung (ohne echten Aufruf): node tests/ki.test.mjs
+// Selbsttest für den KI-Tab: node tests/ki.test.mjs
 import assert from 'node:assert/strict';
-import { ask, buildRequest, DEFAULT_CONFIG, chatPrompt, cleanAnswer } from '../js/ki.js';
+import { rules, buildTurns, userContent, attachmentText, kindOf, MAX_ATTACHMENT_CHARS, MAX_TOTAL_CHARS } from '../js/ki.js';
 
-const fake = (status, data) => {
-  const calls = [];
-  const fn = async (url, init) => { calls.push({ url, init, body: JSON.parse(init.body) }); return { ok: status < 300, status, json: async () => data }; };
-  return { fn, calls };
-};
-const claude = { ...DEFAULT_CONFIG, key: 'test-key' };
+// Regeln nennen die verfügbaren Zeichen
+assert.match(rules(['a', 'b', 'ä', ' ', 'a']), /nur diese Zeichen.*: abä/);
+assert.doesNotMatch(rules([]), /nur diese Zeichen/);
 
-// Claude: richtige Adresse, Header für den Browser-Zugriff, Text aus den text-Blöcken
-let f = fake(200, { stop_reason: 'end_turn', content: [{ type: 'thinking', thinking: '' }, { type: 'text', text: ' Hallo Welt ' }] });
-assert.equal(await ask(claude, 'Schreib etwas', 'alter Text', 'a b c', f.fn), 'Hallo Welt');
-const c = f.calls[0];
-assert.equal(c.url, 'https://api.anthropic.com/v1/messages');
-assert.equal(c.init.headers['x-api-key'], 'test-key');
-assert.equal(c.init.headers['anthropic-dangerous-direct-browser-access'], 'true');
-assert.equal(c.init.headers['anthropic-version'], '2026-10-21');
-assert.equal(c.body.model, 'claude-opus-5-5');
-assert.equal(c.body.fallbacks, 'default');
-assert.equal(c.init.headers['anthropic-beta'], 'server-side-fallback-2026-07-01');
-assert.ok(c.body.system.includes('a b c'), 'erlaubte Zeichen im Systemprompt');
-assert.ok(c.body.messages[0].content.includes('alter Text') && c.body.messages[0].content.includes('Schreib etwas'));
-// Haiku hat keine serverseitige Ausweichlösung
-assert.equal(JSON.parse(buildRequest({ ...claude, model: 'claude-haiku-5-5' }, 's', 'u').init.body).fallbacks, undefined);
+// Gespräch: Regeln vorne, beginnt und endet mit der Person
+const h = [{ role: 'assistant', content: 'Hallo!' }, { role: 'user', content: 'Frage 1' }, { role: 'assistant', content: 'Antwort 1' }, { role: 'user', content: 'Frage 2' }];
+const t = buildTurns(h, ['a']);
+assert.equal(t[0].role, 'user');
+assert.match(t[0].content, /Schreibassistent/);
+assert.deepEqual(t.slice(1).map(x => x.content), ['Frage 1', 'Antwort 1', 'Frage 2'], 'führende Assistenten-Nachricht fällt weg');
+assert.throws(() => buildTurns([{ role: 'user', content: 'x' }, { role: 'assistant', content: 'y' }]), /letzte Nachricht/);
+// Zu langes Gespräch: älteste Nachrichten fallen weg, die neueste bleibt
+const big = 'x'.repeat(MAX_TOTAL_CHARS / 2);
+const long = buildTurns([{ role: 'user', content: big }, { role: 'assistant', content: big }, { role: 'user', content: big }, { role: 'assistant', content: 'ok' }, { role: 'user', content: 'neu' }]);
+assert.ok(long.slice(1).reduce((n, m) => n + m.content.length, 0) <= MAX_TOTAL_CHARS);
+assert.equal(long.at(-1).content, 'neu');
+assert.equal(long[1].role, 'user');
 
-// Ablehnung, falscher Schlüssel, fehlender Schlüssel, offline
-await assert.rejects(ask(claude, 'x', '', '', fake(200, { stop_reason: 'refusal', content: [] }).fn), /abgelehnt/);
-await assert.rejects(ask(claude, 'x', '', '', fake(401, { error: { message: 'invalid x-api-key' } }).fn), /Schlüssel ungültig.*invalid x-api-key/);
-await assert.rejects(ask({ ...claude, key: '' }, 'x', '', ''), /Kein API-Schlüssel/);
-await assert.rejects(ask(claude, 'x', '', '', async () => { throw new TypeError('Failed to fetch'); }), /Keine Verbindung/);
+// Anhänge: Text gekürzt und eingerahmt, Fotos nur erwähnt
+const a = attachmentText({ name: 'aufgabe.pdf', kind: 'pdf', text: 'y'.repeat(MAX_ATTACHMENT_CHARS + 50) });
+assert.match(a, /^=== Anhang: aufgabe.pdf ===/);
+assert.match(a, /\[… gekürzt\]/);
+assert.equal(attachmentText({ name: 'foto.jpg', kind: 'image' }), '=== Foto: foto.jpg ===');
+const c = userContent('Beantworte Aufgabe 1', [{ name: 'a.txt', kind: 'text', text: 'Inhalt' }], 'Mein Entwurf');
+assert.ok(c.indexOf('Mein Entwurf') < c.indexOf('Inhalt') && c.indexOf('Inhalt') < c.indexOf('Beantworte'));
+assert.equal(userContent('', []), 'Bitte sieh dir den Anhang an.');
 
-// OpenAI-kompatibel: Bearer-Header, /chat/completions, Antwort aus choices
-const other = { provider: 'openai', key: 'k2', model: 'irgendein-modell', baseUrl: 'https://example.test/v1/' };
-f = fake(200, { choices: [{ message: { content: 'Antwort' } }] });
-assert.equal(await ask(other, 'x', '', 'a', f.fn), 'Antwort');
-assert.equal(f.calls[0].url, 'https://example.test/v1/chat/completions');
-assert.equal(f.calls[0].init.headers.authorization, 'Bearer k2');
-assert.equal(f.calls[0].body.messages[0].role, 'system');
-await assert.rejects(ask({ ...other, model: '' }, 'x', '', ''), /Modell/);
-
-// Kopierweg über die Claude-App: eine Nachricht mit Vorgaben, Text und Auftrag; Antwort wird entformatiert
-const msg = chatPrompt('Kürzen', 'Mein Text', 'a b');
-assert.ok(msg.includes('a b') && msg.includes('Mein Text') && msg.includes('Auftrag: Kürzen'));
-assert.equal(cleanAnswer('```\n## Titel\n**fett** und normal\n```\n'), 'Titel\nfett und normal');
-console.log('OK – KI-Anbindung');
+// Dateiarten
+assert.equal(kindOf({ name: 'IMG_1.HEIC', type: '' }), 'image');
+assert.equal(kindOf({ name: 'blatt.pdf', type: 'application/pdf' }), 'pdf');
+assert.equal(kindOf({ name: 'notiz.md', type: '' }), 'text');
+assert.equal(kindOf({ name: 'aufsatz.docx', type: '' }), 'word');
+console.log('OK – KI-Tab');

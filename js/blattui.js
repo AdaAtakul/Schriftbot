@@ -2,11 +2,12 @@
 // an derselben Stelle in Handschrift gesetzt. Felder lassen sich verschieben, in der Größe ziehen und neu aufziehen.
 import { detect, layoutField, eraseBlue } from './blatt.js';
 import { importFile } from './pdfimport.js';
-import { current, options, INKS } from './schreiben.js';
+import { current, options, inkColor } from './schreiben.js';
 import { drawPage } from './render.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { loadKey, saveKey } from './storage.js';
+import { ask, info as showInfo } from './dialog.js';
 
 const MIN_W = 12, MIN_H = 6; // kleinstes Feld in mm
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
@@ -42,7 +43,7 @@ export function initBlatt(profile) {
       clean = await Promise.all(sheet.pages.map((_, i) => compose(i)));
       build();
     } catch (err) {
-      statusEl.textContent = '⚠️ Gespeichertes Blatt konnte nicht geladen werden: ' + err.message;
+      statusEl.textContent = 'Gespeichertes Blatt konnte nicht geladen werden: ' + err.message;
     }
   }
 
@@ -72,7 +73,7 @@ export function initBlatt(profile) {
     const file = fileInput.files[0];
     fileInput.value = '';
     if (!file) return;
-    if (sheet && !confirm('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?')) return;
+    if (sheet && !await ask('Das aktuelle Blatt mit seinen Feldern wird ersetzt. Weiter?', { ok: 'Ersetzen' })) return;
     const pages = [], found = [], canvases = [];
     setBusy(true);
     try {
@@ -98,11 +99,11 @@ export function initBlatt(profile) {
       const note = total > pages.length ? ` (nur die ersten ${pages.length} von ${total} Seiten)` : '';
       const empty = found.filter(f => !f.text).length;
       statusEl.textContent = found.length
-        ? `✅ ${found.length} blaue ${found.length === 1 ? 'Antwort' : 'Antworten'} gefunden und in Handschrift gesetzt${note}.` +
+        ? `${found.length} blaue ${found.length === 1 ? 'Antwort' : 'Antworten'} gefunden und in Handschrift gesetzt${note}.` +
           (empty ? ` ${empty} ohne lesbaren Text (z. B. Foto): Feld antippen und Text eintragen.` : '')
-        : `Keine blauen Antworten gefunden${note}. Mit „＋ Textfeld“ ein Feld aufziehen.`;
+        : `Keine blauen Antworten gefunden${note}. Mit „Textfeld“ ein Feld aufziehen.`;
     } catch (err) {
-      statusEl.textContent = '⚠️ Datei konnte nicht gelesen werden: ' + err.message;
+      statusEl.textContent = 'Datei konnte nicht gelesen werden: ' + err.message;
     } finally {
       setBusy(false);
     }
@@ -164,7 +165,7 @@ export function initBlatt(profile) {
     const ctx = v.canvas.getContext('2d');
     ctx.drawImage(clean[i], 0, 0, v.canvas.width, v.canvas.height);
     const k = v.canvas.width / pg.w, s = current();
-    const color = (INKS[s.ink] || INKS.blau).color, pen = options(s).penSize;
+    const color = inkColor(s), pen = options(s).penSize;
     for (const f of fields.filter(f => f.page === i)) {
       ctx.setTransform(k, 0, 0, k, f.x * k, f.y * k);
       drawPage(ctx, { items: layoutOf(f).items }, color, pen);
@@ -204,8 +205,8 @@ export function initBlatt(profile) {
       if (r.overflow) over.push(n + 1);
     });
     const notes = [];
-    if (miss.size) notes.push(`⚠️ Fehlende Zeichen: ${[...miss].join(' ')}`);
-    if (over.length) notes.push(`⚠️ Zu viel Text für Feld ${over.join(', ')} – Feld größer ziehen`);
+    if (miss.size) notes.push(`Noch nicht aufgenommen: ${[...miss].join(' ')}`);
+    if (over.length) notes.push(`Zu viel Text für Feld ${over.join(', ')} – Feld größer ziehen`);
     $('sheet-warn').textContent = notes.join(' · ');
   }
 
@@ -358,10 +359,10 @@ export function initBlatt(profile) {
     .then(b => b.arrayBuffer()).then(b => new Uint8Array(b));
 
   async function doExport(kind) {
-    if (!sheet) return alert('Bitte zuerst ein Arbeitsblatt öffnen.');
-    const s = current(), o = options(s), color = (INKS[s.ink] || INKS.blau).color;
+    if (!sheet) return showInfo('Bitte zuerst ein Arbeitsblatt öffnen.');
+    const s = current(), o = options(s), color = inkColor(s);
     const miss = new Set(fields.flatMap(f => layoutOf(f).missing).filter(c => c !== ' '));
-    if (miss.size && !confirm(`Es fehlen Zeichen: ${[...miss].join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
+    if (miss.size && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${[...miss].join(' ')}\n\nSie erscheinen im Export als rote Kästchen.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren' })) return;
     const labels = exportButtons.map(b => b.innerHTML);
     exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
     shareAgain.hidden = true;
@@ -393,7 +394,7 @@ export function initBlatt(profile) {
       }
       if (!await shareFiles(files)) { pending = files; shareAgain.hidden = false; }
     } catch (err) {
-      alert('Export fehlgeschlagen: ' + err.message);
+      showInfo('Export fehlgeschlagen: ' + err.message);
     } finally {
       exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
@@ -403,11 +404,22 @@ export function initBlatt(profile) {
   $('sheet-png').addEventListener('click', () => doExport('png'));
   shareAgain.addEventListener('click', async () => {
     shareAgain.hidden = true;
-    try { await shareFiles(pending); } catch (err) { alert('Teilen fehlgeschlagen: ' + err.message); }
+    try { await shareFiles(pending); } catch (err) { showInfo('Teilen fehlgeschlagen: ' + err.message); }
     pending = null;
   });
 
   restore();
   // Schreib-Einstellungen (Tinte, Unordnung …) können sich im anderen Tab geändert haben
-  return { render: () => { cache.clear(); renderAll(); syncEditor(); } };
+  // Text von außen ins gewählte Feld (KI-Tab). Gibt false zurück, wenn kein Feld gewählt ist.
+  function insertIntoField(text, mode = 'replace') {
+    const f = sel();
+    if (!f) return false;
+    f.text = mode === 'append' && f.text?.trim() ? f.text.replace(/\s+$/, '') + '\n\n' + text : text;
+    textEl.value = f.text;
+    changed(f);
+    syncEditor();
+    return true;
+  }
+  const selectedField = () => { const f = sel(); return f ? { number: fields.indexOf(f) + 1, page: f.page + 1, text: f.text || '' } : null; };
+  return { render: () => { cache.clear(); renderAll(); syncEditor(); }, insertIntoField, selectedField };
 }

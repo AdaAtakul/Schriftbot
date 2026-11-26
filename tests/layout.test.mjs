@@ -140,4 +140,57 @@ for (let sd = 1; sd < 200; sd++) {
 }
 assert.equal(misspell('aaaa', ['a'], rng(1)), null, 'kein sinnvoller Fehler möglich');
 
+// Getrennte Regler: nur Durchstreichen → Striche, aber keine Welle und kein Druckwechsel; nur Zeilen & Druck → keine Striche
+const onlyStrike = layout(essay, w, { chaos: 0, strike: 1 }, 5).pages.flatMap(pg => pg.items);
+assert.ok(onlyStrike.some(it => it.strike) && onlyStrike.every(it => it.ink === undefined));
+assert.ok(onlyStrike.filter(it => !it.strike).every(it => Math.abs(((it.y - lineMetrics(DEFAULTS).first) / DEFAULTS.lineHeight) % 1) < 1e-9 || Math.abs(((it.y - lineMetrics(DEFAULTS).first) / DEFAULTS.lineHeight) % 1) > 1 - 1e-9), 'keine Welle');
+const onlyWobble = layout(essay, w, { chaos: 0, wobble: 1 }, 5).pages.flatMap(pg => pg.items);
+assert.ok(!onlyWobble.some(it => it.strike) && onlyWobble.some(it => it.ink !== 1));
+// Mehr Durchstreichen → mehr Verschreiber
+const strikeCount = v => layout(essay, w, { strike: v }, 5).pages.flatMap(pg => pg.items).filter(it => it.strike).length;
+assert.ok(strikeCount(0) === 0 && strikeCount(0.3) < strikeCount(1), `${strikeCount(0.3)} < ${strikeCount(1)}`);
+
+// Ränder: Zeilen beginnen unterschiedlich weit eingerückt (höchstens 1,2 x-Höhen), enden unterschiedlich, nie über den Rand
+const edgeItems = layout(essay, w, { chaos: 0, edges: 1 }, 5).pages[0].items;
+const rows = new Map();
+for (const it of edgeItems) { const r = rows.get(it.y) || []; r.push(it); rows.set(it.y, r); }
+const starts = [...rows.values()].map(r => Math.min(...r.map(it => it.x)));
+const ends = [...rows.values()].slice(0, -1).map(r => Math.max(...r.map(it => it.x + 1.3 * it.s)));
+assert.ok(new Set(starts.map(v => v.toFixed(2))).size > 5, 'Zeilenanfänge wandern');
+const plain = Math.min(...layout(essay, w, { chaos: 0 }, 5).pages[0].items.map(it => it.x));
+assert.ok(starts.every(v => v >= plain - 1e-9 && v <= plain + 1.2 * DEFAULTS.xHeight + 1e-9), 'Einzug in Grenzen');
+assert.ok(ends.every(v => v <= right + 0.5) && Math.max(...ends) - Math.min(...ends) > 3, 'rechter Rand flattert');
+assert.deepEqual(layout(essay, w, { edges: 0 }, 5), layout(essay, w, {}, 5), 'Ränder 0 % ändert nichts');
+
+// Müdigkeit: Anfang unverändert, Ende größer und nach rechts gelehnt; 0 % ändert nichts
+const tiredItems = layout(essay, w, { chaos: 0, fatigue: 1 }, 5).pages.flatMap(pg => pg.items);
+const restItems = layout(essay, w, { chaos: 0 }, 5).pages.flatMap(pg => pg.items);
+assert.ok(Math.abs(tiredItems[0].s - restItems[0].s) < 1e-9 && tiredItems[0].rot === 0, 'Anfang wie ausgeruht');
+const avg = (arr, f) => arr.reduce((n, it) => n + f(it), 0) / arr.length;
+const tail = tiredItems.slice(-50);
+assert.ok(avg(tail, it => it.s) / DEFAULTS.xHeight > 1.09, `Ende größer (${avg(tail, it => it.s).toFixed(3)})`);
+assert.ok(avg(tail, it => it.rot) * deg > 4 && avg(tail, it => it.rot) * deg < 5.5, `Ende gelehnt (${(avg(tail, it => it.rot) * deg).toFixed(1)}°)`);
+assert.ok(tail.some(it => Math.abs(it.rot * deg - 5) > 0.5), 'Ende auch unordentlicher');
+assert.ok(tiredItems.length === restItems.length, 'gleiche Buchstaben');
+assert.ok(layout(essay, w, { fatigue: 1 }, 5).pages.length >= layout(essay, w, {}, 5).pages.length, 'braucht mehr Platz');
+assert.deepEqual(layout(essay, w, { chaos: 0.5, fatigue: 0 }, 5), layout(essay, w, { chaos: 0.5 }, 5));
+
+// Korrekturen: nachgezogene Buchstaben und vergessene Wörter mit ^; 0 % ändert nichts
+const fixed = layout(essay, w, { chaos: 0, fix: 1 }, 5).pages.flatMap(pg => pg.items);
+const carets = fixed.filter(it => it.caret), inserted = fixed.filter(it => it.inserted), retraced = fixed.filter(it => it.retrace);
+assert.ok(carets.length >= 2 && retraced.length >= 5, `${carets.length} ^, ${retraced.length} nachgezogen`);
+assert.ok(carets.length <= 400 / 12 + 1, 'nicht öfter als alle 12 Wörter');
+for (const c of carets) {
+  const above = inserted.filter(it => Math.abs(it.y - (c.y - 2.1 * DEFAULTS.xHeight)) < 0.5);
+  assert.ok(above.length >= 3, 'eingefügtes Wort steht über dem ^');
+  assert.ok(above.every(it => it.s < DEFAULTS.xHeight * 0.8), 'und ist kleiner');
+}
+// Kein Buchstabe geht verloren: normale + eingefügte = Buchstaben ohne Korrekturen
+const plainCount = restItems.length;
+assert.equal(fixed.filter(it => !it.caret && !it.retrace).length, plainCount);
+assert.deepEqual(layout(essay, w, { chaos: 0.5, fix: 0 }, 5), layout(essay, w, { chaos: 0.5 }, 5));
+// Korrekturen verschieben die Verschreiber nicht
+const slips = o2 => layout(essay, w, o2, 5).pages.flatMap(pg => pg.items).filter(it => it.strike).length;
+assert.ok(slips({ strike: 1, fix: 1 }) > 0);
+
 console.log('OK – Layout');

@@ -1,103 +1,60 @@
-// KI-Anbindung ohne Server: die App ruft den Anbieter direkt vom iPad aus mit dem eigenen API-Schlüssel auf.
-// Claude über die Messages-API, alle anderen über die verbreitete OpenAI-kompatible Schnittstelle
-// (OpenAI, OpenRouter, Mistral, Groq, Gemini u. a.). Ohne DOM, in Node testbar.
-// Rohes fetch statt SDK, weil die App keinen Build-Schritt hat.
+// KI-Tab: Gespräch mit Claude über claude.ai (nur in der claude.ai-Version der App). Ohne DOM, in Node testbar.
+// Claude merkt sich nichts zwischen Anfragen: Regeln, bisheriges Gespräch und Anhänge gehen jedes Mal mit.
 
-export const PROVIDERS = {
-  claude: { label: 'Claude (Anthropic)', models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-2'] },
-  openai: { label: 'Andere KI (OpenAI-kompatibel)', models: [] },
-};
-export const DEFAULT_CONFIG = { provider: 'claude', key: '', model: 'claude-opus-5-5', baseUrl: 'https://api.openai.com/v1' };
+export const MAX_ATTACHMENT_CHARS = 60000; // je Anhang (Text aus PDF/Textdatei)
+export const MAX_TOTAL_CHARS = 180000;     // alles zusammen, unter dem Limit von 256 KiB
+export const MAX_HISTORY = 30;             // ältere Nachrichten fallen aus dem Gespräch
 
-// Modelle, die bei einer Ablehnung serverseitig auf ein anderes Modell ausweichen können.
-const HAS_FALLBACK = /^claude-(opus-5|sonnet-5-5|fable-5)/;
-
-export function systemPrompt(chars) {
-  return 'Du schreibst Texte, die anschließend in der echten Handschrift der Person, die diese App benutzt, ' +
-    'auf ein Notizblatt (GoodNotes) gesetzt werden. Antworte ausschließlich mit dem fertigen Text: ' +
-    'ohne Einleitung, ohne Erklärung, ohne Markdown (keine Sternchen, Rauten, Tabellen), ohne Emojis. ' +
-    `Verwende nur diese Zeichen, weil nur sie in der Handschrift aufgenommen sind: ${chars} ` +
-    'Zeilenumbrüche sind erlaubt, Aufzählungen schreibst du mit "-" am Zeilenanfang. ' +
-    'Schreib auf Deutsch, außer der Auftrag verlangt etwas anderes. ' +
-    'Wird ein aktueller Text mitgeschickt und betrifft der Auftrag ihn, gib den vollständigen überarbeiteten Text zurück.';
+// Regeln als erste Nachricht. chars: Zeichen, die in der Handschrift aufgenommen sind.
+export function rules(chars = []) {
+  const list = [...new Set(chars)].filter(c => c && c !== ' ').join('');
+  return [
+    'Du bist der Schreibassistent in DeineSchrift, einer Handschrift-App für das iPad. Was du schreibst, kann die Person per Knopf in ihre eigene Handschrift übernehmen (als Seite oder in ein Feld eines Formulars) und z. B. in GoodNotes weiterverwenden.',
+    'Regeln:',
+    '- Wenn die Person einen Text haben möchte (Brief, Karte, Notiz, Zusammenfassung, Lernzettel …), gib NUR diesen Text aus: ohne Einleitung wie „Hier ist …“ und ohne Nachsatz, damit er direkt übernommen werden kann.',
+    '- Bei Fragen, Erklärungen oder Rückfragen darfst du normal antworten.',
+    '- Kein Markdown: keine Sternchen, Rauten, Tabellen oder Fettdruck. Aufzählungen mit "- " am Zeilenanfang, Absätze mit einer Leerzeile.',
+    '- Keine Emojis und keine Sonderzeichen wie → • ≈ ≥ × ✓.',
+    ...(list ? [`- Die Handschrift kennt nur diese Zeichen (plus Leerzeichen und Zeilenumbruch): ${list}`, '  Vermeide alle anderen Zeichen; schreib z. B. Ziffern oder Wörter statt fehlender Symbole.'] : []),
+    '- Antworte auf Deutsch, außer die Person möchte eine andere Sprache.',
+    '- Anhänge stehen in der Nachricht zwischen ===-Zeilen; Fotos siehst du direkt.',
+  ].join('\n');
 }
 
-export function userMessage(task, text) {
-  return text.trim() ? `Aktueller Text:\n"""\n${text}\n"""\n\nAuftrag: ${task}` : `Auftrag: ${task}`;
+// Anhang als Text für die Nachricht (lange Texte werden gekürzt, das wird vermerkt)
+export function attachmentText({ name, kind, text = '', pages = 0 }) {
+  if (kind === 'image') return `=== Foto: ${name} ===`;
+  if (kind === 'scan') return `=== ${name}: gescanntes PDF, ${pages} ${pages === 1 ? 'Seite' : 'Seiten'} als Foto angehängt ===`;
+  const t = text.length > MAX_ATTACHMENT_CHARS ? text.slice(0, MAX_ATTACHMENT_CHARS) + '\n[… gekürzt]' : text;
+  return `=== Anhang: ${name} ===\n${t.trim()}\n=== Ende ${name} ===`;
 }
 
-export function buildRequest(cfg, system, user) {
-  if (cfg.provider === 'claude') {
-    const body = {
-      model: cfg.model || DEFAULT_CONFIG.model,
-      max_tokens: 16000,
-      system,
-      messages: [{ role: 'user', content: user }],
-      output_config: { effort: 'medium' },
-    };
-    const headers = {
-      'content-type': 'application/json',
-      'x-api-key': cfg.key,
-      'anthropic-version': '2026-10-21',
-      'anthropic-dangerous-direct-browser-access': 'true', // nötig für Aufrufe direkt aus dem Browser (CORS)
-    };
-    if (HAS_FALLBACK.test(body.model)) {
-      body.fallbacks = 'default';
-      headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
-    }
-    return { url: 'https://api.anthropic.com/v1/messages', init: { method: 'POST', headers, body: JSON.stringify(body) } };
-  }
-  return {
-    url: cfg.baseUrl.replace(/\/+$/, '') + '/chat/completions',
-    init: {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${cfg.key}` },
-      body: JSON.stringify({ model: cfg.model, messages: [{ role: 'system', content: system }, { role: 'user', content: user }] }),
-    },
-  };
+// Inhalt einer Nutzer-Nachricht: Text, darunter die Anhänge
+export function userContent(text, attachments = [], context = '') {
+  const parts = [];
+  if (context.trim()) parts.push(`=== Mein aktueller Text (Tab Schreiben) ===\n${context.trim()}\n=== Ende ===`);
+  for (const a of attachments) parts.push(attachmentText(a));
+  if (text.trim()) parts.push(text.trim());
+  return parts.join('\n\n') || 'Bitte sieh dir den Anhang an.';
 }
 
-export function parseResponse(provider, data) {
-  if (provider === 'claude') {
-    if (data.stop_reason === 'refusal') throw new Error('Claude hat die Anfrage abgelehnt. Formuliere den Auftrag bitte anders.');
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
-    if (!text) throw new Error('Die Antwort war leer.');
-    return text;
-  }
-  const text = data.choices?.[0]?.message?.content?.trim();
-  if (!text) throw new Error('Die Antwort war leer.');
-  return text;
+// Gesprächsverlauf → Eingabe für Claude: Regeln vorne, nur die letzten Nachrichten,
+// beginnt und endet mit der Person, nichts Leeres, gesamt unter dem Limit.
+export function buildTurns(history, chars) {
+  let msgs = history.filter(m => (m.role === 'user' || m.role === 'assistant') && m.content?.trim()).slice(-MAX_HISTORY);
+  while (msgs.length && msgs[0].role !== 'user') msgs.shift();
+  const size = () => msgs.reduce((n, m) => n + m.content.length, 0);
+  while (msgs.length > 1 && size() > MAX_TOTAL_CHARS) { msgs.shift(); while (msgs.length && msgs[0].role !== 'user') msgs.shift(); }
+  if (!msgs.length || msgs.at(-1).role !== 'user') throw new Error('Die letzte Nachricht muss von dir sein.');
+  return [{ role: 'user', content: rules(chars) }, ...msgs.map(m => ({ role: m.role, content: m.content }))];
 }
 
-function httpError(status, data) {
-  const msg = data?.error?.message || (typeof data?.error === 'string' ? data.error : '');
-  if (status === 401 || status === 403) return new Error('API-Schlüssel ungültig oder ohne Berechtigung. ' + msg);
-  if (status === 429) return new Error('Zu viele Anfragen oder kein Guthaben mehr. ' + msg);
-  if (status === 404) return new Error('Modell oder Adresse nicht gefunden. ' + msg);
-  return new Error(`Fehler ${status}. ${msg}`);
-}
-
-// Für den kostenlosen Weg über die Claude-App: alles in einer Nachricht zum Kopieren.
-export const chatPrompt = (task, text, chars) => `${systemPrompt(chars)}\n\n${userMessage(task, text)}`;
-
-// Aus einer Chat-Antwort übrig gebliebene Formatierung entfernen (Codeblöcke, Fettdruck, Überschriften-Rauten).
-export const cleanAnswer = text => text
-  .replace(/^```.*$/gm, '')
-  .replace(/\*\*(.+?)\*\*/g, '$1')
-  .replace(/^#{1,6}\s+/gm, '')
-  .trim();
-
-export async function ask(cfg, task, text, chars, fetchImpl = fetch) {
-  if (!cfg.key) throw new Error('Kein API-Schlüssel eingetragen (Tab „Profil“). Ohne Schlüssel geht es kostenlos über „In Claude-App fragen“.');
-  if (cfg.provider !== 'claude' && (!cfg.model || !cfg.baseUrl)) throw new Error('Bitte im Profil-Tab Adresse und Modell der KI eintragen.');
-  const { url, init } = buildRequest(cfg, systemPrompt(chars), userMessage(task, text));
-  let res;
-  try {
-    res = await fetchImpl(url, init);
-  } catch {
-    throw new Error('Keine Verbindung zur KI. Bist du offline? Manche Anbieter erlauben auch keinen Zugriff direkt aus dem Browser.');
-  }
-  const data = await res.json().catch(() => null);
-  if (!res.ok) throw httpError(res.status, data);
-  return parseResponse(cfg.provider, data || {});
+// Dateiart nach Name und Typ
+export function kindOf(file) {
+  const n = (file.name || '').toLowerCase(), t = file.type || '';
+  if (t.startsWith('image/') || /\.(jpe?g|png|gif|webp|heic)$/.test(n)) return 'image';
+  if (t === 'application/pdf' || n.endsWith('.pdf')) return 'pdf';
+  if (t.startsWith('text/') || /\.(txt|md|csv|json|html?|xml|rtf)$/.test(n)) return 'text';
+  if (/\.(docx?|pages|odt)$/.test(n)) return 'word';
+  return 'other';
 }

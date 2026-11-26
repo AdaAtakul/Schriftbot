@@ -66,3 +66,43 @@ async function importPdf(file, onPage) {
   }
   return doc.numPages;
 }
+
+// Inhalt eines PDFs für den KI-Tab: Text aller Seiten (bis 40). Hat es keinen Text (Scan),
+// werden die ersten Seiten als JPEG-Fotos zurückgegeben (höchstens maxImages).
+export async function pdfContent(file, maxImages = 0) {
+  const { getDocument } = await pdfjs();
+  const doc = await getDocument({
+    data: new Uint8Array(await file.arrayBuffer()),
+    standardFontDataUrl: new URL('../vendor/pdfjs/standard_fonts/', import.meta.url).href,
+    isEvalSupported: false,
+  }).promise;
+  try {
+    const pages = Math.min(doc.numPages, 40), texts = [];
+    for (let n = 1; n <= pages; n++) {
+      const page = await doc.getPage(n);
+      const tc = await page.getTextContent();
+      texts.push(tc.items.map(it => it.str + (it.hasEOL ? '\n' : '')).join('').replace(/[ \t]+\n/g, '\n').trim());
+      page.cleanup();
+    }
+    const text = texts.filter(Boolean).map((t, i) => (pages > 1 ? `[Seite ${i + 1}]\n` : '') + t).join('\n\n');
+    if (text.replace(/\s/g, '').length > 20 || !maxImages) return { text, pages: doc.numPages, images: [] };
+    const images = [];
+    for (let n = 1; n <= Math.min(doc.numPages, maxImages); n++) {
+      const page = await doc.getPage(n);
+      const vp = page.getViewport({ scale: 1.6 });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(vp.width);
+      canvas.height = Math.round(vp.height);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      images.push(await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.85)));
+      canvas.width = canvas.height = 0;
+      page.cleanup();
+    }
+    return { text: '', pages: doc.numPages, images };
+  } finally {
+    doc.destroy();
+  }
+}

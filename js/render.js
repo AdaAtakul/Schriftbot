@@ -1,25 +1,21 @@
 // Eine Layout-Seite auf ein Canvas zeichnen. ctx muss bereits in mm skaliert sein.
 import { fillStrokes, PEN_SIZE } from './ink.js';
+import { paperShapes } from './paper.js';
 
 export const MISSING_COLOR = '#d0021b';
 
-// Papier nur für die Vorschau (die Linien kommen in GoodNotes vom Hintergrund).
+// GoodNotes-Papier (Farbe, Linien, Karos, Punkte) zeichnen. ctx muss in mm skaliert sein.
 export function drawPaper(ctx, o) {
-  if (!o.ruled) return;
-  ctx.strokeStyle = '#b8c7dc';
-  ctx.lineWidth = 0.2;
-  ctx.beginPath();
-  for (let y = o.lineTop; y <= o.pageH; y += o.lineSpacing) {
-    ctx.moveTo(0, y);
-    ctx.lineTo(o.pageW, y);
+  const p = paperShapes(o.paper, o.paperColor, o.pageW, o.pageH);
+  ctx.fillStyle = p.fill;
+  ctx.fillRect(0, 0, o.pageW, o.pageH);
+  ctx.fillStyle = p.color;
+  for (const [x, y, w, h] of p.rects) ctx.fillRect(x, y, w, h);
+  if (p.dots.length) {
+    ctx.beginPath();
+    for (const [x, y, r] of p.dots) { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 2 * Math.PI); }
+    ctx.fill();
   }
-  if (o.grid) {
-    for (let x = (o.pageW % o.lineSpacing) / 2; x <= o.pageW; x += o.lineSpacing) {
-      ctx.moveTo(x, o.lineTop);
-      ctx.lineTo(x, o.pageH);
-    }
-  }
-  ctx.stroke();
 }
 
 export function drawPage(ctx, page, color, size = PEN_SIZE) {
