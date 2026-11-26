@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>de</string>
+	<key>CFBundleDisplayName</key>
+	<string>Handschrift</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<!-- Nur diese Domain darf die Handschrift-App laden; dafür gibt WebKit ihr Service Worker (offline) und die Brücke zur App -->
+	<key>WKAppBoundDomains</key>
+	<array>
+		<string>bambuseleitung.github.io</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Damit du in Claude ein Foto einer Aufgabe anhängen kannst.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Damit du in Claude per Sprache schreiben kannst.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Damit du in Claude Fotos aus deiner Mediathek anhängen kannst.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Damit exportierte Bilder in deiner Mediathek gesichert werden können.</string>
+</dict>
+</plist>

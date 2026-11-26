@@ -8,6 +8,7 @@ import { initBlatt } from './blattui.js';
 import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { initKiTab } from './kiui.js';
+import { cleanPasted } from './einfuegen.js';
 
 // Läuft die App als Artifact auf claude.ai? Dort gibt es Claude (KI-Tab), aber keinen Service Worker.
 const inClaude = typeof window.claude?.use === 'function';
@@ -52,6 +53,16 @@ try { localStorage.removeItem('ki'); } catch {}
 const blatt = initBlatt(profile);
 initProfilwahl();
 initKiTab(profile, { schreiben, blatt, goTo: showView });
+
+// iPad-App: Claude ist dort ein eigener Tab. Kopierte Antworten setzt die App hierüber ein.
+if (window.schriftbotNative) {
+  document.querySelector('.tabs [data-view="ki"]').hidden = true;
+  if (localStorage.getItem('lastView') === 'ki') showView('schreiben');
+}
+window.schriftbotInsert = (text, mode = 'replace') => {
+  schreiben.insertText(cleanPasted(text), mode === 'append' ? 'append' : 'replace');
+  showView('schreiben');
+};
 
 // PWA: Service Worker für Offline-Betrieb.
 const offlineStatus = document.getElementById('status-offline');

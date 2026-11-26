@@ -108,6 +108,18 @@ export function buildPng(page, o, color, withPaper) {
 // Über das Teilen-Menü weitergeben; ohne Teilen-Funktion (z. B. am PC) herunterladen.
 // Gibt false zurück, wenn Safari einen erneuten Tipp verlangt (Erzeugen hat zu lange gedauert).
 export async function shareFiles(files) {
+  // In der iPad-App (Handschrift mit Claude): Dateien an das native Teilen-Menü geben
+  const native = window.webkit?.messageHandlers?.schriftbot;
+  if (native && window.schriftbotNative) {
+    const toBase64 = async file => {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      return btoa(bin);
+    };
+    native.postMessage({ action: 'share', files: await Promise.all(files.map(async f => ({ name: f.name, data: await toBase64(f) }))) });
+    return true;
+  }
   // In der claude.ai-Version: Teilen und Downloads sind dort gesperrt, nur claude.ai's eigene Speichern-Funktion geht.
   if (typeof window.claude?.use === 'function') {
     const dl = await window.claude.use('downloads').catch(() => null);

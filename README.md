@@ -41,6 +41,26 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 3. Die App ab jetzt immer über das neue Symbol starten. So läuft sie im Vollbild, offline, und Safari löscht ihre Daten deutlich seltener.
 4. Im Tab **Profil** sollte unter „Status“ „✅ Offline-Modus bereit“ stehen.
 
+## 2b. Als iPad-App mit Claude (optional)
+
+Im Ordner `ios/` liegt eine richtige iPad-App: links deine Handschrift-App, im Tab **Claude** das echte claude.ai mit deinem normalen Login (Dateien anhängen, Projekte, Verlauf – alles wie gewohnt). Tippst du unter einer Claude-Antwort auf Claudes **Kopieren**-Knopf, fragt die App: **In deine Handschrift übernehmen?** → **Text ersetzen** oder **Anhängen**, und springt in den Tab „Schreiben“. Exporte gehen über das Teilen-Menü an GoodNotes.
+
+**App bekommen:** Bei jeder Änderung in `ios/` baut GitHub sie automatisch (Tab **Actions** → „iPad-App bauen“ → im Lauf unter **Artifacts** „Schriftbot-ipa“ herunterladen und entpacken). Von Hand starten: Actions → „iPad-App bauen“ → **Run workflow**.
+
+**Installieren** (braucht einen Windows-PC oder Mac):
+
+1. [Sideloadly](https://sideloadly.io) installieren, iPad per Kabel verbinden.
+2. `Schriftbot.ipa` in Sideloadly ziehen, deine Apple-ID eingeben, **Start**.
+3. Auf dem iPad: **Einstellungen → Datenschutz & Sicherheit → Entwicklermodus** einschalten (iPad startet neu), dann **Einstellungen → Allgemein → VPN & Geräteverwaltung** → deine Apple-ID → **Vertrauen**.
+4. Mit einer kostenlosen Apple-ID läuft die App 7 Tage; danach in Sideloadly noch einmal installieren (deine Daten bleiben). Mit einem bezahlten Entwicklerkonto ein Jahr. AltStore kann das Erneuern automatisch übernehmen.
+
+Gut zu wissen:
+
+- Die App lädt die Handschrift-App von GitHub Pages: beim ersten Start braucht sie Internet, danach geht sie offline; Updates kommen automatisch mit.
+- Bei Claude mit **E-Mail-Code** anmelden. Die Google-Anmeldung blockiert Google in Apps.
+- Die App hat ihren eigenen Speicher (getrennt von Safari): Profile einmal per **Alle Profile sichern** / **Importieren** übertragen.
+- Die App liest nur die Zwischenablage, wenn du in Claude etwas kopierst – nicht den Chat selbst.
+
 ## 3. So benutzt du die App
 
 ### Handschrift aufnehmen (Tab „Aufnahme“)
@@ -187,7 +207,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v27';` hochzählen (z. B. auf `'v28'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v28';` hochzählen (z. B. auf `'v29'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ### claude.ai-Version aktualisieren
@@ -234,6 +254,9 @@ js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Tab Profil: Backup, Testmodus
 js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
+ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen
+.github/workflows/ios.yml  baut die iPad-App als .ipa (GitHub Actions, macOS)
+tools/build-artifact.mjs   baut die claude.ai-Version
 vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0)
 tests/                  Selbsttests
 ```

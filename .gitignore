@@ -1,2 +1,6 @@
 .claude/
 dist-artifact/
+ios/Schriftbot.xcodeproj/
+ios/build/
+ios/Payload/
+ios/*.ipa

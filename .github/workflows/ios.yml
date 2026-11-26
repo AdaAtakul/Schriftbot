@@ -1,0 +1,50 @@
+# Baut die iPad-App (unsigniert) als .ipa. Ergebnis: im Tab „Actions“ beim Lauf unter „Artifacts“ → Schriftbot-ipa.
+# Installieren mit Sideloadly oder AltStore und der eigenen Apple-ID (signiert dabei).
+name: iPad-App bauen
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: XcodeGen installieren
+        run: brew install xcodegen
+
+      - name: Xcode-Projekt erzeugen
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: App bauen (ohne Signatur)
+        working-directory: ios
+        run: |
+          xcodebuild build \
+            -project Schriftbot.xcodeproj \
+            -scheme Schriftbot \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: IPA packen
+        working-directory: ios
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/Schriftbot.app Payload/
+          zip -qry Schriftbot.ipa Payload
+          ls -la Schriftbot.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Schriftbot-ipa
+          path: ios/Schriftbot.ipa
+          retention-days: 30
