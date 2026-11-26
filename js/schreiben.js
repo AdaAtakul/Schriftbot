@@ -202,7 +202,30 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   }
 
   let timer;
+  // Ganzen Text löschen (mit Rückfrage); bis zum nächsten Tippen wiederherstellbar
+  const del = $('text-delete'), restore = $('text-restore');
+  let deleted = null;
+  const syncDelete = () => { del.disabled = !input.value.trim(); };
+  const setText = text => { input.value = text; setSetting('text', text); syncDelete(); render(); };
+  del.addEventListener('click', () => {
+    if (!input.value.trim()) return;
+    const n = input.value.trim().split(/\s+/).length;
+    if (!confirm(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`)) return;
+    deleted = input.value;
+    setText('');
+    restore.hidden = false;
+  });
+  restore.addEventListener('click', () => {
+    if (deleted == null) return;
+    setText(deleted);
+    deleted = null;
+    restore.hidden = true;
+  });
+  syncDelete();
+
   input.addEventListener('input', () => {
+    syncDelete();
+    if (deleted != null) { deleted = null; restore.hidden = true; } // neu getippt → nicht mehr zurückholen
     clearTimeout(timer);
     timer = setTimeout(() => { setSetting('text', input.value); render(); }, 120);
   });

@@ -108,7 +108,11 @@
 
     <section id="view-schreiben" class="view view-schreiben" role="tabpanel" hidden>
       <div class="panel editor">
-        <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
+        <div class="text-wrap">
+          <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
+          <button id="text-delete" class="trash" aria-label="Ganzen Text löschen" title="Ganzen Text löschen"><svg class="icon"><use href="#i-trash"/></svg></button>
+        </div>
+        <button id="text-restore" hidden><svg class="icon"><use href="#i-reset"/></svg>Gelöschten Text wiederherstellen</button>
         <p id="schreiben-status" class="status"></p>
         <details class="settings" open>
           <summary>Stil &amp; Papier</summary>

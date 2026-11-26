@@ -292,7 +292,23 @@ details.settings[open] { padding-bottom: 16px; }
   gap: 12px;
   padding: 18px;
 }
-.editor > textarea { flex: 1 0 200px; min-height: 200px; }
+.text-wrap { position: relative; display: flex; flex: 1 0 200px; min-height: 200px; }
+.text-wrap textarea { flex: 1; padding-right: 64px; /* Platz für den Papierkorb */ }
+/* Roter Papierkorb oben rechts im Textfeld */
+.trash {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 48px;
+  padding: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: #e5484d;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(229, 72, 77, 0.35);
+}
+.trash:hover { background: #f05b60; }
+.trash:disabled { opacity: 0.35; box-shadow: none; }
 #controls { display: grid; gap: 6px; }
 .swatches { display: flex; gap: 12px; }
 .swatch {

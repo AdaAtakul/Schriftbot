@@ -72,6 +72,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 ### Text umwandeln (Tab „Schreiben“)
 
 - Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
+- **Roter Papierkorb** oben rechts im Textfeld: löscht den ganzen Text nach einer Rückfrage. Direkt danach holt **Gelöschten Text wiederherstellen** ihn zurück (bis du neu tippst).
 - **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
 - **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Die Vorlage stellt die Stil-Regler darunter ein. Jeden Regler kannst du ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
 - Stil-Regler (gehören zur gewählten Vorlage):
@@ -164,7 +165,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v23';` hochzählen (z. B. auf `'v24'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v24';` hochzählen (z. B. auf `'v25'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
