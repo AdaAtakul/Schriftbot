@@ -79,6 +79,8 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
   - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
   - **Unordnung** (bis 150 %): kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage.
   - **Durchstreichen**: wie oft ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben wird. „aus“ = nie; bei 100 % etwa alle paar Sätze mehrmals. Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener, radierbarer Strich.
+  - **Korrekturen**: Ab und zu wird ein Buchstabe nachgezogen, oder ein Wort wird erst vergessen und dann klein über der Zeile mit einem **^** eingefügt.
+  - **Müdigkeit zum Textende**: Je weiter der Text, desto größer, schräger, weiter und unordentlicher wird die Schrift – wie am Ende einer langen Klausur.
   - **Zeilen & Druck**: Zeilen schwanken leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende nach.
   - **Ränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
   - **Strichdicke**: dünner oder kräftiger (40–250 %), gilt für Vorschau und alle Exporte.
@@ -156,16 +158,18 @@ Gewechselt wird oben rechts in der Kopfzeile (die App lädt dabei kurz neu). Tex
 
 ## 4. Backup – wichtig!
 
-Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, ist es weg.
+Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, sind sie weg.
 
-- Im Tab **Profil → Profil exportieren** speicherst du die Schrift des aktiven Profils als `.json`-Datei, am besten in iCloud Drive. Jede eigene Schrift braucht ein eigenes Backup.
-- **Profil importieren** spielt sie wieder ein (auch auf einem anderen Gerät).
+- **Profil → Alle Profile sichern** packt alle Profile mit ihren Schriften und Stil-Einstellungen in eine `.json`-Datei. Im Teilen-Menü „In Dateien sichern“ wählen, am besten in iCloud Drive.
+- **Profil teilen** schickt das aktive Profil (Schrift und Stil) als Datei, z. B. per AirDrop oder Nachricht. Benutzt das Profil die Schrift eines anderen, kommt diese Schrift mit.
+- **Importieren** liest eine solche Datei ein. Die Profile kommen als **neue Profile** dazu, vorhandene bleiben unangetastet (gleiche Namen werden durchnummeriert). Auf einem neuen Gerät ersetzt der Import das leere Start-Profil. Alte Backups mit nur einer Schrift ersetzen wie früher die Schrift des aktiven Profils.
+- In der Datei stehen nur Schriften und Stil-Einstellungen – keine Texte und keine Geräte-Einstellungen.
 - Ein **roter Punkt am Profil-Tab** erinnert dich, wenn das letzte Backup älter als 7 Tage ist.
 
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v24';` hochzählen (z. B. auf `'v25'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v25';` hochzählen (z. B. auf `'v26'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -176,7 +180,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 | Alte Version wird angezeigt | App ganz schließen (von unten wischen) und neu öffnen, ggf. zweimal. |
 | Teilen-Menü zeigt GoodNotes nicht | Im Teilen-Menü ganz nach rechts wischen → „Mehr“ → GoodNotes aktivieren. |
 | Zeichen fehlen rot im PDF | Die markierten Zeichen im Tab „Aufnahme“ nachtragen. |
-| Profil ist weg | Profil → Profil importieren und das letzte Backup wählen. |
+| Profil ist weg | Profil → Importieren und das letzte Backup wählen. |
 
 ## 7. Für Entwickler
 
@@ -196,6 +200,7 @@ js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
 js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
 js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
+js/sammlung.js          Datei mit mehreren Profilen: Backup aller Profile, Profil teilen
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
@@ -221,6 +226,7 @@ node tests/blatt.test.mjs
 node tests/paper.test.mjs
 node tests/stil.test.mjs
 node tests/storage.test.mjs
+node tests/sammlung.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):

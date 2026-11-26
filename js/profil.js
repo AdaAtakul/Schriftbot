@@ -1,6 +1,14 @@
-// Profil-Tab: Backup als JSON, Testmodus.
+// Profil-Tab: Backup aller Profile, ein Profil teilen, Importieren, Testmodus.
 import { parseProfile, progress } from './profile.js';
-import { saveProfile, getSettings, setSetting, activeProfile, glyphOwner } from './storage.js';
+import {
+  saveProfile, getSettings, setSetting, activeProfile, glyphOwner, profilesMeta, profileSettings, seedSettings,
+  createProfile, setActiveProfile, deleteProfile, loadGlyphs, saveGlyphs,
+} from './storage.js';
+import { buildCollection, isCollection, parseCollection, uniqueName } from './sammlung.js';
+import { shareFiles } from './export.js';
+
+const fileName = name => name.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'profil';
+const jsonFile = (data, name) => new File([JSON.stringify(data)], name, { type: 'application/json' });
 
 export function initProfil(profile) {
   const $ = id => document.getElementById(id);
@@ -9,7 +17,7 @@ export function initProfil(profile) {
     const last = getSettings().lastBackup;
     const days = last ? Math.floor((Date.now() - last) / 86400000) : null;
     $('backup-status').textContent = last == null
-      ? '⚠️ Noch nie ein Backup exportiert.'
+      ? '⚠️ Noch nie ein Backup gesichert.'
       : days === 0 ? '✅ Letztes Backup: heute'
       : `${days > 7 ? '⚠️' : '✅'} Letztes Backup: vor ${days} ${days === 1 ? 'Tag' : 'Tagen'}`;
     // Roter Punkt am Profil-Tab, wenn Aufnahmen existieren, aber kein aktuelles Backup.
@@ -17,16 +25,38 @@ export function initProfil(profile) {
     document.querySelector('.tabs [data-view="profil"]').classList.toggle('badge', overdue);
   }
 
-  $('export-btn').addEventListener('click', () => {
+  async function send(file) {
+    try {
+      // Safari verlangt fürs Teilen einen frischen Tipp; dauert das Zusammenstellen zu lange, noch einmal tippen lassen
+      if (!await shareFiles([file])) alert('Bitte noch einmal tippen, um die Datei zu teilen.');
+      return true;
+    } catch (err) {
+      alert('Teilen fehlgeschlagen: ' + err.message);
+      return false;
+    }
+  }
+
+  // Alle Profile mit Schriften und Stil in einer Datei
+  $('export-btn').addEventListener('click', async () => {
+    const list = profilesMeta().list;
+    const entries = await Promise.all(list.map(async p => ({
+      name: p.name,
+      from: p.from ? list.findIndex(q => q.id === p.from) : null,
+      settings: profileSettings(p.id),
+      handwriting: p.from ? null : await loadGlyphs(p.id),
+    })));
     const date = new Date().toISOString().slice(0, 10);
-    const url = URL.createObjectURL(new Blob([JSON.stringify(profile)], { type: 'application/json' }));
-    const a = Object.assign(document.createElement('a'), { href: url, download: `handschrift-${glyphOwner().name.replace(/[^\p{L}\p{N}_-]+/gu, '-')}-${date}.json` });
-    document.body.append(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
-    setSetting('lastBackup', Date.now());
+    if (!await send(jsonFile(buildCollection(entries), `handschrift-alle-profile-${date}.json`))) return;
+    for (const p of list) if (!p.from) seedSettings(p.id, { lastBackup: Date.now() });
     showBackupStatus();
+  });
+
+  // Aktives Profil teilen: Schrift (auch eine mitbenutzte) und Stil als eigenständiges Profil
+  $('share-profile-btn').addEventListener('click', async () => {
+    const p = activeProfile(), owner = glyphOwner();
+    const settings = { ...profileSettings(owner.id), ...profileSettings(p.id) };
+    const entry = { name: p.name, from: null, settings, handwriting: await loadGlyphs(owner.id) };
+    await send(jsonFile(buildCollection([entry]), `handschrift-${fileName(p.name)}.json`));
   });
 
   $('import-btn').addEventListener('click', () => $('import-file').click());
@@ -34,19 +64,50 @@ export function initProfil(profile) {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
-    let imported;
+    const text = await file.text();
     try {
-      imported = parseProfile(await file.text());
+      if (isCollection(text)) await importCollection(parseCollection(text));
+      else await importSingle(parseProfile(text));
     } catch (err) {
-      return alert('Import fehlgeschlagen: ' + err.message);
+      alert('Import fehlgeschlagen: ' + err.message);
     }
-    const p = progress(imported);
-    const msg = `Profil mit ${p.done} von ${p.total} Zeichen importieren?`
-      + (progress(profile).done ? `\n\nDie Schrift von „${glyphOwner().name}“ wird dabei ersetzt` + (glyphOwner().id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
+  });
+
+  // Sammlung: als neue Profile hinzufügen (Namen werden bei Bedarf durchnummeriert)
+  async function importCollection(entries) {
+    const meta = profilesMeta();
+    const summary = entries.map(e => `• ${e.name}${e.from != null ? ` (Schrift von „${entries[e.from].name}“)` : ` – ${progress(e.handwriting).done} Zeichen`}`).join('\n');
+    if (!confirm(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`)) return;
+    // Nur das leere Start-Profil eines neuen Geräts wird ersetzt
+    const lone = meta.list.length === 1 && !meta.list[0].from && progress(await loadGlyphs(meta.list[0].id)).done === 0 ? meta.list[0] : null;
+    const taken = meta.list.filter(p => p !== lone).map(p => p.name); // der Name des ersetzten Start-Profils ist frei
+    const ids = [];
+    for (const pass of [false, true]) { // erst eigene Schriften, dann die Profile, die sie mitbenutzen
+      entries.forEach((e, i) => {
+        if ((e.from != null) !== pass) return;
+        const name = uniqueName(e.name, taken);
+        taken.push(name);
+        ids[i] = createProfile({ name, from: pass ? ids[e.from] : null });
+      });
+    }
+    for (const [i, e] of entries.entries()) {
+      if (e.handwriting) await saveGlyphs(ids[i], e.handwriting);
+      seedSettings(ids[i], { style: 'normal', styles: {}, ...e.settings });
+    }
+    if (lone) await deleteProfile(lone.id);
+    setActiveProfile(ids[0]);
+    location.reload();
+  }
+
+  // Altes Einzel-Backup (nur eine Schrift): ersetzt die Schrift des aktiven Profils wie bisher
+  async function importSingle(imported) {
+    const p = progress(imported), owner = glyphOwner();
+    const msg = `Schrift mit ${p.done} von ${p.total} Zeichen importieren?`
+      + (progress(profile).done ? `\n\nDie Schrift von „${owner.name}“ wird dabei ersetzt` + (owner.id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
     if (!confirm(msg)) return;
     await saveProfile(imported);
     location.reload();
-  });
+  }
 
   const allow = $('allow-non-pen');
   allow.checked = !!getSettings().allowNonPen;

@@ -5,7 +5,7 @@ import { PRESETS, STYLE_KEYS, styleValues, isModified, withStyleValue, migrateSt
 // Jede Vorlage legt alle Stil-Werte fest; von ordentlich nach unordentlich wird alles mehr (außer Dicke egal)
 const order = Object.keys(PRESETS);
 for (const k of order) for (const key of STYLE_KEYS) assert.equal(typeof PRESETS[k][key], 'number', `${k}.${key}`);
-for (const key of ['chaos', 'strike', 'wobble', 'edges']) {
+for (const key of ['chaos', 'strike', 'fix', 'fatigue', 'wobble', 'edges']) {
   for (let i = 1; i < order.length; i++) assert.ok(PRESETS[order[i]][key] >= PRESETS[order[i - 1]][key], `${key} steigt`);
 }
 assert.equal(PRESETS['sehr-ordentlich'].strike, 0, 'sehr ordentlich streicht nichts durch');

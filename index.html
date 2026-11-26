@@ -220,12 +220,13 @@
           </form>
         </div>
         <div class="card">
-          <h3>Backup</h3>
+          <h3>Backup &amp; Teilen</h3>
           <p id="backup-status" class="status"></p>
-          <p class="hint">Exportiere die Schrift des aktiven Profils regelmäßig, z. B. in die Dateien-App oder iCloud Drive. Damit kannst du sie auch auf einem anderen Gerät wieder einspielen. Jede eigene Schrift braucht ihr eigenes Backup.</p>
+          <p class="hint"><strong>Alle Profile sichern</strong> packt alle Profile mit Schriften und Stil-Einstellungen in eine Datei – am besten regelmäßig in iCloud Drive sichern. <strong>Profil teilen</strong> schickt das aktive Profil (Schrift und Stil) z. B. per AirDrop an Freunde. Beim <strong>Importieren</strong> kommen Profile als neue Profile dazu; nichts wird überschrieben.</p>
           <div class="row">
-            <button id="export-btn"><svg class="icon"><use href="#i-download"/></svg>Profil exportieren</button>
-            <button id="import-btn"><svg class="icon"><use href="#i-upload"/></svg>Profil importieren</button>
+            <button id="export-btn"><svg class="icon"><use href="#i-download"/></svg>Alle Profile sichern</button>
+            <button id="share-profile-btn"><svg class="icon"><use href="#i-share"/></svg>Profil teilen</button>
+            <button id="import-btn"><svg class="icon"><use href="#i-upload"/></svg>Importieren</button>
             <input type="file" id="import-file" accept=".json,application/json" class="visually-hidden">
           </div>
         </div>

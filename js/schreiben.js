@@ -34,6 +34,8 @@ const STYLE_SLIDERS = [
   { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: pct },
   { key: 'chaos', label: 'Unordnung', min: 0, max: 150, step: 5, fmt: pct },
   { key: 'strike', label: 'Durchstreichen', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
+  { key: 'fix', label: 'Korrekturen (^ und nachgezogen)', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
+  { key: 'fatigue', label: 'Müdigkeit zum Textende', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
   { key: 'wobble', label: 'Zeilen & Druck', min: 0, max: 100, step: 5, fmt: pct },
   { key: 'edges', label: 'Ränder', min: 0, max: 100, step: 5, fmt: pct },
   { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: pct },
@@ -60,6 +62,7 @@ export function options(s = current()) {
   return {
     xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
     connect: s.connect / 100, chaos: s.chaos / 100, strike: s.strike / 100, wobble: s.wobble / 100, edges: s.edges / 100,
+    fix: s.fix / 100, fatigue: s.fatigue / 100,
     paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
     ruled: false, ...paperLines(paper), // Lage der Linien wie in GoodNotes
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,

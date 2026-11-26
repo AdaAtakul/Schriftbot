@@ -68,7 +68,13 @@ export async function deleteProfile(id) {
   const p = m.list.find(q => q.id === id);
   if (!p) return null;
   if (!p.from) await tx('readwrite', s => s.delete(dataKey(id)));
-  try { localStorage.removeItem(settingsKey(id)); } catch {}
+  try {
+    // Der Speicher von p1 enthält auch die Geräte-Werte (Text, Testmodus …): die bleiben
+    if (id === 'p1') {
+      const s = read(settingsKey('p1'));
+      localStorage.setItem(settingsKey('p1'), JSON.stringify(Object.fromEntries(Object.entries(s).filter(([k]) => DEVICE.has(k)))));
+    } else localStorage.removeItem(settingsKey(id));
+  } catch {}
   m.list = m.list.filter(q => q.id !== id);
   if (m.active === id) m.active = m.list[0].id;
   saveMeta(m);
@@ -118,3 +124,7 @@ export const deleteKey = key => tx('readwrite', s => s.delete(key));
 
 // Eigene Einstellungen eines (nicht unbedingt aktiven) Profils, z. B. um seine Stil-Vorlage anzuzeigen
 export const profileSettings = id => read(settingsKey(id));
+
+// Schrift eines bestimmten Profils lesen/schreiben (für Sammlungen: Backup aller Profile, Teilen, Import)
+export const loadGlyphs = async id => (await tx('readonly', s => s.get(dataKey(id)))) || emptyProfile();
+export const saveGlyphs = (id, data) => tx('readwrite', s => s.put(data, dataKey(id)));

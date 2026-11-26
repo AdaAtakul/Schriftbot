@@ -1,16 +1,16 @@
 // Stil-Vorlagen für die eigene Handschrift (ohne DOM, in Node testbar).
 // Eine Vorlage legt die Stil-Werte fest; jede lässt sich mit den Reglern anpassen. Die Anpassungen
 // werden je Vorlage gemerkt (settings.styles[vorlage]) und lassen sich zurücksetzen.
-// Werte in Prozent wie die Regler: Verbindungen, Unordnung, Durchstreichen, Zeilen & Druck, Ränder, Strichdicke.
-export const STYLE_KEYS = ['connect', 'chaos', 'strike', 'wobble', 'edges', 'weight'];
+// Werte in Prozent wie die Regler: Verbindungen, Unordnung, Durchstreichen, Korrekturen, Müdigkeit, Zeilen & Druck, Ränder, Strichdicke.
+export const STYLE_KEYS = ['connect', 'chaos', 'strike', 'fix', 'fatigue', 'wobble', 'edges', 'weight'];
 
 export const PRESETS = {
-  'sehr-ordentlich':   { label: 'Sehr ordentlich',   connect: 40,  chaos: 10,  strike: 0,  wobble: 0,   edges: 0,   weight: 95 },
-  'ordentlich':        { label: 'Ordentlich',        connect: 60,  chaos: 30,  strike: 0,  wobble: 15,  edges: 10,  weight: 100 },
-  'normal':            { label: 'Normal',            connect: 70,  chaos: 50,  strike: 0,  wobble: 35,  edges: 30,  weight: 100 },
-  'locker':            { label: 'Locker',            connect: 80,  chaos: 70,  strike: 20, wobble: 55,  edges: 50,  weight: 110 },
-  'unordentlich':      { label: 'Unordentlich',      connect: 90,  chaos: 100, strike: 40, wobble: 80,  edges: 75,  weight: 120 },
-  'sehr-unordentlich': { label: 'Sehr unordentlich', connect: 100, chaos: 140, strike: 70, wobble: 100, edges: 100, weight: 135 },
+  'sehr-ordentlich':   { label: 'Sehr ordentlich',   connect: 40,  chaos: 10,  strike: 0, fix: 0, fatigue: 0,  wobble: 0,   edges: 0,   weight: 95 },
+  'ordentlich':        { label: 'Ordentlich',        connect: 60,  chaos: 30,  strike: 0, fix: 0, fatigue: 10,  wobble: 15,  edges: 10,  weight: 100 },
+  'normal':            { label: 'Normal',            connect: 70,  chaos: 50,  strike: 0, fix: 0, fatigue: 15,  wobble: 35,  edges: 30,  weight: 100 },
+  'locker':            { label: 'Locker',            connect: 80,  chaos: 70,  strike: 20, fix: 15, fatigue: 35, wobble: 55,  edges: 50,  weight: 110 },
+  'unordentlich':      { label: 'Unordentlich',      connect: 90,  chaos: 100, strike: 40, fix: 35, fatigue: 60, wobble: 80,  edges: 75,  weight: 120 },
+  'sehr-unordentlich': { label: 'Sehr unordentlich', connect: 100, chaos: 140, strike: 70, fix: 60, fatigue: 85, wobble: 100, edges: 100, weight: 135 },
 };
 export const DEFAULT_STYLE = 'normal';
 
