@@ -42,7 +42,7 @@ export function drawPage(ctx, page, color, size = PEN_SIZE) {
       ctx.fillText(it.missing === ' ' ? '␣' : it.missing, w / 2, 0);
     } else {
       ctx.fillStyle = color;
-      fillStrokes(ctx, it.strokes, size);
+      fillStrokes(ctx, it.strokes, size * (it.ink || 1)); // ink: Druck des Wortes (Schreibfehler-Regler)
     }
     ctx.restore();
   }

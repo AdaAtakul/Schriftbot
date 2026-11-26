@@ -214,7 +214,7 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
         const sid = uuid(), st0 = stamp();
         records.push(
           [s(1, sid), s(2, st0), v(8, device), v(9, ++seq), v(14, DJB2_EMPTY), v(16, SCHEMA)],
-          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), o.penSize * it.s * UNITS_PER_MM)), s(4, rgba(ink)), s(6, ''),
+          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), o.penSize * (it.ink || 1) * it.s * UNITS_PER_MM)), s(4, rgba(ink)), s(6, ''),
             s(7, [s(1, stamp())]), s(9, ''), s(15, st0), s(20, ''), v(21, SCHEMA)])],
         );
       }

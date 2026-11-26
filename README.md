@@ -75,6 +75,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - **Papier**: Liniert breit / schmal, Kariert 5 mm oder Blanko. Auf liniertem und kariertem Papier steht jede Zeile genau auf einer Linie.
 - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
 - **Unordnung**: kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage – wie echte Handschrift.
+- **Schreibfehler** (Standard 0 %): Ab und zu wird ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben. Dazu schwanken die Zeilen leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende etwas nach. Je höher der Regler, desto öfter (bei 100 % etwa alle 20–25 Wörter, nie zwei Verschreiber dicht hintereinander). Verschreiber nutzen nur aufgenommene Zeichen, **🎲 Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener Strich, den du wegradieren kannst.
 - **Strichdicke**: dünner oder kräftiger schreiben (40–250 %), gilt für Vorschau und alle Exporte.
 - **Schriftgröße, Zeilenabstand, Rand, Tintenfarbe** nach Geschmack.
 - **🎲 Neu würfeln**: andere Mischung der Varianten.
@@ -141,7 +142,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v19';` hochzählen (z. B. auf `'v20'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v20';` hochzählen (z. B. auf `'v21'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen

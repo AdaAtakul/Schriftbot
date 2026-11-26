@@ -8,7 +8,7 @@ const PAPER_LINE = '#b8c7dc';
 // Umrisse eines Glyph-Items in Seitenkoordinaten (mm): Drehung und Skalierung schon angewendet.
 export function itemPolygons(it, size = PEN_SIZE) {
   const c = Math.cos(it.rot || 0), s = Math.sin(it.rot || 0);
-  return it.strokes.map(st => outline(st, size).map(([px, py]) => [
+  return it.strokes.map(st => outline(st, size * (it.ink || 1)).map(([px, py]) => [
     it.x + (px * c - py * s) * it.s,
     it.y + (px * s + py * c) * it.s,
   ]));
