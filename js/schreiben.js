@@ -7,6 +7,7 @@ import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
+import { ASSISTANT_URL, openAssistant, pasteFromClaude, isPending, clearPending } from './claude.js';
 import { PRESETS, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
 
 // Papier wie in GoodNotes (Maße in js/paper.js); Zeilen stehen genau auf Linien, Karos bzw. Punktreihen.
@@ -205,30 +206,56 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   }
 
   let timer;
-  // Ganzen Text löschen (mit Rückfrage); bis zum nächsten Tippen wiederherstellbar
+  // Ganzen Text löschen (mit Rückfrage) oder durch eine Claude-Antwort ersetzen;
+  // der vorherige Text ist bis zum nächsten Tippen wiederherstellbar
   const del = $('text-delete'), restore = $('text-restore');
-  let deleted = null;
+  let previous = null;
   const syncDelete = () => { del.disabled = !input.value.trim(); };
   const setText = text => { input.value = text; setSetting('text', text); syncDelete(); render(); };
+  const keepPrevious = label => {
+    previous = input.value;
+    restore.lastChild.textContent = label;
+    restore.hidden = false;
+  };
   del.addEventListener('click', () => {
     if (!input.value.trim()) return;
     const n = input.value.trim().split(/\s+/).length;
     if (!confirm(`Den ganzen Text löschen (${n} ${n === 1 ? 'Wort' : 'Wörter'})?`)) return;
-    deleted = input.value;
+    keepPrevious('Gelöschten Text wiederherstellen');
     setText('');
-    restore.hidden = false;
   });
   restore.addEventListener('click', () => {
-    if (deleted == null) return;
-    setText(deleted);
-    deleted = null;
+    if (previous == null) return;
+    setText(previous);
+    previous = null;
     restore.hidden = true;
   });
   syncDelete();
 
+  // ---------- Claude (Schriftbot-Assistent) ----------
+  const banner = $('claude-banner');
+  const showBanner = () => { banner.hidden = !isPending(); };
+  $('claude-open').href = ASSISTANT_URL;
+  $('claude-open').addEventListener('click', () => { openAssistant(input.value); setTimeout(showBanner, 500); });
+  async function insertFromClaude() {
+    const res = await pasteFromClaude({ current: input.value, target: 'übernehmen' });
+    if (!res) return;
+    if (input.value.trim()) keepPrevious('Vorherigen Text wiederherstellen');
+    setText(res.text);
+    banner.hidden = true;
+    statusEl.textContent = res.mode === 'append' ? 'Claude-Antwort angehängt.' : 'Claude-Antwort eingefügt.';
+  }
+  $('claude-paste').addEventListener('click', insertFromClaude);
+  $('claude-banner-paste').addEventListener('click', insertFromClaude);
+  $('claude-banner-close').addEventListener('click', () => { clearPending(); banner.hidden = true; });
+  // Zurück aus dem Assistenten: an die Antwort erinnern
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') showBanner(); });
+  window.addEventListener('focus', showBanner);
+  showBanner();
+
   input.addEventListener('input', () => {
     syncDelete();
-    if (deleted != null) { deleted = null; restore.hidden = true; } // neu getippt → nicht mehr zurückholen
+    if (previous != null) { previous = null; restore.hidden = true; } // neu getippt → nicht mehr zurückholen
     clearTimeout(timer);
     timer = setTimeout(() => { setSetting('text', input.value); render(); }, 120);
   });

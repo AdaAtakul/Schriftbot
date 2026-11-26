@@ -91,6 +91,20 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
 - Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
 
+### Mit Claude schreiben (ohne API-Schlüssel)
+
+Claude schreibt dir Antworten, Zusammenfassungen oder Hefteinträge über dein normales Claude-Abo – mit dem **Schriftbot-Assistenten**, einer kleinen Seite auf claude.ai.
+
+1. Im Tab **Schreiben** auf **Mit Claude schreiben** tippen. Der Assistent öffnet sich (beim ersten Mal fragt claude.ai, ob die Seite Claude benutzen darf). Steht schon Text im Feld, ist er kopiert – im Assistenten einfach einfügen.
+2. Im Assistenten wählen: **Aufgabe beantworten**, Zusammenfassen, Korrigieren, Stichpunkte, Hefteintrag oder ein freier Auftrag. Aufgabe einfügen oder **fotografieren**, Länge und Schreibstil wählen, **Text schreiben lassen**. Mit **Kürzer**, **Einfacher**, **Ausführlicher** nachbessern oder den Text direkt ändern.
+3. **In die Handschrift-App übernehmen** → **Ja, kopieren**.
+4. Zurück in der Handschrift-App erscheint **„Antwort von Claude da?“** → **Einfügen** (Safari fragt einmal mit „Einfügen“) → Vorschau → **Text ersetzen** oder **Anhängen**. **Vorherigen Text wiederherstellen** macht es rückgängig.
+
+- Auch im Tab **Blatt** hat jedes Feld **Mit Claude** und **Antwort einfügen**.
+- Der Assistent sorgt für schlichten Text ohne Formatierung und Sonderzeichen; beim Einfügen werden Reste (Sternchen, Pfeile, Emojis) entfernt, damit nichts rot markiert wird.
+- Der Assistent braucht Internet und dein Claude-Konto. Er ist privat: nur du kannst ihn öffnen, bis du ihn auf claude.ai über „Teilen“ freigibst.
+- Erlaubt Safari das Lesen der Zwischenablage nicht, erscheint ein Feld zum Einfügen von Hand.
+
 ### Arbeitsblatt ausfüllen (Tab „Blatt“)
 
 Du hast ein Arbeitsblatt als PDF, in das die Antworten blau hineingetippt sind? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
@@ -169,7 +183,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v25';` hochzählen (z. B. auf `'v26'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v26';` hochzählen (z. B. auf `'v27'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -201,6 +215,8 @@ js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
 js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
 js/sammlung.js          Datei mit mehreren Profilen: Backup aller Profile, Profil teilen
+js/claude.js            Schriftbot-Assistent öffnen, Antwort einfügen (Vorschau, Ersetzen/Anhängen)
+js/einfuegen.js         Eingefügten Text bereinigen und einsetzen
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
@@ -227,6 +243,7 @@ node tests/paper.test.mjs
 node tests/stil.test.mjs
 node tests/storage.test.mjs
 node tests/sammlung.test.mjs
+node tests/einfuegen.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):

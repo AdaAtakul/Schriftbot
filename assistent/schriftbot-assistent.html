@@ -1,0 +1,514 @@
+<title>Schriftbot-Assistent</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: eine ruhige Spalte wie ein Schreibpult – Auftrag oben, Antwort als helles Blatt darunter, Bestätigung als Blatt von unten. */
+:root {
+  --bg: #0e0f13; --panel: #16171d; --surface: #1e2028; --field: #111218; --border: #2c2f3b;
+  --fg: #eceef5; --muted: #9a9fb2; --accent: #7381ff; --accent-2: #9d78ff; --on-accent: #ffffff;
+  --paper: #fbfaf6; --paper-ink: #1d2a5c; --paper-line: #d9dce6;
+  --ok: #4ade80; --warn: #ffb547; --danger: #ff6b6b;
+  --font-body: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", -apple-system, sans-serif;
+  --radius: 16px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f3f3f7; --panel: #ffffff; --surface: #ffffff; --field: #f6f6fa; --border: #dcdde6;
+  --fg: #171923; --muted: #5e6275; --accent: #4f5df0; --accent-2: #7a55f0; --on-accent: #ffffff;
+  --paper: #ffffff; --paper-ink: #1d2a5c; --paper-line: #e3e5ee; color-scheme: light; } }
+:root[data-theme="light"] {
+  --bg: #f3f3f7; --panel: #ffffff; --surface: #ffffff; --field: #f6f6fa; --border: #dcdde6;
+  --fg: #171923; --muted: #5e6275; --accent: #4f5df0; --accent-2: #7a55f0; --on-accent: #ffffff;
+  --paper: #ffffff; --paper-ink: #1d2a5c; --paper-line: #e3e5ee; color-scheme: light; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--fg); }
+body { font: 16px/1.5 var(--font-body); -webkit-text-size-adjust: 100%; }
+.wrap {
+  max-width: 760px; margin: 0 auto; display: grid; gap: 18px;
+  padding-block: 20px 120px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2 { font-family: var(--font-display); letter-spacing: -0.01em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(24px, 5vw, 30px); }
+h2 { font-size: 18px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+/* Kopf */
+.head { display: flex; align-items: center; gap: 14px; }
+.mark { width: 44px; height: 44px; flex-shrink: 0; border-radius: 13px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent); }
+.mark svg { width: 24px; height: 24px; }
+.head > div { min-width: 0; }
+
+/* Schritte: echte Reihenfolge, daher nummeriert */
+.steps { display: flex; gap: 6px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.steps li { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 14px; font-weight: 500; }
+.steps li span { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+  background: var(--field); border: 1px solid var(--border); }
+.steps li[aria-current="step"] { color: var(--fg); border-color: var(--accent); }
+.steps li[aria-current="step"] span, .steps li.done span { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+
+.card { display: grid; gap: 14px; padding: 18px; border-radius: var(--radius); background: var(--panel); border: 1px solid var(--border); }
+.card > * { min-width: 0; }
+label.lbl, .lbl { font-size: 14px; font-weight: 600; color: var(--muted); }
+
+/* Schnellwahl */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--fg); font: 500 15px var(--font-body); cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+
+textarea, input[type="text"] {
+  width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--field);
+  color: var(--fg); font: 17px/1.5 var(--font-body); resize: vertical;
+}
+textarea:focus, input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent); }
+
+.material { display: grid; gap: 8px; }
+.photo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.thumb { position: relative; width: 72px; height: 72px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: var(--field); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; min-height: 0; padding: 0; border-radius: 50%;
+  border: 0; background: rgba(0,0,0,.65); color: #fff; font-size: 15px; cursor: pointer; }
+
+/* Optionen als Segmente */
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.seg { display: flex; padding: 4px; gap: 4px; border-radius: 12px; background: var(--field); border: 1px solid var(--border); }
+.seg button { flex: 1; min-height: 40px; border: 0; border-radius: 9px; background: transparent; color: var(--muted);
+  font: 500 15px var(--font-body); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--fg); box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 20px;
+  border-radius: 13px; border: 1px solid var(--border); background: var(--surface); color: var(--fg);
+  font: 600 16px var(--font-body); cursor: pointer; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.primary { border-color: transparent; color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 35%, transparent); }
+.btn.big { min-height: 56px; font-size: 17px; }
+.btn svg { width: 20px; height: 20px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; }
+.row > .grow { flex: 1 1 220px; }
+
+/* Antwort als helles Blatt mit Linien, wie später in der App */
+.answer-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.status { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.paper {
+  min-height: 220px; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border);
+  background-color: var(--paper); color: var(--paper-ink);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--paper-line) 31px, var(--paper-line) 32px);
+  background-position: 0 10px; font: 18px/32px var(--font-body);
+}
+.paper:focus { outline: none; border-color: var(--accent); }
+.count { font-variant-numeric: tabular-nums; }
+.tweaks { display: flex; flex-wrap: wrap; gap: 8px; }
+.note { padding: 10px 12px; border-radius: 12px; font-size: 15px; background: color-mix(in srgb, var(--warn) 14%, var(--surface)); border: 1px solid color-mix(in srgb, var(--warn) 45%, var(--border)); }
+.note.err { background: color-mix(in srgb, var(--danger) 12%, var(--surface)); border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+
+/* Verlauf */
+.history { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.history li { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--field); border: 1px solid var(--border); }
+.history li > div { flex: 1; min-width: 0; }
+.history .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history button { min-height: 40px; padding: 0 12px; font-size: 14px; }
+
+/* Bestätigung: Blatt von unten */
+.sheet-bg { position: fixed; inset: 0; z-index: 20; background: rgba(5,6,10,.55); display: grid; align-items: end; justify-items: center; }
+.sheet { width: min(640px, 100%); max-height: 90%; overflow: auto; display: grid; gap: 14px;
+  padding: 22px max(18px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  border-radius: 22px 22px 0 0; background: var(--panel); border: 1px solid var(--border); border-bottom: 0;
+  animation: rise .22s ease-out; }
+@keyframes rise { from { transform: translateY(24px); opacity: .6; } }
+.preview { max-height: 9.6em; overflow: hidden; padding: 12px 14px; border-radius: 12px; background: var(--field); border: 1px solid var(--border);
+  white-space: pre-wrap; -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
+.done-icon { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ok) 20%, var(--surface)); color: var(--ok); }
+.done-icon svg { width: 30px; height: 30px; }
+.howto { display: grid; gap: 8px; margin: 0; padding-left: 22px; }
+.howto b { font-weight: 600; }
+.appurl { font: 500 14px ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .dot, .sheet { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+    <div>
+      <h1>Schriftbot-Assistent</h1>
+      <p class="muted small">Claude schreibt den Text, deine Handschrift-App setzt ihn in deine Schrift. Läuft über dein Claude-Abo.</p>
+    </div>
+  </header>
+
+  <ol class="steps" aria-label="Ablauf">
+    <li id="st1" aria-current="step"><span>1</span>Auftrag</li>
+    <li id="st2"><span>2</span>Text prüfen</li>
+    <li id="st3"><span>3</span>In die App</li>
+  </ol>
+
+  <p id="unavailable" class="note err" hidden>Dieser Assistent braucht claude.ai. Öffne ihn angemeldet in Safari oder in der Claude-App.</p>
+
+  <form id="ask" class="card" autocomplete="off">
+    <h2>Was soll Claude schreiben?</h2>
+    <div class="chips" id="chips" role="group" aria-label="Schnellwahl"></div>
+    <label class="lbl" for="task">Auftrag</label>
+    <textarea id="task" rows="3"></textarea>
+
+    <div class="material">
+      <label class="lbl" for="source">Aufgabe oder dein Text <span class="muted">(optional, einfügen)</span></label>
+      <textarea id="source" rows="5" placeholder="Hier die Aufgabe oder deinen Text einfügen: lange drücken, dann Einfügen."></textarea>
+      <div class="photo-row" id="photoRow" hidden>
+        <label class="btn" for="photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Foto der Aufgabe</label>
+        <input id="photo" type="file" accept="image/*" multiple hidden>
+        <div id="thumbs" class="photo-row"></div>
+      </div>
+    </div>
+
+    <div class="opts">
+      <div class="material"><span class="lbl" id="lenLbl">Länge</span><div class="seg" id="len" role="group" aria-labelledby="lenLbl"></div></div>
+      <div class="material"><span class="lbl" id="toneLbl">Schreibstil</span><div class="seg" id="tone" role="group" aria-labelledby="toneLbl"></div></div>
+    </div>
+
+    <div class="row">
+      <button id="go" class="btn primary big grow" type="submit">Text schreiben lassen</button>
+      <button id="stop" class="btn big" type="button" hidden>Stopp</button>
+    </div>
+  </form>
+
+  <section id="result" class="card" hidden aria-live="polite">
+    <div class="answer-head">
+      <div class="status" id="status"></div>
+      <span class="muted small count" id="count"></span>
+    </div>
+    <textarea id="answer" class="paper" rows="9" readonly aria-label="Antwort von Claude"></textarea>
+    <p id="resNote" class="note" hidden></p>
+    <div class="tweaks" id="tweaks" hidden>
+      <button class="chip" type="button" data-tweak="Mach den Text deutlich kürzer.">Kürzer</button>
+      <button class="chip" type="button" data-tweak="Formuliere den Text einfacher, mit kürzeren Sätzen.">Einfacher</button>
+      <button class="chip" type="button" data-tweak="Mach den Text etwas ausführlicher, mit einem zusätzlichen Gedanken oder Beispiel.">Ausführlicher</button>
+      <button class="chip" type="button" data-tweak="Schreib den Text noch einmal neu, mit anderen Formulierungen.">Neu formulieren</button>
+    </div>
+    <button id="take" class="btn primary big" type="button" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>In die Handschrift-App übernehmen
+    </button>
+  </section>
+
+  <section class="card" id="histCard" hidden>
+    <h2>Letzte Texte</h2>
+    <ul class="history" id="history"></ul>
+  </section>
+</div>
+
+<div class="sheet-bg" id="confirm" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+    <h2 id="cfTitle">Diesen Text übernehmen?</h2>
+    <div class="preview" id="cfPreview"></div>
+    <p class="muted small" id="cfMeta"></p>
+    <div class="row">
+      <button class="btn primary big grow" id="cfYes" type="button">Ja, kopieren</button>
+      <button class="btn big" id="cfNo" type="button">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="copied" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cpTitle">
+    <div class="done-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 id="cpTitle">Kopiert</h2>
+    <ol class="howto">
+      <li>Wechsle zur <b>Handschrift-App</b> (Symbol auf dem Home-Bildschirm).</li>
+      <li>Im Tab <b>Schreiben</b> erscheint <b>„Antwort von Claude einfügen“</b>. Tippe darauf und dann auf <b>Einfügen</b>.</li>
+      <li>Wähle <b>Ersetzen</b> oder <b>Anhängen</b>. Fertig.</li>
+    </ol>
+    <p class="appurl">https://bambuseleitung.github.io/Schriftbot/</p>
+    <button class="btn big" id="cpOk" type="button">Schließen</button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="manual" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mnTitle">
+    <h2 id="mnTitle">Bitte selbst kopieren</h2>
+    <p class="muted">Diese Ansicht erlaubt kein automatisches Kopieren. Der Text ist markiert: lange drücken und <b>Kopieren</b> wählen.</p>
+    <textarea id="manualText" rows="8" readonly></textarea>
+    <button class="btn big" id="mnOk" type="button">Fertig</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+
+  // ---------- Schnellwahl, Länge, Stil ----------
+  const PRESETS = [
+    { id: 'answer', label: 'Aufgabe beantworten', task: 'Beantworte die Aufgabe vollständig in ganzen Sätzen.', needs: true },
+    { id: 'sum', label: 'Zusammenfassen', task: 'Fasse den Text in eigenen Worten zusammen.', needs: true },
+    { id: 'fix', label: 'Korrigieren', task: 'Korrigiere Rechtschreibung, Grammatik und Zeichensetzung. Ändere sonst nichts am Inhalt und Stil.', needs: true, keepLength: true },
+    { id: 'bullets', label: 'Stichpunkte', task: 'Fasse den Inhalt als kurze Stichpunkte zusammen, jeder Punkt in einer eigenen Zeile mit "- " davor.', needs: true },
+    { id: 'entry', label: 'Hefteintrag', task: 'Schreibe einen Hefteintrag zum Thema: eine Überschrift in der ersten Zeile, dann die wichtigsten Inhalte.' },
+    { id: 'free', label: 'Freier Auftrag', task: '' },
+  ];
+  const LENGTHS = [['kurz', 'Kurz', 'etwa 40 bis 70 Wörter'], ['mittel', 'Mittel', 'etwa 100 bis 160 Wörter'], ['lang', 'Ausführlich', 'etwa 200 bis 300 Wörter']];
+  const TONES = [
+    ['schule', 'Schüler:in', 'wie eine gute Schülerin oder ein guter Schüler der Oberstufe: in eigenen Worten, sachlich richtig, nicht zu perfekt oder hochgestochen'],
+    ['sachlich', 'Sachlich', 'sachlich und klar, wie in einem guten Lehrbuch'],
+    ['locker', 'Locker', 'locker und persönlich, wie eine Notiz oder Nachricht'],
+  ];
+  let preset = store.get('preset', 'answer'), len = store.get('len', 'mittel'), tone = store.get('tone', 'schule');
+
+  function seg(el, items, current, onPick) {
+    el.replaceChildren(...items.map(([id, label]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = label; b.dataset.id = id;
+      b.setAttribute('aria-pressed', String(id === current));
+      b.addEventListener('click', () => { for (const x of el.children) x.setAttribute('aria-pressed', String(x === b)); onPick(id); });
+      return b;
+    }));
+  }
+  seg($('len'), LENGTHS, len, v => { len = v; store.set('len', v); });
+  seg($('tone'), TONES, tone, v => { tone = v; store.set('tone', v); });
+
+  const task = $('task'), source = $('source');
+  $('chips').replaceChildren(...PRESETS.map(p => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.textContent = p.label; b.dataset.id = p.id;
+    b.addEventListener('click', () => pickPreset(p.id, true));
+    return b;
+  }));
+  function pickPreset(id, fill) {
+    preset = id; store.set('preset', id);
+    const p = PRESETS.find(x => x.id === id) || PRESETS[0];
+    for (const b of $('chips').children) b.setAttribute('aria-pressed', String(b.dataset.id === id));
+    if (fill) { task.value = p.task; if (!p.task) task.focus(); }
+    task.placeholder = p.id === 'free' ? 'z. B. Schreib einen Brief an meine Oma über die Klassenfahrt.' : '';
+    $('lenLbl').parentElement.hidden = !!p.keepLength;
+    saveDraft();
+  }
+  // Entwurf behalten, falls die Seite neu lädt
+  const draft = store.get('draft', null);
+  task.value = draft?.task ?? '';
+  source.value = draft?.source ?? '';
+  pickPreset(preset, !draft?.task);
+  function saveDraft() { store.set('draft', { task: task.value, source: source.value }); }
+  task.addEventListener('input', saveDraft);
+  source.addEventListener('input', saveDraft);
+
+  // ---------- Fotos ----------
+  let photos = [];
+  function renderThumbs() {
+    $('thumbs').replaceChildren(...photos.map((f, i) => {
+      const d = document.createElement('div'); d.className = 'thumb';
+      const img = document.createElement('img'); img.alt = 'Foto ' + (i + 1); img.src = URL.createObjectURL(f);
+      const x = document.createElement('button'); x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Foto entfernen');
+      x.addEventListener('click', () => { photos.splice(i, 1); renderThumbs(); });
+      d.append(img, x); return d;
+    }));
+  }
+
+  // ---------- Steuerung ----------
+  const RULES = [
+    'Du schreibst Text, den eine App danach in die echte Handschrift der Person umwandelt (z. B. für Hausaufgaben in GoodNotes).',
+    'Regeln für deine Antwort:',
+    '- Gib NUR den fertigen Text aus: keine Einleitung, keine Erklärung, keine Rückfrage, kein Kommentar am Ende.',
+    '- Kein Markdown: keine Sternchen, Rauten, Unterstriche, Tabellen oder Fettdruck. Aufzählungen nur mit "- " am Zeilenanfang, Nummerierung als "1." ist erlaubt.',
+    '- Keine Emojis und keine Sonderzeichen wie → • ≈ ≥ ≤ × ÷ ✓. Benutze nur Buchstaben (auch ä ö ü ß), Ziffern und diese Zeichen: . , ! ? : ; - ( ) " „ “ \' / + = % §',
+    '- Trenne Absätze durch eine Leerzeile.',
+    '- Schreibe auf Deutsch, außer der Auftrag verlangt ausdrücklich eine andere Sprache.',
+  ].join('\n');
+
+  function buildPrompt() {
+    const p = PRESETS.find(x => x.id === preset) || PRESETS[0];
+    const L = LENGTHS.find(x => x[0] === len), T = TONES.find(x => x[0] === tone);
+    const parts = [RULES, '', 'Auftrag: ' + (task.value.trim() || p.task || 'Schreibe einen passenden Text.')];
+    if (!p.keepLength) parts.push('Länge: ' + L[2] + '.');
+    parts.push('Schreibstil: ' + T[2] + '.');
+    if (photos.length) parts.push('Die Aufgabe ist auf dem Foto zu sehen' + (photos.length > 1 ? ' (mehrere Fotos, in Reihenfolge)' : '') + '. Lies sie genau.');
+    if (source.value.trim()) parts.push('', 'Aufgabe bzw. Text:', '"""', source.value.trim().slice(0, 20000), '"""');
+    return parts.join('\n');
+  }
+
+  // Formatierungsreste entfernen, damit die App nichts Fremdes rot markiert
+  function clean(t) {
+    return t.replace(/\r/g, '')
+      .replace(/\*\*(.+?)\*\*/g, '$1').replace(/__(.+?)__/g, '$1').replace(/(^|\s)\*(\S[^*]*?)\*(?=\s|$)/g, '$1$2')
+      .replace(/^#{1,6}\s+/gm, '').replace(/^[ \t]*[•*·▪◦][ \t]+/gm, '- ').replace(/[→⇒➔]/g, '-').replace(/[✓✔]/g, '')
+      .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, '')
+      .replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  const answer = $('answer'), status = $('status'), resNote = $('resNote');
+  let sample = null, ctl = null, turns = null;
+  const steps = n => ['st1', 'st2', 'st3'].forEach((id, i) => {
+    $(id).toggleAttribute('aria-current', i === n - 1); if (i === n - 1) $(id).setAttribute('aria-current', 'step');
+    $(id).classList.toggle('done', i < n - 1);
+  });
+  const words = t => (t.trim().match(/\S+/g) || []).length;
+  const showCount = () => { const n = words(answer.value); $('count').textContent = n ? `${n} Wörter` : ''; };
+  answer.addEventListener('input', showCount);
+
+  const ERR = {
+    not_granted: 'Du hast den Zugriff auf Claude für diese Seite nicht erlaubt. Lade die Seite neu, um noch einmal gefragt zu werden.',
+    sampling_disabled: 'Claude ist für dein Konto hier nicht verfügbar.',
+    rate_limited: 'Gerade zu viele Anfragen oder dein Nutzungslimit ist erreicht. Versuch es in ein paar Minuten noch einmal.',
+    session_expired: 'Bitte melde dich bei claude.ai neu an und lade die Seite neu.',
+    refused: 'Claude hat diesen Auftrag abgelehnt. Formuliere ihn anders.',
+    empty_completion: 'Claude hat keinen Text geliefert. Formuliere den Auftrag etwas genauer.',
+    prompt_too_large: 'Der eingefügte Text ist zu lang. Kürze ihn etwas.',
+    image_rejected: 'Ein Foto ließ sich nicht verwenden. Nimm ein anderes (JPEG oder PNG).',
+  };
+
+  function busy(on) {
+    $('go').disabled = on; $('stop').hidden = !on;
+    for (const b of $('tweaks').children) b.disabled = on;
+    $('take').disabled = on;
+    answer.readOnly = on;
+  }
+
+  async function run(input, label) {
+    if (!sample) return;
+    ctl = new AbortController();
+    $('result').hidden = false;
+    resNote.hidden = true;
+    resNote.className = 'note';
+    status.replaceChildren(Object.assign(document.createElement('span'), { className: 'dot' }), document.createTextNode(label));
+    $('take').hidden = true; $('tweaks').hidden = true;
+    answer.value = ''; showCount();
+    busy(true);
+    steps(2);
+    $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try {
+      const opts = { signal: ctl.signal, cache: false, onText: ({ text }) => { answer.value = text; showCount(); status.textContent = 'Claude schreibt …'; } };
+      if (photos.length && !Array.isArray(input)) opts.images = photos; // Fotos nur beim ersten Auftrag
+      const { text, truncated } = await sample(input, opts);
+      answer.value = clean(text); showCount();
+      turns = (Array.isArray(input) ? input : [{ role: 'user', content: input }]).concat({ role: 'assistant', content: text });
+      status.textContent = 'Fertig. Du kannst den Text hier noch ändern.';
+      if (truncated) { resNote.textContent = 'Der Text wurde abgeschnitten. Wähle eine kürzere Länge oder teile die Aufgabe.'; resNote.hidden = false; }
+      $('take').hidden = false; $('tweaks').hidden = false;
+    } catch (e) {
+      answer.value = e?.code === 'refused' ? '' : clean(e?.text || '');
+      showCount();
+      if (e?.code === 'cancelled') status.textContent = 'Gestoppt.';
+      else {
+        status.textContent = 'Das hat nicht geklappt.';
+        resNote.textContent = ERR[e?.code] || 'Verbindung unterbrochen. Tippe noch einmal auf „Text schreiben lassen“.';
+        resNote.className = 'note err'; resNote.hidden = false;
+        if (e?.code === 'not_granted' || e?.code === 'sampling_disabled') $('go').hidden = true;
+      }
+      if (answer.value.trim()) { $('take').hidden = false; $('tweaks').hidden = false; }
+      if (!answer.value.trim()) steps(1);
+    } finally {
+      busy(false);
+    }
+  }
+
+  $('ask').addEventListener('submit', e => {
+    e.preventDefault();
+    const p = PRESETS.find(x => x.id === preset);
+    if (p?.needs && !source.value.trim() && !photos.length) {
+      source.focus();
+      source.placeholder = 'Bitte zuerst die Aufgabe oder deinen Text hier einfügen (oder ein Foto wählen).';
+      return;
+    }
+    if (!task.value.trim() && !p?.task) { task.focus(); return; }
+    turns = null;
+    run(buildPrompt(), 'Claude denkt nach …');
+  });
+  $('stop').addEventListener('click', () => ctl?.abort());
+  for (const b of $('tweaks').children) b.addEventListener('click', () => {
+    if (!turns) return;
+    // Der eigene, evtl. bearbeitete Text ist die Grundlage der Änderung
+    const base = turns.slice(0, -1).concat({ role: 'assistant', content: answer.value });
+    run(base.concat({ role: 'user', content: b.dataset.tweak + ' Es gelten weiter dieselben Regeln. Gib nur den fertigen Text aus.' }), 'Claude überarbeitet …');
+  });
+
+  // ---------- Bestätigen & kopieren ----------
+  const open = id => { $(id).hidden = false; $(id).querySelector('button')?.focus(); };
+  const close = id => { $(id).hidden = true; };
+  $('take').addEventListener('click', () => {
+    const t = clean(answer.value);
+    if (!t) return;
+    answer.value = t;
+    $('cfPreview').textContent = t;
+    $('cfMeta').textContent = `${words(t)} Wörter. Nach dem Kopieren fügst du ihn in der Handschrift-App ein.`;
+    steps(3);
+    open('confirm');
+    $('cfYes').focus();
+  });
+  $('cfNo').addEventListener('click', () => { close('confirm'); steps(2); });
+  $('cfYes').addEventListener('click', async () => {
+    const t = answer.value;
+    close('confirm');
+    remember(t);
+    try {
+      await navigator.clipboard.writeText(t);
+      open('copied');
+    } catch {
+      $('manualText').value = t;
+      open('manual');
+      $('manualText').focus(); $('manualText').select();
+    }
+  });
+  $('cpOk').addEventListener('click', () => close('copied'));
+  $('mnOk').addEventListener('click', () => close('manual'));
+  for (const id of ['confirm', 'copied', 'manual']) {
+    $(id).addEventListener('click', e => { if (e.target === $(id)) close(id); });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') ['confirm', 'copied', 'manual'].forEach(close); });
+
+  // ---------- Verlauf (nur in diesem Browser) ----------
+  function remember(t) {
+    const h = store.get('history', []).filter(x => x.text !== t);
+    h.unshift({ text: t, at: Date.now() });
+    store.set('history', h.slice(0, 6));
+    renderHistory();
+  }
+  function renderHistory() {
+    const h = store.get('history', []);
+    $('histCard').hidden = !h.length;
+    $('history').replaceChildren(...h.map(item => {
+      const li = document.createElement('li');
+      const d = document.createElement('div');
+      const t = document.createElement('div'); t.className = 't'; t.textContent = item.text.replace(/\s+/g, ' ');
+      const m = document.createElement('div'); m.className = 'muted small';
+      m.textContent = `${words(item.text)} Wörter · ${new Date(item.at).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}`;
+      d.append(t, m);
+      const b = document.createElement('button'); b.className = 'btn'; b.type = 'button'; b.textContent = 'Nochmal übernehmen';
+      b.addEventListener('click', () => {
+        answer.value = item.text; showCount(); $('result').hidden = false; $('take').hidden = false;
+        status.textContent = 'Aus dem Verlauf.'; turns = null; $('tweaks').hidden = true;
+        $('take').click();
+      });
+      li.append(d, b);
+      return li;
+    }));
+  }
+  renderHistory();
+
+  // ---------- Claude verbinden ----------
+  (async () => {
+    sample = await window.claude?.use?.('sample').catch?.(() => null) ?? null;
+    if (!sample) { $('unavailable').hidden = false; $('go').disabled = true; return; }
+    const caps = await sample.limits().catch(() => null);
+    $('photoRow').hidden = !caps?.images;
+    $('photo').accept = caps?.images?.mediaTypes?.join(',') || 'image/*';
+    $('photo').addEventListener('change', () => {
+      const max = caps?.images?.maxCount || 4;
+      photos = photos.concat([...$('photo').files]).slice(0, max);
+      $('photo').value = '';
+      renderThumbs();
+    });
+  })();
+})();
+</script>

@@ -7,6 +7,7 @@ import { drawPage } from './render.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { loadKey, saveKey } from './storage.js';
+import { ASSISTANT_URL, openAssistant, pasteFromClaude } from './claude.js';
 
 const MIN_W = 12, MIN_H = 6; // kleinstes Feld in mm
 const newSeed = () => Math.floor(Math.random() * 2 ** 31);
@@ -251,6 +252,19 @@ export function initBlatt(profile) {
     const f = sel();
     if (!f) return;
     f.xHeight = +sizeEl.value;
+    changed(f);
+    syncEditor();
+  });
+  // Claude-Antwort ins gewählte Feld (über den Schriftbot-Assistenten)
+  $('field-claude-open').href = ASSISTANT_URL;
+  $('field-claude-open').addEventListener('click', () => openAssistant(sel()?.text || ''));
+  $('field-claude-paste').addEventListener('click', async () => {
+    const f = sel();
+    if (!f) return;
+    const res = await pasteFromClaude({ current: f.text || '', target: `in Feld ${fields.indexOf(f) + 1} übernehmen` });
+    if (!res) return;
+    f.text = res.text;
+    textEl.value = res.text;
     changed(f);
     syncEditor();
   });
