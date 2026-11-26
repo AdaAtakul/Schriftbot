@@ -7,6 +7,7 @@ import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
+import { PRESETS, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
 
 // Papier wie in GoodNotes (Maße in js/paper.js); Zeilen stehen genau auf Linien, Karos bzw. Punktreihen.
 export const PAPERS = PAPER_KINDS;
@@ -19,17 +20,25 @@ export const INKS = {
   weiss: { label: 'Weiß (für dunkles Papier)', color: '#f2f2f2' },
 };
 
+// Tintenfarbe: feste Farbe oder eigene über den Farbton-Regler
+export const inkColor = s => (s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.blau).color);
+
 const STANDARD = {
-  paper: 'liniert-breit', ink: 'blau', connect: 70, chaos: 50, mistakes: 0,
-  weight: 100, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
+  paper: 'liniert-breit', ink: 'blau', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
+const pct = v => v + ' %';
+// Stil-Regler: gelten für die gewählte Vorlage (Anpassungen werden je Vorlage gemerkt)
+const STYLE_SLIDERS = [
+  { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'chaos', label: 'Unordnung', min: 0, max: 150, step: 5, fmt: pct },
+  { key: 'strike', label: 'Durchstreichen', min: 0, max: 100, step: 5, fmt: v => v ? pct(v) : 'aus' },
+  { key: 'wobble', label: 'Zeilen & Druck', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'edges', label: 'Ränder', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: pct },
+];
 const SLIDERS = [
-  { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
-  { key: 'chaos', label: 'Unordnung', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
-  { key: 'mistakes', label: 'Schreibfehler', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
-  { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: v => v + ' %' },
   { key: 'xHeight', label: 'Schriftgröße (x-Höhe)', min: 1.5, max: 6, step: 0.1, fmt: mm },
   { key: 'lineHeight', label: 'Zeilenabstand', min: 4, max: 20, step: 0.1, fmt: (v, s) => {
     const lm = lineMetrics(options(s));
@@ -38,9 +47,11 @@ const SLIDERS = [
   { key: 'margin', label: 'Rand', min: 5, max: 40, step: 1, fmt: mm },
 ];
 
-// Aktuelle Einstellungen (gespeicherte Werte, sonst Standard).
+// Aktuelle Einstellungen: Standard, gespeicherte Werte, darüber die Werte der Stil-Vorlage.
 export function current() {
-  return { ...STANDARD, ...getSettings() };
+  const raw = getSettings(), mig = migrateStyle(raw);
+  if (mig) { setSetting('style', mig.style); setSetting('styles', mig.styles); Object.assign(raw, mig); }
+  return { ...STANDARD, ...raw, ...styleValues(raw) };
 }
 
 // Einstellungen → Layout-Optionen.
@@ -48,7 +59,7 @@ export function options(s = current()) {
   const paper = PAPERS[s.paper] ? s.paper : STANDARD.paper;
   return {
     xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
-    connect: s.connect / 100, chaos: s.chaos / 100, mistakes: s.mistakes / 100,
+    connect: s.connect / 100, chaos: s.chaos / 100, strike: s.strike / 100, wobble: s.wobble / 100, edges: s.edges / 100,
     paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
     ruled: false, ...paperLines(paper), // Lage der Linien wie in GoodNotes
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,
@@ -75,8 +86,20 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
 
+  // Stil-Vorlage
+  const styleSel = $('style');
+  for (const [key, p] of Object.entries(PRESETS)) styleSel.add(new Option(p.label, key));
+  styleSel.addEventListener('change', () => { setSetting('style', styleSel.value); syncControls(); render(); });
+  $('style-reset').addEventListener('click', () => {
+    const s = current(), styles = { ...(s.styles || {}) };
+    delete styles[s.style];
+    setSetting('styles', styles);
+    syncControls();
+    render();
+  });
+
   const inkEl = $('ink');
-  for (const [key, ink] of Object.entries(INKS)) {
+  for (const [key, ink] of Object.entries({ ...INKS, eigen: { label: 'Eigene Farbe (Farbton-Regler)', color: '' } })) {
     const b = document.createElement('button');
     b.className = 'swatch';
     b.style.setProperty('--c', ink.color);
@@ -86,6 +109,13 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     b.addEventListener('click', () => { setSetting('ink', key); syncControls(); render(); });
     inkEl.append(b);
   }
+  const hue = $('ink-hue');
+  hue.addEventListener('input', () => {
+    setSetting('inkHue', Number(hue.value));
+    setSetting('ink', 'eigen');
+    syncControls();
+    render();
+  });
 
   const paperColorEl = $('paper-color');
   for (const [key, c] of Object.entries(PAPER_COLORS)) {
@@ -99,20 +129,24 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     paperColorEl.append(b);
   }
 
-  const controlsEl = $('controls');
-  const sliders = SLIDERS.map(spec => {
+  const makeSlider = (spec, parent, style) => {
     const label = document.createElement('label');
     label.className = 'slider';
     label.innerHTML = `${spec.label} <output></output><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}">`;
     const range = label.querySelector('input');
     range.addEventListener('input', () => {
-      setSetting(spec.key, Number(range.value));
+      if (style) setSetting('styles', withStyleValue(current(), spec.key, Number(range.value)));
+      else setSetting(spec.key, Number(range.value));
       syncControls();
       render();
     });
-    controlsEl.append(label);
+    parent.append(label);
     return { spec, label, range, out: label.querySelector('output') };
-  });
+  };
+  const sliders = [
+    ...STYLE_SLIDERS.map(spec => makeSlider(spec, $('style-controls'), true)),
+    ...SLIDERS.map(spec => makeSlider(spec, $('controls'), false)),
+  ];
 
   function syncControls() {
     const s = current();
@@ -121,6 +155,13 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       out.textContent = spec.fmt(s[spec.key], s);
     }
     for (const b of inkEl.children) b.setAttribute('aria-pressed', b.dataset.ink === s.ink);
+    inkEl.querySelector('[data-ink="eigen"]').style.setProperty('--c', hueColor(+s.inkHue));
+    hue.value = s.inkHue;
+    $('ink-hue-out').textContent = s.ink === 'eigen' ? `${s.inkHue}°` : 'aus';
+    styleSel.value = PRESETS[s.style] ? s.style : 'normal';
+    const modified = isModified(s);
+    $('style-reset').hidden = !modified;
+    $('style-note').textContent = modified ? 'Angepasst – deine Werte für diese Vorlage bleiben gespeichert.' : '';
     for (const b of paperColorEl.children) b.setAttribute('aria-pressed', b.dataset.paperColor === options(s).paperColor);
   }
 
@@ -129,7 +170,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     if (!pagesEl.clientWidth) return; // Tab nicht sichtbar
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
-    const color = (INKS[s.ink] || INKS.blau).color;
+    const color = inkColor(s);
     const dpr = window.devicePixelRatio || 1;
     const cssW = Math.min(pagesEl.clientWidth - 32, 900);
     const pxPerMm = cssW / o.pageW;
@@ -171,8 +212,10 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
   $('reset-settings').addEventListener('click', () => {
-    if (!confirm('Alle Schreib-Einstellungen auf Standard zurücksetzen?')) return;
+    if (!confirm('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?')) return;
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
+    setSetting('style', 'normal');
+    setSetting('styles', {});
     paperSel.value = STANDARD.paper;
     syncControls();
     render();
@@ -217,7 +260,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const miss = result.missing.filter(ch => ch !== ' ');
     if (miss.length && !confirm(`Es fehlen Zeichen: ${miss.join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
 
-    const color = (INKS[s.ink] || INKS.blau).color;
+    const color = inkColor(s);
     const date = new Date().toISOString().slice(0, 10);
     const labels = exportButtons.map(b => b.innerHTML);
     exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });

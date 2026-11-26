@@ -4,8 +4,8 @@ import { initAufnahme } from './aufnahme.js';
 import { initTextAufnahme } from './textaufnahme.js';
 import { initProfil } from './profil.js';
 import { initSchreiben } from './schreiben.js';
-import { initKi } from './kiui.js';
 import { initBlatt } from './blattui.js';
+import { initProfilwahl } from './profilwahl.js';
 
 // Navigation zwischen den Modulen; letzter Tab wird gemerkt.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -42,8 +42,10 @@ const aufnahme = initAufnahme(profile, () => schreiben.sync()); // Schriftgröß
 initTextAufnahme(profile, aufnahme.refresh);
 schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
-initKi(profile);
+// Die KI-Funktion wurde entfernt: einen früher gespeicherten API-Schlüssel vom Gerät löschen.
+try { localStorage.removeItem('ki'); } catch {}
 initBlatt(profile);
+initProfilwahl();
 
 // PWA: Service Worker für Offline-Betrieb.
 const offlineStatus = document.getElementById('status-offline');

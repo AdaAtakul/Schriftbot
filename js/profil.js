@@ -1,6 +1,6 @@
 // Profil-Tab: Backup als JSON, Testmodus.
 import { parseProfile, progress } from './profile.js';
-import { saveProfile, getSettings, setSetting } from './storage.js';
+import { saveProfile, getSettings, setSetting, activeProfile, glyphOwner } from './storage.js';
 
 export function initProfil(profile) {
   const $ = id => document.getElementById(id);
@@ -20,7 +20,7 @@ export function initProfil(profile) {
   $('export-btn').addEventListener('click', () => {
     const date = new Date().toISOString().slice(0, 10);
     const url = URL.createObjectURL(new Blob([JSON.stringify(profile)], { type: 'application/json' }));
-    const a = Object.assign(document.createElement('a'), { href: url, download: `handschrift-profil-${date}.json` });
+    const a = Object.assign(document.createElement('a'), { href: url, download: `handschrift-${glyphOwner().name.replace(/[^\p{L}\p{N}_-]+/gu, '-')}-${date}.json` });
     document.body.append(a);
     a.click();
     a.remove();
@@ -42,7 +42,7 @@ export function initProfil(profile) {
     }
     const p = progress(imported);
     const msg = `Profil mit ${p.done} von ${p.total} Zeichen importieren?`
-      + (progress(profile).done ? '\n\nDein aktuelles Profil wird dabei ersetzt.' : '');
+      + (progress(profile).done ? `\n\nDie Schrift von „${glyphOwner().name}“ wird dabei ersetzt` + (glyphOwner().id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
     if (!confirm(msg)) return;
     await saveProfile(imported);
     location.reload();

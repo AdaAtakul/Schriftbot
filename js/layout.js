@@ -12,7 +12,10 @@ export const DEFAULTS = {
   spacing: 0.15,    // Abstand zwischen Buchstaben in x-Höhen
   connect: 0,       // Verbindungen 0..1: Anteil der Stellen, an denen ein Paar genutzt wird
   chaos: 0,         // Unordnung 0..1
-  mistakes: 0,      // Schreibfehler 0..1: durchgestrichene Verschreiber, schwankende Zeilen, wechselnder Druck
+  edges: 0,         // Ränder 0..1: Zeilenanfänge und -enden wandern links und rechts
+  // strike 0..1: Durchstreichen – wie oft ein Wort erst falsch geschrieben und durchgestrichen wird
+  // wobble 0..1: Zeilen & Druck – schwankende Zeilen, Druck je Wort, nachlassend zum Zeilenende
+  // (alt: mistakes 0..1 setzt beide zugleich; ohne Angabe 0)
   ruled: false,     // true: Grundlinien rasten auf Papierlinien ein
   lineSpacing: 8.8, // Abstand der Papierlinien in mm
   lineTop: 20,      // Lage der ersten Papierlinie in mm von oben
@@ -38,16 +41,18 @@ const CHAOS = {
   slant: 0.3 * Math.PI / 180 // Schräglage je Zeile ±0,3° (mehr würde auf liniertem Papier von der Linie laufen)
 };
 
-// Schreibfehler bei 100 %.
+// Durchstreichen, Zeilen & Druck bei 100 %.
 const MISTAKES = {
-  rate: 0.08,  // Anteil der geeigneten Wörter, die erst falsch geschrieben werden
-  gap: 8,      // mindestens so viele Wörter zwischen zwei Verschreibern
+  rate: 0.15,  // Anteil der geeigneten Wörter, die erst falsch geschrieben werden
+  gap: [10, 3], // mindestens so viele Wörter zwischen zwei Verschreibern (bei wenig … bei 100 %)
   minLen: 4,   // nur Wörter ab 4 Buchstaben
   wave: 0.1,   // Zeile schwankt um bis zu ±0,1 x-Höhen (bleibt auf liniertem Papier auf der Linie)
   flow: 0.18,  // Druck je Wort ±18 %
   fade: 0.12,  // bis zu 12 % dünner am Zeilenende
 };
 const LETTERS = [...'abcdefghijklmnopqrstuvwxyzäöüß'];
+// Ränder bei 100 % (in x-Höhen): Zeilenanfang rückt bis zu so weit ein, Zeile bricht bis zu so viel früher um.
+const EDGES = { left: 1.2, right: 4 };
 
 // Ersatzzeichen, falls ein Zeichen nicht aufgenommen ist (z. B. typografische Zeichen der iPad-Tastatur).
 const ALIASES = {
@@ -179,7 +184,9 @@ export function layout(text, profile, options = {}, seed = 1) {
   const random = rng(seed), pairRandom = rng(seed + 1), jitterRandom = rng(seed + 2);
   const lineRandom = rng(seed + 3);
   const jitter = (amount, r = jitterRandom) => (r() * 2 - 1) * amount * o.chaos;
-  const m = o.mistakes;
+  const strike = o.strike ?? o.mistakes ?? 0, wobble = o.wobble ?? o.mistakes ?? 0, edges = o.edges || 0;
+  const slipGap = Math.round(MISTAKES.gap[0] + (MISTAKES.gap[1] - MISTAKES.gap[0]) * strike);
+  const edgeRandom = rng(seed + 5);
   const unit = o.xHeight;
   const left = o.margin, right = o.pageW - o.margin, bottom = o.pageH - o.margin;
   const has = key => recordedCount(profile, key) > 0;
@@ -190,7 +197,7 @@ export function layout(text, profile, options = {}, seed = 1) {
   const missing = new Set();
   const pages = [];
   const letters = LETTERS.filter(has);
-  let page, x, baseline, lineAngle, wave;
+  let page, x, baseline, lineAngle, wave, lineStart, lineRight, indent = 0;
 
   // Zufällige Variante, nie dieselbe wie beim letzten Auftreten dieses Zeichens.
   // r: eigene Zufallsquelle (für Verschreiber), sonst die gemeinsame.
@@ -259,15 +266,19 @@ export function layout(text, profile, options = {}, seed = 1) {
 
   const lm = lineMetrics(o);
   const startLine = () => {
-    x = left;
+    // Ränder: Einzug wandert langsam (halb alter, halb neuer Wert), rechts bricht die Zeile mal früher um
+    indent = (indent + edgeRandom()) / 2;
+    lineStart = left + indent * EDGES.left * edges * unit;
+    lineRight = right - edgeRandom() * EDGES.right * edges * unit;
+    x = lineStart;
     lineAngle = jitter(CHAOS.slant);
     // Sanfte Welle: Wellenlänge 60–140 mm, Höhe bis ±MISTAKES.wave x-Höhen
-    wave = { amp: (0.5 + 0.5 * lineRandom()) * MISTAKES.wave * m * unit, len: 60 + 80 * lineRandom(), ph: lineRandom() * 2 * Math.PI };
+    wave = { amp: (0.5 + 0.5 * lineRandom()) * MISTAKES.wave * wobble * unit, len: 60 + 80 * lineRandom(), ph: lineRandom() * 2 * Math.PI };
   };
   const yAt = px => baseline + (px - left) * Math.tan(lineAngle)
     + (wave.amp && wave.amp * Math.sin(wave.ph + 2 * Math.PI * (px - left) / wave.len));
   // Druck: je Wort etwas anders, zum Zeilenende hin nachlassend
-  const inkAt = (px, flow) => flow * (1 - MISTAKES.fade * m * (px - left) / (right - left));
+  const inkAt = (px, flow) => flow * (1 - MISTAKES.fade * wobble * (px - left) / (right - left));
   const newPage = () => {
     page = { items: [] };
     pages.push(page);
@@ -283,17 +294,17 @@ export function layout(text, profile, options = {}, seed = 1) {
   const widthOf = glyphs => glyphs.reduce((n, g, i) => n + g.w + (i ? g.gap : 0), 0);
   // Wort setzen; gibt die x-Position des Wortanfangs zurück.
   function place(glyphs, sp, flow) {
-    if (x > left && x + sp + widthOf(glyphs) > right) newLine();
+    if (x > lineStart && x + sp + widthOf(glyphs) > lineRight) newLine();
     else x += sp;
     const start = x;
     glyphs.forEach((g, i) => {
       if (i) x += g.gap;
-      if (x > left && x + g.w > right) newLine(); // Wort länger als eine Zeile
+      if (x > lineStart && x + g.w > right) newLine(); // Wort länger als eine Zeile
       const y = yAt(x);
       if (g.missing) page.items.push({ missing: g.missing, x, y, w: g.w, s: unit, rot: lineAngle });
       else {
         const item = { strokes: g.strokes, x: x + g.dx, y: y + g.dy, s: unit * g.sc, rot: g.rot + lineAngle };
-        if (m) item.ink = inkAt(x, flow);
+        if (wobble) item.ink = inkAt(x, flow);
         page.items.push(item);
       }
       x += g.w;
@@ -305,26 +316,26 @@ export function layout(text, profile, options = {}, seed = 1) {
   // damit der Rest des Textes dieselben Varianten behält.
   let wordIndex = 0, sinceSlip = Infinity;
   function slipFor(w, r, chance) {
-    if (!(chance < MISTAKES.rate * m) || sinceSlip < MISTAKES.gap) return null;
+    if (!(chance < MISTAKES.rate * strike) || sinceSlip < slipGap) return null;
     const core = w.match(/^\p{L}+/u)?.[0];
     if (!core || [...core].length < MISTAKES.minLen || ![...core].every(has)) return null;
     const wrong = misspell(core, letters, r);
     if (!wrong) return null;
     const glyphs = word(wrong, r);
-    return widthOf(glyphs) <= right - left ? glyphs : null;
+    return widthOf(glyphs) <= right - left - EDGES.left * unit ? glyphs : null; // nie über zwei Zeilen
   }
 
   newPage();
   text.split('\n').forEach((para, pi) => {
     if (pi > 0) newLine();
     para.split(' ').forEach((w, wi) => {
-      const sp = wi > 0 && x > left ? spaceWidth() : 0;
+      const sp = wi > 0 && x > lineStart ? spaceWidth() : 0;
       if (!w) { x += sp; return; }
       let flow = 1, slip = null, r;
-      if (m) {
+      if (strike || wobble) {
         r = rng((Math.imul(seed, 0x9e3779b1) + wordIndex * 0x85ebca6b) >>> 0);
         const chance = r();
-        flow = 1 + (r() * 2 - 1) * MISTAKES.flow * m;
+        flow = 1 + (r() * 2 - 1) * MISTAKES.flow * wobble;
         slip = slipFor(w, r, chance);
       }
       wordIndex++;
@@ -335,7 +346,7 @@ export function layout(text, profile, options = {}, seed = 1) {
       const start = place(slip, sp, flow), len = (x - start) / unit;
       page.items.push({
         strokes: strikeStrokes(len, (right - start) / unit, r, typicalPressure(profile.glyphs)),
-        x: start, y: yAt(start), s: unit, rot: lineAngle, strike: true, ink: inkAt(start, flow),
+        x: start, y: yAt(start), s: unit, rot: lineAngle, strike: true, ...(wobble ? { ink: inkAt(start, flow) } : {}),
       });
       place(word(w), spaceWidth(r), flow);
     });

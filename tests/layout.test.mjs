@@ -140,4 +140,26 @@ for (let sd = 1; sd < 200; sd++) {
 }
 assert.equal(misspell('aaaa', ['a'], rng(1)), null, 'kein sinnvoller Fehler möglich');
 
+// Getrennte Regler: nur Durchstreichen → Striche, aber keine Welle und kein Druckwechsel; nur Zeilen & Druck → keine Striche
+const onlyStrike = layout(essay, w, { chaos: 0, strike: 1 }, 5).pages.flatMap(pg => pg.items);
+assert.ok(onlyStrike.some(it => it.strike) && onlyStrike.every(it => it.ink === undefined));
+assert.ok(onlyStrike.filter(it => !it.strike).every(it => Math.abs(((it.y - lineMetrics(DEFAULTS).first) / DEFAULTS.lineHeight) % 1) < 1e-9 || Math.abs(((it.y - lineMetrics(DEFAULTS).first) / DEFAULTS.lineHeight) % 1) > 1 - 1e-9), 'keine Welle');
+const onlyWobble = layout(essay, w, { chaos: 0, wobble: 1 }, 5).pages.flatMap(pg => pg.items);
+assert.ok(!onlyWobble.some(it => it.strike) && onlyWobble.some(it => it.ink !== 1));
+// Mehr Durchstreichen → mehr Verschreiber
+const strikeCount = v => layout(essay, w, { strike: v }, 5).pages.flatMap(pg => pg.items).filter(it => it.strike).length;
+assert.ok(strikeCount(0) === 0 && strikeCount(0.3) < strikeCount(1), `${strikeCount(0.3)} < ${strikeCount(1)}`);
+
+// Ränder: Zeilen beginnen unterschiedlich weit eingerückt (höchstens 1,2 x-Höhen), enden unterschiedlich, nie über den Rand
+const edgeItems = layout(essay, w, { chaos: 0, edges: 1 }, 5).pages[0].items;
+const rows = new Map();
+for (const it of edgeItems) { const r = rows.get(it.y) || []; r.push(it); rows.set(it.y, r); }
+const starts = [...rows.values()].map(r => Math.min(...r.map(it => it.x)));
+const ends = [...rows.values()].slice(0, -1).map(r => Math.max(...r.map(it => it.x + 1.3 * it.s)));
+assert.ok(new Set(starts.map(v => v.toFixed(2))).size > 5, 'Zeilenanfänge wandern');
+const plain = Math.min(...layout(essay, w, { chaos: 0 }, 5).pages[0].items.map(it => it.x));
+assert.ok(starts.every(v => v >= plain - 1e-9 && v <= plain + 1.2 * DEFAULTS.xHeight + 1e-9), 'Einzug in Grenzen');
+assert.ok(ends.every(v => v <= right + 0.5) && Math.max(...ends) - Math.min(...ends) > 3, 'rechter Rand flattert');
+assert.deepEqual(layout(essay, w, { edges: 0 }, 5), layout(essay, w, {}, 5), 'Ränder 0 % ändert nichts');
+
 console.log('OK – Layout');

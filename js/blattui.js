@@ -2,7 +2,7 @@
 // an derselben Stelle in Handschrift gesetzt. Felder lassen sich verschieben, in der Größe ziehen und neu aufziehen.
 import { detect, layoutField, eraseBlue } from './blatt.js';
 import { importFile } from './pdfimport.js';
-import { current, options, INKS } from './schreiben.js';
+import { current, options, inkColor } from './schreiben.js';
 import { drawPage } from './render.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
@@ -164,7 +164,7 @@ export function initBlatt(profile) {
     const ctx = v.canvas.getContext('2d');
     ctx.drawImage(clean[i], 0, 0, v.canvas.width, v.canvas.height);
     const k = v.canvas.width / pg.w, s = current();
-    const color = (INKS[s.ink] || INKS.blau).color, pen = options(s).penSize;
+    const color = inkColor(s), pen = options(s).penSize;
     for (const f of fields.filter(f => f.page === i)) {
       ctx.setTransform(k, 0, 0, k, f.x * k, f.y * k);
       drawPage(ctx, { items: layoutOf(f).items }, color, pen);
@@ -359,7 +359,7 @@ export function initBlatt(profile) {
 
   async function doExport(kind) {
     if (!sheet) return alert('Bitte zuerst ein Arbeitsblatt öffnen.');
-    const s = current(), o = options(s), color = (INKS[s.ink] || INKS.blau).color;
+    const s = current(), o = options(s), color = inkColor(s);
     const miss = new Set(fields.flatMap(f => layoutOf(f).missing).filter(c => c !== ' '));
     if (miss.size && !confirm(`Es fehlen Zeichen: ${[...miss].join(' ')}\nSie werden im Export rot markiert. Trotzdem exportieren?`)) return;
     const labels = exportButtons.map(b => b.innerHTML);

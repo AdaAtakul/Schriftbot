@@ -294,7 +294,6 @@ details.settings[open] { padding-bottom: 16px; }
 }
 .editor > textarea { flex: 1 0 200px; min-height: 200px; }
 #controls { display: grid; gap: 6px; }
-.ki textarea { min-height: 80px; resize: vertical; }
 .swatches { display: flex; gap: 12px; }
 .swatch {
   width: 40px;
@@ -307,6 +306,32 @@ details.settings[open] { padding-bottom: 16px; }
   box-shadow: 0 0 0 1px var(--border-strong);
 }
 .swatch:hover { background: var(--c); }
+.swatch[data-ink="eigen"] { background: conic-gradient(from 0deg, #e53935, #fdd835, #43a047, #1e88e5, #8e24aa, #e53935); }
+.swatch[data-ink="eigen"][aria-pressed="true"] { background: var(--c); }
+
+/* Stil-Werte als abgesetzte Gruppe */
+.group { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: var(--field); border: 1px solid var(--border); }
+.group:empty { display: none; }
+
+/* Farbton-Regler mit Regenbogen-Spur */
+.hue input {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  margin: 13px 0;
+  border-radius: 7px;
+  background: linear-gradient(90deg, hsl(0 72% 40%), hsl(60 72% 40%), hsl(120 72% 36%), hsl(180 72% 36%), hsl(240 72% 40%), hsl(300 72% 40%), hsl(359 72% 40%));
+}
+.hue input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--panel);
+  box-shadow: 0 0 0 1px var(--border-strong), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.hue input::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 3px solid var(--panel); }
 .swatch[aria-pressed="true"] { background: var(--c); border-color: var(--surface); box-shadow: 0 0 0 3px var(--accent); }
 
 /* ---------- Arbeitsblatt ---------- */
@@ -379,6 +404,21 @@ details.settings[open] { padding-bottom: 16px; }
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 .field-box:not(.selected) .field-handle { display: none; }
+
+/* ---------- Profile ---------- */
+.topbar-end { display: flex; justify-content: flex-end; }
+.profile-switch { position: relative; display: flex; align-items: center; color: var(--muted); }
+.profile-switch .icon { position: absolute; left: 12px; pointer-events: none; }
+.profile-switch select { width: auto; max-width: 240px; min-height: 44px; padding: 0 14px 0 40px; border-radius: 14px; background: var(--surface); font-size: 16px; font-weight: 600; }
+.card-wide { grid-column: 1 / -1; }
+.profile-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.profile-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--field); border: 1px solid var(--border); }
+.profile-item.active { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.profile-item > div:first-child { display: grid; flex: 1; min-width: 0; }
+.profile-actions { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.profile-actions button { min-height: 40px; padding: 0 12px; font-size: 15px; }
+.badge-active { align-self: center; padding: 4px 10px; border-radius: 999px; background: var(--accent-grad); color: #fff; font-size: 13px; font-weight: 700; }
+#profile-new { max-width: 520px; }
 
 /* ---------- Profil ---------- */
 .view-profil { overflow-y: auto; }

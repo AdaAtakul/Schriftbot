@@ -73,11 +73,16 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 
 - Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
 - **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
-- **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
-- **Unordnung**: kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage – wie echte Handschrift.
-- **Schreibfehler** (Standard 0 %): Ab und zu wird ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben. Dazu schwanken die Zeilen leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende etwas nach. Je höher der Regler, desto öfter (bei 100 % etwa alle 20–25 Wörter, nie zwei Verschreiber dicht hintereinander). Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener Strich, den du wegradieren kannst.
-- **Strichdicke**: dünner oder kräftiger schreiben (40–250 %), gilt für Vorschau und alle Exporte.
-- **Schriftgröße, Zeilenabstand, Rand, Tintenfarbe** nach Geschmack.
+- **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Die Vorlage stellt die Stil-Regler darunter ein. Jeden Regler kannst du ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
+- Stil-Regler (gehören zur gewählten Vorlage):
+  - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
+  - **Unordnung** (bis 150 %): kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage.
+  - **Durchstreichen**: wie oft ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben wird. „aus“ = nie; bei 100 % etwa alle paar Sätze mehrmals. Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener, radierbarer Strich.
+  - **Zeilen & Druck**: Zeilen schwanken leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende nach.
+  - **Ränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
+  - **Strichdicke**: dünner oder kräftiger (40–250 %), gilt für Vorschau und alle Exporte.
+- **Tintenfarbe**: feste Farben oder der Regenbogen-Knopf mit dem **Farbton**-Regler für jede beliebige Tintenfarbe.
+- **Schriftgröße, Zeilenabstand, Rand** nach Geschmack.
 - **Neu würfeln**: andere Mischung der Varianten.
 - **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **↶ Angleichen rückgängig** geht, bis du die App schließt.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
@@ -98,31 +103,9 @@ Du hast ein Arbeitsblatt als PDF, in das die Antworten blau hineingetippt sind? 
 4. Exportieren über die Leiste unten: **GoodNotes** (Blatt als Hintergrund, die Schrift radierbar darüber), **PDF** oder **PNG**.
 
 - Tinte, Strichdicke, Unordnung und Schreibfehler kommen aus dem Tab „Schreiben“.
-- Bei einem **Foto** oder einem eingescannten PDF gibt es keinen lesbaren Text. Dann werden die blauen Stellen trotzdem gefunden, und du trägst den Text selbst ein (z. B. per KI-Assistent im Tab „Schreiben“ erzeugen und hineinkopieren).
+- Bei einem **Foto** oder einem eingescannten PDF gibt es keinen lesbaren Text. Dann werden die blauen Stellen trotzdem gefunden, und du trägst den Text selbst ein.
 - Als Antwort zählt nur deutlich blaue Schrift. Schwarzer Aufgabentext bleibt unangetastet, auch wenn er direkt über der Antwort steht.
 - Das zuletzt geöffnete Blatt bleibt mit allen Feldern gespeichert, auch nach dem Schließen der App.
-
-### KI-Assistent (Claude oder eine andere KI)
-
-Im Tab **Schreiben** unter **KI-Assistent** schreibst du einen Auftrag, z. B. „Fasse die Photosynthese in 5 Sätzen zusammen“. Die Antwort ersetzt den Text im Textfeld und erscheint sofort in deiner Handschrift. **Korrigieren**, **Kürzen** und **Stichpunkte** bearbeiten den vorhandenen Text. **↶ Vorherigen Text zurückholen** macht die letzte Änderung rückgängig.
-
-**Kostenlos über dein Claude-Abo (ohne API-Schlüssel):**
-
-1. Auftrag eintippen und **In Claude-App fragen** antippen. Auftrag, dein Text und die Zeichenvorgaben landen in der Zwischenablage, und die Claude-App (oder claude.ai) öffnet sich.
-2. Dort ins Eingabefeld einfügen und senden.
-3. Die Antwort kopieren (lange drücken → Kopieren), zurück zur Handschrift-App wechseln und **Antwort einfügen** antippen. Safari fragt einmal mit „Einfügen“ nach.
-
-**Direkt mit API-Schlüssel** (schneller, aber pro Anfrage kostenpflichtig): **Ausführen** und die Schnellknöpfe. Einrichten im Tab **Profil → KI-Assistent**:
-
-- **Claude**: Unter [console.anthropic.com](https://console.anthropic.com) → *API Keys* einen Schlüssel anlegen und Guthaben aufladen, dann den Schlüssel einfügen. Voreingestellt ist `claude-opus-5-5`; `claude-haiku-5-5` ist deutlich günstiger.
-- **Andere KI**: „Andere KI (OpenAI-kompatibel)“ wählen und Adresse, Modellname und Schlüssel des Anbieters eintragen (z. B. OpenAI `https://api.openai.com/v1`, OpenRouter `https://openrouter.ai/api/v1`). Manche Anbieter erlauben keinen Zugriff direkt aus dem Browser. Dann erscheint „Keine Verbindung“.
-
-Gut zu wissen:
-
-- Der Schlüssel bleibt nur auf diesem iPad und kommt nicht ins Profil-Backup.
-- Auftrag und Text gehen an den gewählten Anbieter, der die Kosten direkt mit dir abrechnet.
-- Die KI bekommt die Liste deiner aufgenommenen Zeichen und benutzt nur diese, damit nichts rot markiert wird.
-- Der Assistent braucht Internet. Der Rest der App läuft weiter offline.
 
 ### Nach GoodNotes exportieren
 
@@ -161,18 +144,27 @@ Linien sind 0,5 pt dick und grau (#d0d2d3), auf dunklem Papier (#333333) #58595b
 
 Cornell-, Checklisten- und Planer-Papiere sind nicht dabei, weil für sie keine Maße vorliegen.
 
+### Profile (Tab „Profil“ und Auswahl oben rechts)
+
+Du kannst mehrere Profile mit eigenem Namen anlegen. Jedes Profil hat eigenen Stil, eigene Tinte und eigenes Papier. Die Schrift ist entweder
+
+- **eine eigene** – z. B. eine zweite Handschrift oder die einer anderen Person; nach dem Anlegen im Tab „Aufnahme“ neu aufnehmen, oder
+- **die eines anderen Profils** – z. B. deine Schrift als „Schnell mitgeschrieben“ mit der Vorlage „Unordentlich“. Aufnahmen und Korrekturen landen dann bei dem Profil, dem die Schrift gehört.
+
+Gewechselt wird oben rechts in der Kopfzeile (die App lädt dabei kurz neu). Text, Arbeitsblatt und Exportwahl gelten für alle Profile.
+
 ## 4. Backup – wichtig!
 
 Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, ist es weg.
 
-- Im Tab **Profil → Profil exportieren** speicherst du eine `.json`-Datei, am besten in iCloud Drive.
+- Im Tab **Profil → Profil exportieren** speicherst du die Schrift des aktiven Profils als `.json`-Datei, am besten in iCloud Drive. Jede eigene Schrift braucht ein eigenes Backup.
 - **Profil importieren** spielt sie wieder ein (auch auf einem anderen Gerät).
 - Ein **roter Punkt am Profil-Tab** erinnert dich, wenn das letzte Backup älter als 7 Tage ist.
 
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v22';` hochzählen (z. B. auf `'v23'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v23';` hochzählen (z. B. auf `'v24'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -201,14 +193,14 @@ js/pdfimport.js         PDF (pdf.js) und Fotos einlesen, 200 dpi
 js/layout.js            Satz: Paare, Varianten, Unordnung, Umbruch, Seiten, Linien
 js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
 js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
+js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
+js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Tab Profil: Backup, Testmodus
 js/storage.js           IndexedDB und Einstellungen
-js/ki.js                KI-Aufruf: Claude (Messages-API) oder OpenAI-kompatibel
-js/kiui.js              KI-Assistent: Einstellungen und Aufträge
 sw.js                   Service Worker (Offline-Cache)
 vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0)
 tests/                  Selbsttests
@@ -224,9 +216,10 @@ node tests/layout.test.mjs
 node tests/export.test.mjs
 node tests/goodnotes.test.mjs
 node tests/textplan.test.mjs
-node tests/ki.test.mjs
 node tests/blatt.test.mjs
 node tests/paper.test.mjs
+node tests/stil.test.mjs
+node tests/storage.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):
