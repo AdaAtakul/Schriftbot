@@ -72,7 +72,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 ### Text umwandeln (Tab „Schreiben“)
 
 - Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
-- **Papier**: Liniert breit / schmal, Kariert 5 mm oder Blanko. Auf liniertem und kariertem Papier steht jede Zeile genau auf einer Linie.
+- **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
 - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
 - **Unordnung**: kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage – wie echte Handschrift.
 - **Schreibfehler** (Standard 0 %): Ab und zu wird ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben. Dazu schwanken die Zeilen leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende etwas nach. Je höher der Regler, desto öfter (bei 100 % etwa alle 20–25 Wörter, nie zwei Verschreiber dicht hintereinander). Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener Strich, den du wegradieren kannst.
@@ -132,7 +132,7 @@ Gut zu wissen:
 2. Im Teilen-Menü **GoodNotes** wählen. Fehlt GoodNotes dort, „In Dateien sichern“ wählen und die Datei in der Dateien-App antippen → „Öffnen in GoodNotes“ (oder in GoodNotes über **Importieren**).
 3. GoodNotes legt ein neues Notizbuch an. Jeder Strich ist ein echter Kugelschreiber-Strich: mit dem **Radierer** einzelne Buchstaben löschen, mit dem **Lasso** verschieben, umfärben oder löschen. Buchstaben aus mehreren Strichen (t, ä, i …) brauchen einen Radierer-Tipp pro Strich.
 
-- Mit „Linien mitexportieren“ bekommt jede Seite die Linien als Papier.
+- Mit „Papier“ in der Exportleiste bekommt jede Seite das gewählte Papier als Hintergrund.
 - Das .goodnotes-Format ist nicht offiziell dokumentiert, die App baut es nach dem offenen Projekt [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) (MIT) nach. Ein GoodNotes-Update kann den Import brechen – dann vorübergehend das PDF nehmen.
 - GoodNotes-Striche haben eine feste Breite, der Druck des Pencils geht dabei verloren.
 
@@ -143,12 +143,23 @@ Gut zu wissen:
 3. Erscheint stattdessen der Knopf **Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
 
 - Das PDF ist A4, mehrseitig und in Vektorqualität – die Schrift bleibt bei jedem Zoom scharf.
-- **Linien mitexportieren**: Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommen die Linien standardmäßig mit ins PDF.
-- **PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne „Linien mitexportieren“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
+- **Papier** (Haken in der Exportleiste): Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommt das gewählte Papier standardmäßig mit ins PDF.
+- **PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne Haken bei „Papier“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
 
-### Linien an GoodNotes anpassen
+### Papier wie in GoodNotes
 
-GoodNotes veröffentlicht die genauen Abstände seiner Linienvorlagen nicht. Voreingestellt sind ca. 8,8 mm (breit) und 6,2 mm (schmal). Wenn die Linien nicht passen, unter **Einstellungen** „Linienabstand“ und „Erste Linie von oben“ nachstellen.
+Die Vorlagen sind nach den Messungen des offenen Projekts [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) nachgebaut. GoodNotes legt sie in festen Abständen ab der linken oberen Ecke an (1 pt = 0,353 mm):
+
+| Vorlage | Abstand | Erste Linie (Oberkante) |
+|---|---|---|
+| Liniert breit | 25 pt = 8,82 mm | 49,5 pt = 17,5 mm |
+| Liniert schmal | 17,5 pt = 6,17 mm | 50 pt = 17,6 mm |
+| Kariert | 16 pt = 5,64 mm | 15,5 pt |
+| Gepunktet | 16 pt = 5,64 mm, Punkte mit 0,5 pt Radius | 16 pt |
+
+Linien sind 0,5 pt dick und grau (#d0d2d3), auf dunklem Papier (#333333) #58595b. Gelbes Papier ist #f8f7e9.
+
+Cornell-, Checklisten- und Planer-Papiere sind nicht dabei, weil für sie keine Maße vorliegen.
 
 ## 4. Backup – wichtig!
 
@@ -161,7 +172,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v21';` hochzählen (z. B. auf `'v22'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v22';` hochzählen (z. B. auf `'v23'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -189,6 +200,7 @@ js/blattui.js           Tab Blatt: Felder verschieben, aufziehen, bearbeiten, Ex
 js/pdfimport.js         PDF (pdf.js) und Fotos einlesen, 200 dpi
 js/layout.js            Satz: Paare, Varianten, Unordnung, Umbruch, Seiten, Linien
 js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
+js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
@@ -214,6 +226,7 @@ node tests/goodnotes.test.mjs
 node tests/textplan.test.mjs
 node tests/ki.test.mjs
 node tests/blatt.test.mjs
+node tests/paper.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):

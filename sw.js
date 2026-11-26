@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v21';
+const VERSION = 'v22';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',
@@ -9,6 +9,7 @@ const FILES = [
   'js/blatt.js',
   'js/blattui.js',
   'js/pdfimport.js',
+  'js/paper.js',
   'js/aufnahme.js',
   'js/export.js',
   'js/goodnotes.js',

@@ -6,26 +6,22 @@ import { equalize } from './profile.js';
 import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
+import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
 
-// Linienabstände der GoodNotes-Vorlagen sind nicht offiziell dokumentiert (Nutzerangaben),
-// deshalb lassen sie sich unten feinjustieren.
-export const PAPERS = {
-  'liniert-breit': { label: 'Liniert breit', ruled: true, lineSpacing: 8.8 },
-  'liniert-schmal': { label: 'Liniert schmal', ruled: true, lineSpacing: 6.2 },
-  'kariert': { label: 'Kariert 5 mm', ruled: true, grid: true, lineSpacing: 5 },
-  'blanko': { label: 'Blanko', ruled: false },
-};
+// Papier wie in GoodNotes (Maße in js/paper.js); Zeilen stehen genau auf Linien, Karos bzw. Punktreihen.
+export const PAPERS = PAPER_KINDS;
 
 export const INKS = {
   blau: { label: 'Blau', color: '#1f4fbf' },
   dunkelblau: { label: 'Dunkelblau', color: '#162a66' },
   schwarz: { label: 'Schwarz', color: '#1b1b1b' },
   rot: { label: 'Rot', color: '#c0281b' },
+  weiss: { label: 'Weiß (für dunkles Papier)', color: '#f2f2f2' },
 };
 
 const STANDARD = {
   paper: 'liniert-breit', ink: 'blau', connect: 70, chaos: 50, mistakes: 0,
-  weight: 100, xHeight: 3, lineHeight: 8.8, margin: 20, lineSpacing: 8.8, lineTop: 20,
+  weight: 100, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
@@ -40,8 +36,6 @@ const SLIDERS = [
     return lm.lines ? `${mm(lm.step)} (${lm.lines} ${lm.lines === 1 ? 'Linie' : 'Linien'})` : mm(v);
   } },
   { key: 'margin', label: 'Rand', min: 5, max: 40, step: 1, fmt: mm },
-  { key: 'lineSpacing', label: 'Linienabstand', min: 3, max: 15, step: 0.1, fmt: mm, ruledOnly: true },
-  { key: 'lineTop', label: 'Erste Linie von oben', min: 0, max: 60, step: 0.5, fmt: mm, ruledOnly: true },
 ];
 
 // Aktuelle Einstellungen (gespeicherte Werte, sonst Standard).
@@ -51,11 +45,12 @@ export function current() {
 
 // Einstellungen → Layout-Optionen.
 export function options(s = current()) {
-  const paper = PAPERS[s.paper] || PAPERS[STANDARD.paper];
+  const paper = PAPERS[s.paper] ? s.paper : STANDARD.paper;
   return {
     xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
     connect: s.connect / 100, chaos: s.chaos / 100, mistakes: s.mistakes / 100,
-    ruled: paper.ruled, grid: !!paper.grid, lineSpacing: +s.lineSpacing, lineTop: +s.lineTop,
+    paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
+    ruled: false, ...paperLines(paper), // Lage der Linien wie in GoodNotes
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,
   };
 }
@@ -72,11 +67,10 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   paperSel.value = current().paper;
   paperSel.addEventListener('change', () => {
     setSetting('paper', paperSel.value);
-    const p = PAPERS[paperSel.value];
-    if (p.ruled) { // Vorlage gewählt → passenden Linien- und Zeilenabstand übernehmen
-      setSetting('lineSpacing', p.lineSpacing);
-      setSetting('lineHeight', p.lineSpacing);
-    }
+    const p = paperLines(paperSel.value);
+    // Liniert: eine Zeile je Linie. Karos/Punkte liegen enger (5,64 mm): jede zweite Reihe, sonst stoßen die Zeilen aneinander.
+    const rows = PAPERS[paperSel.value].ruled ? 1 : 2;
+    if (p.ruled) setSetting('lineHeight', +(p.lineSpacing * rows).toFixed(2));
     syncControls();
     render();
   });
@@ -91,6 +85,18 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     b.title = ink.label;
     b.addEventListener('click', () => { setSetting('ink', key); syncControls(); render(); });
     inkEl.append(b);
+  }
+
+  const paperColorEl = $('paper-color');
+  for (const [key, c] of Object.entries(PAPER_COLORS)) {
+    const b = document.createElement('button');
+    b.className = 'swatch';
+    b.style.setProperty('--c', c.paper);
+    b.dataset.paperColor = key;
+    b.setAttribute('aria-label', 'Papier ' + c.label);
+    b.title = c.label;
+    b.addEventListener('click', () => { setSetting('paperColor', key); syncControls(); render(); });
+    paperColorEl.append(b);
   }
 
   const controlsEl = $('controls');
@@ -110,13 +116,12 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
   function syncControls() {
     const s = current();
-    const ruled = PAPERS[s.paper]?.ruled;
-    for (const { spec, label, range, out } of sliders) {
+    for (const { spec, range, out } of sliders) {
       range.value = s[spec.key];
       out.textContent = spec.fmt(s[spec.key], s);
-      label.hidden = spec.ruledOnly && !ruled;
     }
     for (const b of inkEl.children) b.setAttribute('aria-pressed', b.dataset.ink === s.ink);
+    for (const b of paperColorEl.children) b.setAttribute('aria-pressed', b.dataset.paperColor === options(s).paperColor);
   }
 
   // ---------- Vorschau ----------

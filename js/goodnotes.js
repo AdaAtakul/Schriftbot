@@ -4,6 +4,7 @@
 // github.com/Taylor-Nilsen/goodnotes-codec, docs/FORMAT.md und Document.new), dessen Dateien GoodNotes importiert.
 // shortcut: inoffizielles Format (Schema 24), ein GoodNotes-Update kann den Import brechen → dann PDF nehmen.
 import { simplify } from './export.js';
+import { PAPER_COLORS } from './paper.js';
 
 const SCHEMA = 24, DJB2_EMPTY = 5381;
 const UNITS_PER_MM = 72 / 25.4 * 11 / 6; // GoodNotes-Seiteneinheiten: PDF-Punkte × 11/6
@@ -206,7 +207,7 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
     const mx = 44 * size[0] / 834.24, my = 58.6667 * size[1] / 1078.825;
     events.push([s(1, tid), s(2, [s(1, did), s(2, tid), s(4, aid), v(5, 1), v(6, 1), d(7, 29.33333396911621), s(8, point(...size)),
       d(10, now), s(11, uuid()), s(12, [d(1, 29.33333396911621), s(2, stamp(1))]), s(13, lww(true, 1)), v(15, device), v(16, now),
-      s(17, lww(1, 1)), s(18, [s(1, [s(1, point(mx, my)), s(2, point(size[0] - 2 * mx, size[1] - 2 * my))]), f(2, 28.416668), f(3, 0.9166667), v(5, 1)]),
+      s(17, lww(1, 1)), s(18, [s(1, [s(1, point(mx, my)), s(2, point(size[0] - 2 * mx, size[1] - 2 * my))]), f(2, 28.416668), f(3, 0.9166667), v(5, PAPER_COLORS[o.paperColor]?.dark ? 2 : 1)]),
       s(19, [s(2, stamp(1))]), v(21, SCHEMA)])]);
     return tid;
   };
