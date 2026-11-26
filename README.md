@@ -127,6 +127,14 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Die Abstände zwischen deinen Wörtern werden automatisch als Leerzeichen übernommen.
 - Text dreimal schreiben = drei Varianten für jedes Zeichen. Einzelne Zeichen kannst du jederzeit unter **Einzeln** nachbessern.
 
+### Mitgelieferte Schriften A–F
+
+Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften zur Auswahl, von ordentlich bis unordentlich. Sie stammen aus der freien Sammlung [UJIpenchars2](https://doi.org/10.24432/C5FG8S) (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; Lizenz [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)): 60 Personen haben dort jedes Zeichen zweimal einzeln auf ein Tablet geschrieben.
+
+- Für DeineSchrift umgerechnet: Grundlinie und x-Höhe je Person bestimmt, Ä/Ö aus den Punkten des Ü ergänzt, „/ + =“ einfach nachgebildet; ß wird als „ss“ geschrieben. Werkzeug: `tools/uji-schriften.py`.
+- Es sind Einzelbuchstaben: Die Schrift wirkt wie ordentliche Druck-Handschrift, „Buchstaben verbinden“ hat hier keine Wirkung.
+- Eine Schrift wird erst beim Auswählen geladen (Internet nötig) und ist danach ein normales Profil.
+
 ### Text umwandeln (Bereich „Schreiben“ – hier startet die App)
 
 - Links Text eingeben oder einfügen (darunter Wörter, Seiten und fehlende Zeichen), rechts erscheint die A4-Vorschau.
@@ -149,7 +157,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
   - **Unruhige Zeilenränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
   - **Strichdicke**: dünner oder kräftiger (40–250 %), gilt für Vorschau und alle Exporte.
 - **Tintenfarbe**: feste Farben oder der Regenbogen-Knopf mit dem **Farbton**-Regler für jede beliebige Tintenfarbe.
-- **Schriftgröße, Zeilenabstand, Rand** nach Geschmack.
+- **Schriftgröße, Zeilenabstand, Rand** nach Geschmack. **Rand** verschiebt den ganzen Text, **Zeilen versetzen** rückt jede Zeile für sich etwas nach links oder rechts (Standard 20 %).
 - **Neu würfeln**: andere Mischung der Varianten.
 - **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **Angleichen rückgängig** geht, bis du die App schließt.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.

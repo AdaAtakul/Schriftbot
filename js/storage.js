@@ -44,10 +44,11 @@ export const glyphOwner = (p = activeProfile(), m = profilesMeta()) => (p.from &
 const dataKey = id => (id === 'p1' ? 'profile' : 'profile:' + id);
 const settingsKey = id => (id === 'p1' ? 'settings' : 'settings:' + id);
 
-export function createProfile({ name, from = null, demo = false }) {
+export function createProfile({ name, from = null, demo = false, builtin = null }) {
   const m = profilesMeta();
   const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  m.list.push(demo ? { id, name, from, demo: true } : { id, name, from });
+  // demo: mitgelieferte Schrift (Aufnahme zeigt dann einen Hinweis); builtin: Kennung der mitgelieferten Datei
+  m.list.push(demo ? { id, name, from, demo: true, ...(builtin ? { builtin } : {}) } : { id, name, from });
   saveMeta(m);
   return id;
 }

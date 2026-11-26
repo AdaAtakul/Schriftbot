@@ -5,6 +5,7 @@ import {
 } from './storage.js';
 import { PRESETS, DEFAULT_STYLE } from './stil.js';
 import { ask, info as showInfo, askText } from './dialog.js';
+import { BUILTIN, useBuiltin } from './schriften.js';
 
 export function initProfilwahl() {
   const $ = id => document.getElementById(id);
@@ -19,6 +20,14 @@ export function initProfilwahl() {
     const nameOf = id => m.list.find(p => p.id === id)?.name || '?';
 
     switcher.replaceChildren(...m.list.map(p => new Option(p.name, p.id, false, p.id === active.id)));
+    // Mitgelieferte Handschriften, die noch nicht als Profil angelegt sind
+    const fresh = BUILTIN.filter(b => !m.list.some(p => p.builtin === b.id));
+    if (fresh.length) {
+      const g = document.createElement('optgroup');
+      g.label = 'Mitgelieferte Schriften';
+      g.append(...fresh.map(b => new Option(b.name, '__builtin:' + b.id)));
+      switcher.append(g);
+    }
     switcher.add(new Option('Profile verwalten …', '__manage'));
 
     list.replaceChildren(...m.list.map(p => {
@@ -85,7 +94,17 @@ export function initProfilwahl() {
     switchTo(id);
   });
 
-  switcher.addEventListener('change', () => {
+  switcher.addEventListener('change', async () => {
+    if (switcher.value.startsWith('__builtin:')) {
+      const id = switcher.value.slice(10);
+      switcher.disabled = true;
+      try { await useBuiltin(id); location.reload(); } catch (err) {
+        switcher.disabled = false;
+        switcher.value = activeProfile().id;
+        showInfo(err.message);
+      }
+      return;
+    }
     if (switcher.value === '__manage') {
       switcher.value = activeProfile().id;
       document.querySelector('.tabs [data-view="profil"]').click();
