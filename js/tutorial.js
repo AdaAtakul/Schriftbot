@@ -82,7 +82,7 @@ export function showTutorial({ goTo, demo = false, onClose = () => {} }) {
     }
     if (s.link) {
       const a = document.createElement('a');
-      a.href = 'anleitung.html';
+      a.href = 'anleitung';
       a.textContent = 'Ausführliche Anleitung und häufige Fragen';
       box.append(a);
     }

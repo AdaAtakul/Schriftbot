@@ -14,8 +14,8 @@ Wichtige Fakten:
 ## Seiten
 
 - [Schriftbot (die App)](https://deineschrift.de/): Web-App zum Aufnehmen der Handschrift und Schreiben von Text
-- [Anleitung und häufige Fragen](https://deineschrift.de/anleitung.html): Schritt-für-Schritt-Anleitung, Vergleich mit Handschrift-Schriftarten, FAQ
-- [Datenschutz und Lizenzen](https://deineschrift.de/datenschutz.html): welche Daten anfallen, verwendete Open-Source-Bibliotheken
+- [Anleitung und häufige Fragen](https://deineschrift.de/anleitung): Schritt-für-Schritt-Anleitung, Vergleich mit Handschrift-Schriftarten, FAQ
+- [Datenschutz und Lizenzen](https://deineschrift.de/datenschutz): welche Daten anfallen, verwendete Open-Source-Bibliotheken
 
 ## Optional
 

@@ -2,7 +2,7 @@
 
 **Getippten Text in deine eigene Handschrift verwandeln.** Schriftbot nimmt deine Handschrift einmal mit dem Apple Pencil (oder Finger/Maus) auf und schreibt danach jeden Text darin – als eigene Seiten oder direkt in ein Formular. Das Ergebnis gibst du als GoodNotes-Datei, PDF oder PNG weiter.
 
-**Ausprobieren:** https://deineschrift.de/ · [Anleitung & häufige Fragen](https://deineschrift.de/anleitung.html)
+**Ausprobieren:** https://deineschrift.de/ · [Anleitung & häufige Fragen](https://deineschrift.de/anleitung)
 
 - Kostenlos, ohne Anmeldung, ohne Cookies und Tracking
 - Optimiert für Safari auf dem iPad, läuft in jedem aktuellen Browser (Handy unten mit Tab-Leiste, heller und dunkler Modus)
@@ -58,17 +58,17 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Hosting (Cloudflare Pages)**: Siehe Abschnitt 1c. Die Domain `deineschrift.de` bleibt bei GoDaddy registriert (Cloudflare nimmt keine .de-Domains zur Übertragung an), nur die DNS-Verwaltung liegt bei Cloudflare.
 - **Umzug**: Unter der neuen Adresse ist der Browser-Speicher leer. Vorher **Alle Profile sichern**, danach **Importieren**. Zieht die Seite erneut um, die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `CNAME` und `ios/` ersetzen.
 
-## 1c. Auf Cloudflare Pages veröffentlichen (statt GitHub Pages)
+## 1c. Auf Cloudflare veröffentlichen (statt GitHub Pages)
 
-Die Seite besteht nur aus fertigen Dateien, jeder Dateihoster reicht. Mit Cloudflare Pages ist das kostenlos:
+Die Seite besteht nur aus fertigen Dateien, jeder Dateihoster reicht. Bei Cloudflare ist das kostenlos (hier als Worker mit statischen Dateien, `deineschrift.ada-atakul1.workers.dev`):
 
 1. **Konto** auf [cloudflare.com](https://dash.cloudflare.com/sign-up) anlegen, **Domain hinzufügen** → `deineschrift.de` → Free-Plan. Cloudflare nennt zwei Nameserver.
-2. Bei GoDaddy (Domain → DNS → Nameserver → „Eigene Nameserver verwenden“) diese beiden eintragen. Die Domain bleibt dort registriert, nur die DNS-Verwaltung zieht um.
-3. In Cloudflare **Workers & Pages → Pages → Upload assets**: Projektname z. B. `schriftbot`, die Datei `schriftbot-site.zip` hochladen (Ordnerinhalt: `index.html`, `css/`, `js/`, `vendor/`, `icons/` …), **Deploy**.
-4. Im Projekt **Custom domains** → `deineschrift.de` (und `www.deineschrift.de`) hinzufügen. Die DNS-Einträge legt Cloudflare selbst an, das Zertifikat kommt automatisch.
-5. Bei einem Update: neues Zip erzeugen und im Projekt **Create deployment** hochladen. `VERSION` in `sw.js` vorher hochzählen.
+2. Bei GoDaddy (Domain → DNS → Nameserver → „Eigene Nameserver verwenden“) diese beiden eintragen. Die Domain bleibt dort registriert (Cloudflare nimmt keine .de-Domains zur Übertragung an), nur die DNS-Verwaltung zieht um.
+3. In Cloudflare unter **Workers & Pages** ein Projekt anlegen und `schriftbot-site.zip` hochladen (Inhalt: `index.html`, `css/`, `js/`, `vendor/`, `icons/`, `_headers` …).
+4. Beim Worker unter **Settings → Domains & Routes → Add → Custom domain** `deineschrift.de` und `www.deineschrift.de` eintragen. Bestehende alte DNS-Einträge (GitHub) vorher in der Cloudflare-DNS-Liste löschen.
+5. **Update:** neues Zip erzeugen und hochladen (**Deployments**). `VERSION` in `sw.js` vorher hochzählen.
 
-Nicht ins Zip gehören `tests/`, `tools/`, `ios/`, `.github/`, `README.md`. Ein Projekt, das per Direct Upload angelegt wurde, lässt sich später nicht auf Git umstellen.
+Cloudflare entfernt `.html` aus Adressen: `anleitung.html` wird zu `/anleitung`. Die Seiten verweisen deshalb ohne Endung. Die Datei `_headers` (Sicherheits-Header) gehört ins Zip; `tests/`, `tools/`, `ios/`, `.github/` und `README.md` nicht.
 
 ## 2. Auf dem iPad installieren
 
@@ -246,7 +246,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v29';` hochzählen (z. B. auf `'v30'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v30';` hochzählen (z. B. auf `'v30'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ### claude.ai-Version aktualisieren

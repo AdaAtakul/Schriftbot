@@ -1,5 +1,5 @@
 // Bei jeder Änderung an den Dateien VERSION hochzählen, sonst sieht das iPad die alte Version.
-const VERSION = 'v29';
+const VERSION = 'v30';
 const CACHE = 'handschrift-' + VERSION;
 const FILES = [
   './',
@@ -59,7 +59,7 @@ self.addEventListener('activate', e => {
 
 // Erst bei Bedarf geladen und dann für offline gemerkt: pdf.js (3 MB, nur fürs Blatt) und die Seiten
 // Anleitung/Datenschutz. Die Demo-Schrift kommt immer frisch, wenn online (sie wird nur beim ersten Start gebraucht).
-const LAZY = /\/(vendor\/pdfjs\/|anleitung\.html$|datenschutz\.html$|css\/seite\.css$|icons\/)/;
+const LAZY = /\/(vendor\/pdfjs\/|anleitung(\.html)?$|datenschutz(\.html)?$|css\/seite\.css$|icons\/)/;
 const FRESH = /\/demo\//;
 
 // Cache zuerst, damit die App offline sofort startet.
