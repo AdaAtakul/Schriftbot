@@ -214,8 +214,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
     const color = (INKS[s.ink] || INKS.blau).color;
     const date = new Date().toISOString().slice(0, 10);
-    const labels = exportButtons.map(b => b.textContent);
-    exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ Wird erstellt …'; });
+    const labels = exportButtons.map(b => b.innerHTML);
+    exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
     shareAgain.hidden = true;
     try {
       let files;
@@ -237,7 +237,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     } catch (err) {
       alert('Export fehlgeschlagen: ' + err.message);
     } finally {
-      exportButtons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+      exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
   }
   $('export-goodnotes').addEventListener('click', () => doExport('goodnotes'));

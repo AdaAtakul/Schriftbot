@@ -41,3 +41,8 @@ export function setSetting(key, value) {
   s[key] = value;
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch {}
 }
+
+// Beliebige Werte (z. B. das Arbeitsblatt mit seinen Bildern) in IndexedDB.
+export const loadKey = key => tx('readonly', s => s.get(key));
+export const saveKey = (key, value) => tx('readwrite', s => s.put(value, key));
+export const deleteKey = key => tx('readwrite', s => s.delete(key));
