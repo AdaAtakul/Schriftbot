@@ -43,7 +43,7 @@
 	<!-- Nur diese Domain darf die Handschrift-App laden; dafür gibt WebKit ihr Service Worker (offline) und die Brücke zur App -->
 	<key>WKAppBoundDomains</key>
 	<array>
-		<string>bambuseleitung.github.io</string>
+		<string>deineschrift.de</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Damit du in Claude ein Foto einer Aufgabe anhängen kannst.</string>

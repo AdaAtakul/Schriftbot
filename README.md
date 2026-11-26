@@ -2,7 +2,7 @@
 
 **Getippten Text in deine eigene Handschrift verwandeln.** Schriftbot nimmt deine Handschrift einmal mit dem Apple Pencil (oder Finger/Maus) auf und schreibt danach jeden Text darin – als eigene Seiten oder direkt in ein Formular. Das Ergebnis gibst du als GoodNotes-Datei, PDF oder PNG weiter.
 
-**Ausprobieren:** https://bambuseleitung.github.io/Schriftbot/ · [Anleitung & häufige Fragen](https://bambuseleitung.github.io/Schriftbot/anleitung.html)
+**Ausprobieren:** https://deineschrift.de/ · [Anleitung & häufige Fragen](https://deineschrift.de/anleitung.html)
 
 - Kostenlos, ohne Anmeldung, ohne Cookies und Tracking
 - Optimiert für Safari auf dem iPad, läuft in jedem aktuellen Browser (Handy unten mit Tab-Leiste, heller und dunkler Modus)
@@ -27,6 +27,8 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
    manifest.webmanifest
    sw.js
    sitemap.xml
+   robots.txt
+   CNAME
    llms.txt
    LICENSE
    README.md
@@ -53,8 +55,9 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
   Neue Besucher bekommen dann beim ersten Öffnen ein Profil „Demo-Schrift“ und starten im Tab „Schreiben“ mit einem Beispieltext. Im Tab „Aufnahme“ steht stattdessen „Eigene Schrift aufnehmen“. Fehlt die Datei, startet Schriftbot wie bisher in der Aufnahme.
 - **Vorschaubild**: `icons/og.png` (1200 × 630) erscheint, wenn jemand den Link teilt. Sobald die Demo-Schrift da ist, lohnt sich ein echtes Bild mit Handschrift.
 - **Datenschutz**: `datenschutz.html` nennt als Kontakt GitHub Issues. Je nach Lage kann eine Anschrift nötig sein – im Zweifel rechtlich prüfen lassen.
-- **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. Eine `robots.txt` wirkt bei GitHub-Projektseiten nicht (sie müsste unter `bambuseleitung.github.io/robots.txt` liegen); Suchmaschinen dürfen ohne sie alles lesen.
-- **Eigene Adresse**: Zieht die Seite um (eigene Domain, anderer Repo-Name), die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml` und `llms.txt` ersetzen.
+- **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. `robots.txt` liegt im Hauptordner und wirkt, weil die Seite auf der eigenen Domain im Wurzelverzeichnis läuft.
+- **Eigene Domain (`deineschrift.de`)**: Die Datei `CNAME` im Hauptordner muss erhalten bleiben. Bei der Domain (DNS) vier A-Einträge `185.199.108.153`, `.109.153`, `.110.153`, `.111.153` für `@`, optional vier AAAA-Einträge `2606:50c0:8000::153` bis `8003::153`, und ein CNAME `www` auf `bambuseleitung.github.io`. Dann im Repo **Settings → Pages → Custom domain** `deineschrift.de` eintragen und **Enforce HTTPS** anhaken. **Reihenfolge:** Erst DNS und GitHub-Einstellung, dann mergen – sonst ist die Seite kurz nicht erreichbar.
+- **Umzug**: Unter der neuen Adresse ist der Browser-Speicher leer. Vorher **Alle Profile sichern**, danach **Importieren**. Zieht die Seite erneut um, die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `CNAME` und `ios/` ersetzen.
 
 ## 2. Auf dem iPad installieren
 

@@ -12,9 +12,9 @@ enum Tab: Hashable {
 /// Kopierst du in Claude eine Antwort (Claudes Kopieren-Knopf), bietet die App an, sie in die Handschrift zu übernehmen.
 @MainActor
 final class Browser: NSObject, ObservableObject, WKNavigationDelegate, WKUIDelegate {
-    static let appURL = URL(string: "https://bambuseleitung.github.io/Schriftbot/")!
+    static let appURL = URL(string: "https://deineschrift.de/")!
     static let claudeURL = URL(string: "https://claude.ai/new")!
-    static let appHost = "bambuseleitung.github.io"
+    static let appHost = "deineschrift.de"
     private static let background = UIColor(red: 0.055, green: 0.059, blue: 0.075, alpha: 1)
 
     @Published var tab: Tab = .handwriting
