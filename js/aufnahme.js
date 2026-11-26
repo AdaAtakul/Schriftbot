@@ -22,7 +22,7 @@ const GUIDES = [
 const ACTIONS_H = 60; // Platz für die Knöpfe unter jedem Kästchen (px)
 const GAP = 16;
 
-export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. Finger und Maus kannst du im Tab „Profil“ unter „Eingabe & Speicher“ erlauben.';
+export const PEN_ONLY = 'Bitte mit dem Apple Pencil schreiben. Finger und Maus kannst du unter „Profil“ → „Eingabe & Speicher“ erlauben.';
 
 export function initAufnahme(profile, onScaled = () => {}) {
   const $ = id => document.getElementById(id);

@@ -1,11 +1,11 @@
 /* Textseiten (Anleitung, Datenschutz): gleiche Farben wie die App, gut lesbar. */
 :root {
-  --bg: #0e0f13; --panel: #15161c; --surface: #1d1f27; --border: #2b2e3a;
-  --ink: #eceef5; --muted: #a2a7b8; --accent: #8b96ff; --accent-grad: linear-gradient(135deg, #6f7dff 0%, #9a74ff 100%);
-  color-scheme: dark;
+  --bg: #f2f2f7; --panel: #ffffff; --surface: #ffffff; --border: rgba(60, 60, 67, 0.18);
+  --ink: #1c1c1e; --muted: #6c6c70; --accent: #2f5bd3; --accent-fill: #2f5bd3; --accent-grad: var(--accent-fill);
+  color-scheme: light;
 }
-@media (prefers-color-scheme: light) {
-  :root { --bg: #f3f4f8; --panel: #ffffff; --surface: #ffffff; --border: #dde0e9; --ink: #161821; --muted: #4f5568; --accent: #4350d6; color-scheme: light; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #000000; --panel: #1c1c1e; --surface: #1c1c1e; --border: rgba(84, 84, 88, 0.6); --ink: #f5f5f7; --muted: #98989f; --accent: #7b9bff; --accent-fill: #3a5bd9; color-scheme: dark; }
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }

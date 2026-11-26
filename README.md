@@ -1,6 +1,6 @@
-# Schriftbot
+# DeineSchrift
 
-**Getippten Text in deine eigene Handschrift verwandeln.** Schriftbot nimmt deine Handschrift einmal mit dem Apple Pencil (oder Finger/Maus) auf und schreibt danach jeden Text darin – als eigene Seiten oder direkt in ein Formular. Das Ergebnis gibst du als GoodNotes-Datei, PDF oder PNG weiter.
+**Getippten Text in deine eigene Handschrift verwandeln.** DeineSchrift nimmt deine Handschrift einmal mit dem Apple Pencil (oder Finger/Maus) auf und schreibt danach jeden Text darin – als eigene Seiten oder direkt in ein Formular. Das Ergebnis gibst du als GoodNotes-Datei, PDF oder PNG weiter.
 
 **Ausprobieren:** https://deineschrift.de/ · [Anleitung & häufige Fragen](https://deineschrift.de/anleitung)
 
@@ -46,12 +46,12 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 
 ## 1b. Vor dem Veröffentlichen
 
-- **Demo-Schrift** (empfohlen): Damit Besucher Schriftbot sofort ausprobieren können, legst du eine Beispiel-Schrift bei.
-  1. In Schriftbot ein Profil mit der Demo-Schrift aufnehmen (alle Zeichen, auch „ “ und Satzzeichen) und die Stil-Vorlage wählen, die Besucher zuerst sehen sollen.
+- **Beispielschrift** (empfohlen): Damit Besucher DeineSchrift sofort ausprobieren können, legst du eine Beispiel-Schrift bei.
+  1. In DeineSchrift ein Profil mit der Beispielschrift aufnehmen (alle Zeichen, auch „ “ und Satzzeichen) und die Stil-Vorlage wählen, die Besucher zuerst sehen sollen.
   2. **Profil → Profil teilen** und die Datei sichern.
   3. Sie im Repo als **`demo/demo-schrift.json`** hochladen und `VERSION` in `sw.js` hochzählen.
 
-  Neue Besucher bekommen dann beim ersten Öffnen ein Profil „Demo-Schrift“ und starten im Tab „Schreiben“ mit einem Beispieltext. Im Tab „Aufnahme“ steht stattdessen „Eigene Schrift aufnehmen“. Fehlt die Datei, startet Schriftbot wie bisher in der Aufnahme.
+  Neue Besucher bekommen dann beim ersten Öffnen ein Profil „Beispielschrift“ und starten im Tab „Schreiben“ mit einem Beispieltext. Im Tab „Aufnahme“ steht stattdessen „Eigene Schrift aufnehmen“. Fehlt die Datei, startet Schriftbot wie bisher in der Aufnahme.
 - **Vorschaubild**: `icons/og.png` (1200 × 630) erscheint, wenn jemand den Link teilt. Sobald die Demo-Schrift da ist, lohnt sich ein echtes Bild mit Handschrift.
 - **Datenschutz**: `datenschutz.html` nennt als Kontakt GitHub Issues. Je nach Lage kann eine Anschrift nötig sein – im Zweifel rechtlich prüfen lassen.
 - **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. `robots.txt` liegt im Hauptordner und wirkt, weil die Seite auf der eigenen Domain im Wurzelverzeichnis läuft.
@@ -101,7 +101,7 @@ Gut zu wissen:
 
 ## 3. So benutzt du die App
 
-### Handschrift aufnehmen (Tab „Aufnahme“)
+### Handschrift aufnehmen (Bereich „Aufnehmen“)
 
 - Links wählst du das Zeichen, rechts schreibst du es mit dem Pencil in die drei Kästchen (= drei Varianten, damit die Schrift später lebendig wirkt).
 - **Grundlinie** (dunkle Linie): Hier steht die Schrift. **x-Höhe** (blau gestrichelt): So hoch sind Kleinbuchstaben wie a, n, o. **Oberlänge / Unterlänge**: für b, d, h, k bzw. g, j, p, y.
@@ -127,9 +127,11 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Die Abstände zwischen deinen Wörtern werden automatisch als Leerzeichen übernommen.
 - Text dreimal schreiben = drei Varianten für jedes Zeichen. Einzelne Zeichen kannst du jederzeit unter **Einzeln** nachbessern.
 
-### Text umwandeln (Tab „Schreiben“)
+### Text umwandeln (Bereich „Schreiben“ – hier startet die App)
 
 - Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
+- Beim allerersten Öffnen steht eine Seite Beispieltext im Feld, damit die Vorschau sofort etwas zeigt. Gibt es noch keine Schrift, erklärt ein Hinweis über der Vorschau den nächsten Schritt.
+- **Papier** wählst du über Vorschaubilder (in der gewählten Papierfarbe). **Im Export** legt fest, ob Linien und Papierfarbe mitkommen oder **nur die Schrift** (PNG mit durchsichtigem Hintergrund, PDF ohne Linien); die Vorschau zeigt dann ein Schachbrettmuster.
 - **Roter Papierkorb** oben rechts im Textfeld: löscht den ganzen Text nach einer Rückfrage. Direkt danach holt **Gelöschten Text wiederherstellen** ihn zurück (bis du neu tippst).
 - **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
 - **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Unter **Feineinstellungen der Vorlage** lässt sich jeder Wert ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
@@ -167,7 +169,7 @@ Gut zu wissen über die claude.ai-Version:
 - Exporte speichert sie über claude.ai. Die GoodNotes-Datei heißt dort **…goodnotes.zip**: in der Dateien-App „.zip“ aus dem Namen löschen, dann in GoodNotes öffnen.
 - Sie ist privat: nur du kannst sie öffnen, bis du sie auf claude.ai über „Teilen“ freigibst.
 
-### Formular ausfüllen (Tab „Blatt“)
+### Formular ausfüllen (Bereich „Ausfüllen“)
 
 Du hast ein Formular oder Blatt als PDF, in das du deine Einträge blau hineingetippt hast? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
 
@@ -246,7 +248,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v30';` hochzählen (z. B. auf `'v30'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v31';` hochzählen (z. B. auf `'v31'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ### claude.ai-Version aktualisieren

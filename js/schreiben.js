@@ -1,8 +1,9 @@
 // Modul 2: Text → Handschrift mit Live-Vorschau.
 import { layout, lineMetrics, DEFAULTS } from './layout.js';
 import { drawPage, drawPaper } from './render.js';
+import { paperShapes } from './paper.js';
 import { getSettings, setSetting, saveProfile } from './storage.js';
-import { equalize } from './profile.js';
+import { equalize, progress } from './profile.js';
 import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
@@ -79,18 +80,55 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   let seed = getSettings().seed || 1;
 
   // ---------- Bedienelemente ----------
-  const paperSel = $('paper');
-  for (const [key, p] of Object.entries(PAPERS)) paperSel.add(new Option(p.label, key));
-  paperSel.value = current().paper;
-  paperSel.addEventListener('change', () => {
-    setSetting('paper', paperSel.value);
-    const p = paperLines(paperSel.value);
-    // Liniert: eine Zeile je Linie. Karos/Punkte liegen enger (5,64 mm): jede zweite Reihe, sonst stoßen die Zeilen aneinander.
-    const rows = PAPERS[paperSel.value].ruled ? 1 : 2;
-    if (p.ruled) setSetting('lineHeight', +(p.lineSpacing * rows).toFixed(2));
-    syncControls();
-    render();
-  });
+  // Papier als Vorschaubilder (wie die Vorlagen in GoodNotes), in der gewählten Papierfarbe
+  const paperEl = $('paper');
+  const THUMB_W = 64, THUMB_H = Math.round(THUMB_W * DEFAULTS.pageH / DEFAULTS.pageW);
+  for (const [key, p] of Object.entries(PAPERS)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'paper-opt';
+    b.dataset.paper = key;
+    b.setAttribute('role', 'radio');
+    const c = document.createElement('canvas');
+    c.width = THUMB_W * 2; c.height = THUMB_H * 2;
+    c.style.width = THUMB_W + 'px'; c.style.height = THUMB_H + 'px';
+    c.setAttribute('aria-hidden', 'true');
+    const l = document.createElement('span');
+    l.textContent = p.label;
+    b.append(c, l);
+    b.addEventListener('click', () => {
+      setSetting('paper', key);
+      const pl = paperLines(key);
+      // Liniert: eine Zeile je Linie. Karos/Punkte liegen enger (5,64 mm): jede zweite Reihe, sonst stoßen die Zeilen aneinander.
+      const rows = PAPERS[key].ruled ? 1 : 2;
+      if (pl.ruled) setSetting('lineHeight', +(pl.lineSpacing * rows).toFixed(2));
+      syncControls();
+      render();
+    });
+    paperEl.append(b);
+  }
+  let thumbsFor = '';
+  function drawThumbs(color) {
+    if (thumbsFor === color) return;
+    thumbsFor = color;
+    for (const b of paperEl.children) {
+      const c = b.querySelector('canvas'), ctx = c.getContext('2d');
+      ctx.setTransform(c.width / DEFAULTS.pageW, 0, 0, c.width / DEFAULTS.pageW, 0, 0);
+      // Linien in der Vorschau etwas kräftiger, sonst verschwinden sie bei dieser Größe
+      const p = paperShapes(b.dataset.paper, color, DEFAULTS.pageW, DEFAULTS.pageH);
+      ctx.fillStyle = p.fill; ctx.fillRect(0, 0, DEFAULTS.pageW, DEFAULTS.pageH);
+      ctx.fillStyle = p.color;
+      for (const [x, y, w, h] of p.rects) ctx.fillRect(x, y, w, Math.max(h, 1.1));
+      ctx.beginPath();
+      for (const [x, y, r] of p.dots) { ctx.moveTo(x + 1.3, y); ctx.arc(x, y, Math.max(r, 1.3), 0, 2 * Math.PI); }
+      ctx.fill();
+    }
+  }
+
+  // Export-Hintergrund: mit Papier oder nur die Schrift (PNG durchsichtig, PDF ohne Linien und Farbe)
+  const bgEl = $('export-bg');
+  const exportPaper = () => getSettings().exportPaper ?? true;
+  for (const b of bgEl.children) b.addEventListener('click', () => { setSetting('exportPaper', b.dataset.bg === 'paper'); syncControls(); render(); });
 
   // Stil-Vorlage
   const styleSel = $('style');
@@ -170,6 +208,13 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     $('style-reset').hidden = !modified;
     $('style-note').textContent = modified ? 'Angepasst – deine Werte für diese Vorlage bleiben gespeichert.' : '';
     for (const b of paperColorEl.children) b.setAttribute('aria-pressed', b.dataset.paperColor === options(s).paperColor);
+    for (const b of paperEl.children) b.setAttribute('aria-checked', b.dataset.paper === options(s).paper);
+    drawThumbs(options(s).paperColor);
+    const withPaper = exportPaper();
+    for (const b of bgEl.children) b.setAttribute('aria-checked', (b.dataset.bg === 'paper') === withPaper);
+    $('export-bg-hint').textContent = withPaper
+      ? 'PDF, Bild und GoodNotes mit Linien und Papierfarbe.'
+      : 'Nur die Schrift: Bild (PNG) mit durchsichtigem Hintergrund, PDF ohne Linien.';
   }
 
   // ---------- Vorschau ----------
@@ -193,19 +238,23 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       canvas.width = Math.round(cssW * dpr);
       canvas.height = Math.round(cssW * dpr * o.pageH / o.pageW);
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const withPaper = exportPaper();
+      canvas.classList.toggle('transparent', !withPaper);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr * pxPerMm, 0, 0, dpr * pxPerMm, 0, 0);
-      drawPaper(ctx, o);
+      if (withPaper) drawPaper(ctx, o);
       drawPage(ctx, page, color, o.penSize);
     });
 
     const notes = [`${result.pages.length} ${result.pages.length === 1 ? 'Seite' : 'Seiten'}`];
     const shown = result.missing.filter(ch => ch !== ' ');
-    if (shown.length) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
-    if (isDemo()) notes.push('Demo-Schrift – deine eigene nimmst du im Tab „Aufnahme“ auf');
+    const noGlyphs = progress(profile).done === 0; // dann erklärt der Hinweis über der Vorschau alles
+    if (shown.length && !noGlyphs) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
+    if (isDemo()) notes.push('Beispielschrift – deine eigene nimmst du unter „Aufnehmen“ auf');
     statusEl.textContent = notes.join(' · ');
-    statusEl.classList.toggle('warn', shown.length > 0);
+    $('write-empty').hidden = progress(profile).done > 0;
+    statusEl.classList.toggle('warn', shown.length > 0 && !noGlyphs);
   }
 
   let timer;
@@ -251,7 +300,6 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
     setSetting('style', 'normal');
     setSetting('styles', {});
-    paperSel.value = STANDARD.paper;
     syncControls();
     render();
   });
@@ -282,10 +330,9 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   });
 
   // ---------- Export ----------
-  const paperBox = $('export-paper'), shareAgain = $('share-again');
+  const shareAgain = $('share-again');
   const exportButtons = [$('export-goodnotes'), $('export-pdf'), $('export-png')];
-  paperBox.checked = getSettings().exportPaper ?? true;
-  paperBox.addEventListener('change', () => setSetting('exportPaper', paperBox.checked));
+  $('write-empty-record').addEventListener('click', () => document.getElementById('tab-aufnahme').click());
   let pending = null;
 
   async function doExport(kind) {
@@ -293,7 +340,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
     const miss = result.missing.filter(ch => ch !== ' ');
-    if (miss.length && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${miss.join(' ')}\n\nSie erscheinen im Export als rote Kästchen. Nimm sie am besten erst im Tab „Aufnahme“ auf.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren', cancel: 'Abbrechen' })) return;
+    if (miss.length && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${miss.join(' ')}\n\nSie erscheinen im Export als rote Kästchen. Nimm sie am besten erst unter „Aufnehmen“ auf.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren', cancel: 'Abbrechen' })) return;
 
     const color = inkColor(s);
     const date = new Date().toISOString().slice(0, 10);
@@ -304,14 +351,14 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       let files;
       if (kind === 'goodnotes') {
         // Linien (falls gewählt) als Papier, die Schrift als einzelne radierbare Striche darüber
-        const paper = new Uint8Array(await buildPdf({ pages: [{ items: [] }] }, o, color, paperBox.checked).arrayBuffer());
+        const paper = new Uint8Array(await buildPdf({ pages: [{ items: [] }] }, o, color, exportPaper()).arrayBuffer());
         files = [new File([buildGoodnotes(result, o, color, paper, `Handschrift ${date}`)], `handschrift-${date}.goodnotes`, { type: 'application/octet-stream' })];
       } else if (kind === 'pdf') {
-        files = [new File([buildPdf(result, o, color, paperBox.checked)], `handschrift-${date}.pdf`, { type: 'application/pdf' })];
+        files = [new File([buildPdf(result, o, color, exportPaper())], `handschrift-${date}.pdf`, { type: 'application/pdf' })];
       } else {
         files = [];
         for (const [i, page] of result.pages.entries()) {
-          const blob = await buildPng(page, o, color, paperBox.checked);
+          const blob = await buildPng(page, o, color, exportPaper());
           files.push(new File([blob], `handschrift-${date}-seite-${i + 1}.png`, { type: 'image/png' }));
         }
       }

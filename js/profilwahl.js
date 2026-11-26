@@ -81,7 +81,7 @@ export function initProfilwahl() {
     const keys = ['paper', 'paperColor', 'ink', 'inkHue', 'lineHeight', 'margin', ...(fromSel.value ? ['xHeight'] : [])];
     for (const k of keys) if (k in cur) keep[k] = cur[k];
     seedSettings(id, { ...keep, style: styleSel.value, styles: {} });
-    if (!fromSel.value) await showInfo(`Profil „${name}“ ist angelegt. Nimm jetzt im Tab „Aufnahme“ die neue Schrift auf.`);
+    if (!fromSel.value) await showInfo(`Profil „${name}“ ist angelegt. Nimm jetzt unter „Aufnehmen“ die neue Schrift auf.`);
     switchTo(id);
   });
 

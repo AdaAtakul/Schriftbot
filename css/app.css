@@ -1,59 +1,73 @@
-/* Studio: dunkle Oberfläche, helle Seiten in der Mitte, kräftiger Akzent. */
+/* DeineSchrift – Papier & Tinte. Ruhige Werkzeug-Oberfläche nach Apples Human Interface Guidelines:
+   Systemschrift, Systemgrau, ein Akzent (Tintenblau), durchscheinende Leisten, Tippflächen ab 44 pt. */
 :root {
-  --bg: #0e0f13;
-  --panel: #15161c;
-  --surface: #1d1f27;
-  --surface-2: #262833;
-  --surface-3: #30323f;
-  --field: #101117;
-  --border: #2b2e3a;
-  --border-strong: #3a3d4c;
-  --ink: #eceef5;
-  --muted: #959aad;
-  --accent: #6f7dff;
-  --accent-2: #a37bff;
-  --accent-grad: linear-gradient(135deg, #6f7dff 0%, #9a74ff 100%);
-  --accent-soft: rgba(111, 125, 255, 0.16);
-  --ok: #4ade80;
-  --warn: #ffb547;
-  --danger: #ff6b6b;
+  --bg: #f2f2f7;                         /* gruppierter Hintergrund */
+  --desk: #e9e8e3;                       /* Schreibtisch hinter dem Papier */
+  --panel: #ffffff;
+  --surface: #ffffff;
+  --surface-2: rgba(118, 118, 128, 0.12); /* Füllung für graue Knöpfe */
+  --surface-3: rgba(118, 118, 128, 0.2);
+  --field: #ffffff;
+  --border: rgba(60, 60, 67, 0.13);
+  --border-strong: rgba(60, 60, 67, 0.29);
+  --ink: #1c1c1e;
+  --muted: #6c6c70;
+  --accent: #2f5bd3;                     /* Tintenblau: Text, Symbole */
+  --accent-fill: #2f5bd3;                /* gefüllte Knöpfe mit weißer Schrift */
+  --accent-2: var(--accent);
+  --accent-grad: var(--accent-fill);
+  --accent-soft: rgba(47, 91, 211, 0.12);
+  --on-accent: #ffffff;
+  --ok: #1f7a35;
+  --warn: #b25000;
+  --danger: #d70015;
   --radius: 14px;
-  --touch: 48px; /* Mindestgröße für Touch-Ziele */
-  --strong: #fff;                       /* Text auf gewählten Knöpfen */
-  --glass: rgba(14, 15, 19, 0.7);       /* Kopfzeile */
-  --glass-2: rgba(29, 31, 39, 0.82);    /* schwebende Leisten */
-  --glass-3: rgba(29, 31, 39, 0.5);
-  --scrim: rgba(5, 6, 10, 0.6);
-  --placeholder: #6b7084;
-  --danger-text: #ffb3b3;
-  color-scheme: dark;
+  --touch: 44px;
+  --strong: #1c1c1e;
+  --glass: rgba(249, 249, 251, 0.78);
+  --glass-2: rgba(255, 255, 255, 0.74);
+  --glass-3: rgba(255, 255, 255, 0.6);
+  --scrim: rgba(0, 0, 0, 0.28);
+  --placeholder: #8e8e93;
+  --danger-text: #b3001b;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-2: 0 10px 34px rgba(0, 0, 0, 0.14), 0 1px 3px rgba(0, 0, 0, 0.06);
+  --paper-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 12px 32px rgba(0, 0, 0, 0.1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);  /* wie Apples Federkurven */
+  --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);  /* leichtes Überschwingen */
+  color-scheme: light;
 }
-/* Heller Modus nach Systemeinstellung */
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #f3f4f8;
-    --panel: #ffffff;
-    --surface: #ffffff;
-    --surface-2: #eef0f6;
-    --surface-3: #e2e5ee;
-    --field: #ffffff;
-    --border: #dde0e9;
-    --border-strong: #c6cad8;
-    --ink: #161821;
-    --muted: #555b6f;
-    --accent: #4f5be8;
-    --accent-soft: rgba(79, 91, 232, 0.12);
-    --ok: #15803d;
-    --warn: #a14a05;
-    --danger: #cf2a2a;
-    --strong: #161821;
-    --glass: rgba(243, 244, 248, 0.82);
-    --glass-2: rgba(255, 255, 255, 0.9);
-    --glass-3: rgba(255, 255, 255, 0.7);
-    --scrim: rgba(20, 22, 30, 0.35);
-    --placeholder: #80869a;
-    --danger-text: #b42318;
-    color-scheme: light;
+    --bg: #000000;
+    --desk: #121214;
+    --panel: #1c1c1e;
+    --surface: #1c1c1e;
+    --surface-2: rgba(118, 118, 128, 0.24);
+    --surface-3: rgba(118, 118, 128, 0.36);
+    --field: #2c2c2e;
+    --border: rgba(84, 84, 88, 0.4);
+    --border-strong: rgba(84, 84, 88, 0.75);
+    --ink: #f5f5f7;
+    --muted: #98989f;
+    --accent: #7b9bff;
+    --accent-fill: #3a5bd9;
+    --accent-soft: rgba(123, 155, 255, 0.18);
+    --ok: #30d158;
+    --warn: #ff9f0a;
+    --danger: #ff453a;
+    --strong: #ffffff;
+    --glass: rgba(22, 22, 24, 0.76);
+    --glass-2: rgba(44, 44, 46, 0.74);
+    --glass-3: rgba(28, 28, 30, 0.6);
+    --scrim: rgba(0, 0, 0, 0.55);
+    --placeholder: #636366;
+    --danger-text: #ff6961;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 12px 40px rgba(0, 0, 0, 0.55);
+    --paper-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 18px 48px rgba(0, 0, 0, 0.55);
+    color-scheme: dark;
   }
 }
 
@@ -75,8 +89,8 @@ body {
   flex-direction: column;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background:
-    radial-gradient(900px 500px at 75% -10%, rgba(111, 125, 255, 0.14), transparent 70%),
-    radial-gradient(700px 400px at 0% 110%, rgba(163, 123, 255, 0.08), transparent 70%),
+    radial-gradient(900px 500px at 75% -10%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+    radial-gradient(700px 400px at 0% 110%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 70%),
     var(--bg);
   /* Kein Doppeltipp-Zoom und keine Textauswahl in der ganzen App: der Pencil markiert sonst beim Schreiben Text. */
   touch-action: manipulation;
@@ -120,7 +134,7 @@ h1, h2, h3 { letter-spacing: -0.01em; }
   border-radius: 10px;
   color: #fff;
   background: var(--accent-grad);
-  box-shadow: 0 6px 20px rgba(111, 125, 255, 0.35);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .tabs {
@@ -147,7 +161,7 @@ h1, h2, h3 { letter-spacing: -0.01em; }
 .tabs button[aria-selected="true"] {
   color: #fff;
   background: var(--accent-grad);
-  box-shadow: 0 4px 16px rgba(111, 125, 255, 0.35);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .tabs button.badge::after {
   content: '';
@@ -190,7 +204,7 @@ button.primary {
   background: var(--accent-grad);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 4px 18px rgba(111, 125, 255, 0.3);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 button.primary:hover { filter: brightness(1.08); }
 button.danger { color: var(--danger); border-color: rgba(255, 107, 107, 0.35); background: rgba(255, 107, 107, 0.08); }
@@ -277,7 +291,7 @@ main { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: co
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.05),
     0 24px 70px rgba(0, 0, 0, 0.55),
-    0 0 120px rgba(111, 125, 255, 0.10);
+    0 0 120px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 .floatbar {
@@ -339,11 +353,11 @@ details.settings[open] { padding-bottom: 16px; }
   padding: 0;
   border-radius: 12px;
   color: #fff;
-  background: #e5484d;
+  background: var(--danger);
   border-color: transparent;
   box-shadow: 0 4px 14px rgba(229, 72, 77, 0.35);
 }
-.trash:hover { background: #f05b60; }
+.trash:hover { background: var(--danger); }
 .trash:disabled { opacity: 0.35; box-shadow: none; }
 #controls { display: grid; gap: 6px; }
 .swatches { display: flex; gap: 12px; }
@@ -412,15 +426,15 @@ details.settings[open] { padding-bottom: 16px; }
 .sheet-page { position: relative; width: min(100%, 900px); }
 .sheet-page canvas { display: block; width: 100%; height: 100%; border-radius: 3px; }
 .sheet-overlay { position: absolute; inset: 0; touch-action: pan-y pinch-zoom; }
-.sheet-overlay.drawing { touch-action: none; cursor: crosshair; background: rgba(111, 125, 255, 0.04); }
+.sheet-overlay.drawing { touch-action: none; cursor: crosshair; background: color-mix(in srgb, var(--accent) 4%, transparent); }
 .field-box {
   position: absolute;
-  border: 1.5px dashed rgba(111, 125, 255, 0.65);
+  border: 1.5px dashed color-mix(in srgb, var(--accent) 65%, transparent);
   border-radius: 4px;
   touch-action: none;
   cursor: move;
 }
-.field-box.selected { border: 2px solid var(--accent); background: rgba(111, 125, 255, 0.06); box-shadow: 0 0 0 4px rgba(111, 125, 255, 0.15); }
+.field-box.selected { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent); }
 .field-box.overflow { border-color: var(--warn); }
 /* Nummer links neben dem Feld (im Seitenrand), damit sie keinen Aufgabentext verdeckt */
 .field-tag {
@@ -585,21 +599,21 @@ details.settings[open] { padding-bottom: 16px; }
   .toast { bottom: calc(150px + env(safe-area-inset-bottom, 0px)); }
 }
 
-/* ---------- Claude (Schriftbot-Assistent) ---------- */
+/* ---------- Claude (DeineSchrift-Assistent) ---------- */
 .claude-row > * { flex: 1 1 auto; }
 a.btn-link {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: var(--touch); padding: 0 18px; border-radius: 12px; text-decoration: none; white-space: nowrap;
-  font-weight: 600; color: #fff; background: var(--accent-grad); box-shadow: 0 4px 18px rgba(111, 125, 255, 0.3);
+  font-weight: 600; color: #fff; background: var(--accent-grad); box-shadow: 0 4px 18px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 a.btn-link:active { transform: scale(0.97); }
 a.btn-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .claude-banner {
   display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 14px; border-radius: var(--radius);
-  background: linear-gradient(135deg, rgba(111, 125, 255, 0.22), rgba(163, 123, 255, 0.18));
-  border: 1px solid rgba(111, 125, 255, 0.6); animation: banner-in .25s ease-out;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 18%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent); animation: banner-in .25s ease-out;
 }
-.claude-banner > .icon { color: #c9b8ff; }
+.claude-banner > .icon { color: var(--accent); }
 .claude-banner > div { display: grid; flex: 1; min-width: 0; }
 .claude-banner span { color: var(--muted); font-size: 14px; }
 .claude-banner button.ghost { min-width: 40px; padding: 0; border-color: transparent; background: transparent; color: var(--muted); }
@@ -631,7 +645,7 @@ a.btn-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px
 
 /* ---------- Dialoge ---------- */
 .sheet-msg { margin: 0; white-space: pre-line; line-height: 1.5; }
-button.danger-solid { border-color: transparent; background: #e5484d; color: #fff; font-weight: 600; }
+button.danger-solid { border-color: transparent; background: var(--danger); color: #fff; font-weight: 600; }
 .sheet input[type="text"] { width: 100%; }
 
 /* ---------- KI ---------- */
@@ -674,7 +688,7 @@ button.danger-solid { border-color: transparent; background: #e5484d; color: #ff
 .ki-empty[hidden] { display: none; }
 .ki-empty h2 { margin: 0; font-size: clamp(24px, 3.4vw, 32px); text-wrap: balance; }
 .ki-empty .hint { max-width: 520px; margin: 0; }
-.ki-hello { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: var(--accent-grad); color: #fff; box-shadow: 0 10px 30px rgba(111, 125, 255, 0.35); }
+.ki-hello { width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center; background: var(--accent-grad); color: #fff; box-shadow: 0 10px 30px color-mix(in srgb, var(--accent) 35%, transparent); }
 .ki-hello .icon { width: 28px; height: 28px; }
 .ki-suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 8px; max-width: 640px; }
 .ki-suggestion { min-height: 44px; border-radius: 14px; background: var(--surface); font-size: 15px; }
@@ -765,3 +779,187 @@ details.more[open] > summary::after { content: '–'; }
 /* Größere Tippflächen für kleine Kästchen */
 .ki-ctx-toggle { min-height: 44px; }
 .ki-ctx-toggle input { width: 22px; height: 22px; }
+
+/* =====================================================================
+   Redesign „Papier & Tinte“ – überschreibt die älteren Regeln oben.
+   ===================================================================== */
+body { background: var(--bg); }
+.view h2 { font-size: 28px; letter-spacing: -0.02em; }
+
+/* Kopfzeile: durchscheinend, feine Trennlinie */
+.topbar { border-bottom: 0.5px solid var(--border-strong); }
+.brand { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.brand b { color: var(--accent); font-weight: 700; }
+.brand-icon { width: 34px; height: 34px; padding: 7px; border-radius: 9px; color: #fff; background: var(--accent-fill); box-shadow: none; }
+
+/* Tab-Leiste wie in iPadOS: Kapsel, gewählter Bereich hebt sich als helle Pille ab */
+.tabs { position: relative; gap: 2px; padding: 3px; border: 0; border-radius: 999px; background: var(--surface-2); }
+.tabs button { z-index: 1; min-height: 44px; padding: 0 18px; border-radius: 999px; color: var(--ink); font-weight: 600; font-size: 16px; background: transparent; box-shadow: none; transition: color .25s var(--ease-out); }
+.tabs button .icon { color: var(--muted); transition: color .25s var(--ease-out); }
+.tabs button:hover { background: transparent; }
+.tabs button[aria-selected="true"] { color: var(--ink); background: transparent; box-shadow: none; }
+.tabs button[aria-selected="true"] .icon { color: var(--accent); }
+.tab-indicator {
+  position: absolute; z-index: 0; top: 3px; left: 0; height: calc(100% - 6px); width: 0; border-radius: 999px;
+  background: var(--panel); box-shadow: var(--shadow-1);
+  transition: transform .45s var(--ease-spring), width .45s var(--ease-spring);
+}
+@media (prefers-color-scheme: dark) { .tab-indicator { background: var(--surface-3); box-shadow: none; } }
+
+/* Knöpfe: grau gefüllt, Hauptaktion in Tintenblau, keine Leuchtschatten */
+button { border: 0; border-radius: 12px; background: var(--surface-2); font-weight: 600; letter-spacing: -0.01em;
+  transition: background .2s, color .2s, transform .45s var(--ease-pop), box-shadow .2s; }
+button:hover { background: var(--surface-3); }
+button:active { transform: scale(0.94); transition: transform .08s ease-out; }
+button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+button.primary { background: var(--accent-fill); color: var(--on-accent); box-shadow: none; }
+button.primary:hover { filter: brightness(1.06); background: var(--accent-fill); }
+button.danger { color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border: 0; }
+button.danger-solid { background: var(--danger); }
+.icon-btn, #help-btn { background: var(--surface-2); color: var(--accent); }
+a.btn-link { background: var(--accent-fill); box-shadow: none; }
+
+textarea, input[type="text"], input[type="url"], input[type="password"], input:not([type]), select {
+  border: 0.5px solid var(--border-strong); border-radius: 12px; background: var(--field);
+}
+.profile-switch select { background: var(--surface-2); border: 0; font-weight: 600; }
+
+/* Seitenleisten im Stil gruppierter Listen: Grau als Grund, weiße Karten darauf */
+.panel { background: var(--bg); border-right: 0.5px solid var(--border-strong); }
+details.settings, .subcard, .card, .group, .demo-note { border: 0; box-shadow: none; background: var(--surface); }
+.group { background: var(--bg); }
+@media (prefers-color-scheme: dark) { .group { background: var(--field); } }
+details.fine { border: 0.5px solid var(--border-strong); }
+.text-wrap textarea { border: 0; box-shadow: var(--shadow-1); }
+.text-wrap textarea:focus { box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-1); }
+.trash { box-shadow: none; border-radius: 10px; background: var(--danger); }
+
+/* Bühne: Papier liegt auf einem ruhigen „Schreibtisch“ */
+.stage { background: var(--desk); }
+.page, .sheet-page { border-radius: 2px; box-shadow: var(--paper-shadow); }
+.page.transparent {
+  background-color: #fff;
+  background-image: conic-gradient(#e6e6ea 25%, #fff 0 50%, #e6e6ea 0 75%, #fff 0);
+  background-size: 16px 16px;
+}
+.floatbar { border-radius: 999px; padding: 6px; gap: 6px; border: 0.5px solid var(--border-strong); box-shadow: var(--shadow-2); }
+.floatbar button { border-radius: 999px; }
+
+/* Segment-Schalter (Apple „Segmented Control“) */
+.seg, .mode-switch { display: flex; gap: 2px; padding: 2px; border: 0; border-radius: 10px; background: var(--surface-2); }
+.seg button, .mode-switch button { flex: 1; min-height: 40px; padding: 0 12px; border-radius: 8px; background: transparent; color: var(--ink); font-size: 15px; font-weight: 600; }
+.seg button[aria-pressed="true"], .seg button[aria-checked="true"], .mode-switch button[aria-pressed="true"] {
+  background: var(--panel); color: var(--ink); box-shadow: var(--shadow-1);
+}
+@media (prefers-color-scheme: dark) {
+  .seg button[aria-pressed="true"], .seg button[aria-checked="true"], .mode-switch button[aria-pressed="true"] { background: var(--surface-3); }
+}
+#export-bg + .hint { display: block; margin-top: 4px; }
+
+/* Papier-Auswahl mit Vorschaubildern */
+.paper-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.paper-opt { display: grid; justify-items: center; gap: 6px; min-height: 0; padding: 6px 2px 8px; border-radius: 12px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; line-height: 1.2; text-align: center; }
+.paper-opt:hover { background: var(--surface-2); }
+.paper-opt canvas { display: block; width: 100% !important; max-width: 64px; height: auto !important; aspect-ratio: 210 / 297; border-radius: 4px; box-shadow: 0 0 0 0.5px var(--border-strong), var(--shadow-1); transition: transform .45s var(--ease-pop), box-shadow .2s; }
+.paper-opt[aria-checked="true"] { color: var(--accent); }
+.paper-opt[aria-checked="true"] canvas { box-shadow: 0 0 0 2.5px var(--accent), var(--shadow-1); transform: translateY(-2px); }
+
+/* Farbfelder */
+.swatch { transition: transform .45s var(--ease-pop), box-shadow .2s; }
+.swatch[aria-pressed="true"] { transform: scale(1.08); }
+
+/* Noch keine Schrift: Hinweis über der Vorschau */
+.write-empty { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; padding: 24px; background: color-mix(in srgb, var(--desk) 55%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.write-empty-card { max-width: 420px; display: grid; justify-items: center; gap: 10px; padding: 28px; text-align: center; border-radius: 22px; background: var(--panel); box-shadow: var(--shadow-2); }
+.write-empty-card h2 { margin: 0; font-size: 22px; }
+.write-empty-card p { margin: 0 0 6px; color: var(--muted); }
+
+/* Ausfüllen: Erklärung mit Grafik und drei Schritten */
+.fill-intro { max-width: 560px; border: 0; background: transparent; padding: 24px 20px; }
+.fill-intro h2 { font-size: 24px; text-wrap: balance; }
+.fill-demo { width: min(100%, 300px); height: auto; overflow: visible; }
+.fd-sheet { fill: #fff; stroke: var(--border-strong); stroke-width: 0.6; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12)); }
+.fd-q { fill: #d9dbe2; }
+.fd-line { stroke: #c8ccd6; stroke-width: 0.8; fill: none; }
+.fd-typed { font: 600 11px -apple-system, "Segoe UI", sans-serif; fill: #1d5ff2; }
+.fd-ink { fill: none; stroke: #1f3f9e; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 260; stroke-dashoffset: 260; }
+.fill-steps { list-style: none; counter-reset: s; display: grid; gap: 12px; margin: 4px 0 22px; padding: 0; text-align: left; }
+.fill-steps li { counter-increment: s; position: relative; display: grid; gap: 2px; padding: 12px 14px 12px 52px; border-radius: 14px; background: var(--surface); }
+.fill-steps li::before { content: counter(s); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 15px; }
+.fill-steps span { color: var(--muted); font-size: 15px; }
+
+/* Aufnahme */
+.current-char { background: none; color: var(--accent); -webkit-background-clip: border-box; background-clip: border-box; }
+#text-page, .box canvas, #char-preview { box-shadow: 0 0 0 0.5px var(--border-strong), var(--shadow-1); }
+.chip { border: 0; }
+.chip[data-status="0"] { background: var(--surface); color: var(--muted); }
+.chip[data-status="1"], .chip[data-status="2"] { background: color-mix(in srgb, var(--warn) 16%, transparent); border: 0; }
+.chip[data-status="3"] { background: color-mix(in srgb, var(--ok) 16%, transparent); border: 0; }
+.progress { background: var(--bg); }
+
+/* Profil */
+.profile-item { border: 0; background: var(--surface); }
+.profile-item.active { box-shadow: 0 0 0 2px var(--accent); }
+.badge-active { background: var(--accent-soft); color: var(--accent); }
+
+/* Dialoge, Hinweise, Einführung */
+.sheet { border: 0; border-radius: 16px 16px 0 0; box-shadow: var(--shadow-2); }
+.sheet::before { content: ''; justify-self: center; width: 36px; height: 5px; margin: -10px 0 2px; border-radius: 3px; background: var(--border-strong); }
+.toast { border: 0; box-shadow: var(--shadow-2); background: var(--panel); border-radius: 999px; }
+.tour { border: 0; box-shadow: var(--shadow-2); border-radius: 24px; }
+.banner { border-bottom: 0.5px solid var(--border-strong); }
+.banner.safety { background: color-mix(in srgb, var(--warn) 12%, var(--bg)); }
+.empty { border: 0; background: transparent; }
+
+@media (max-width: 1000px) {
+  .tabs button { padding: 0 12px; font-size: 15px; }
+}
+/* Handy: Tab-Leiste unten wie in iOS (Symbol + Name, gewählter Bereich in Tintenblau) */
+@media (max-width: 700px) {
+  .tabs button { flex: 1; min-width: 0; flex-direction: column; gap: 2px; padding: 4px 2px; border-radius: 10px; }
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; justify-self: stretch; justify-content: space-around; gap: 0;
+    -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6);
+    border-radius: 0; background: var(--glass-2); padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px)); border-top: 0.5px solid var(--border-strong); }
+  .tabs button { min-height: 50px; font-size: 11px; font-weight: 600; color: var(--muted); }
+  .tabs button[aria-selected="true"] { color: var(--accent); background: transparent; }
+  .tab-indicator { display: none; }
+  .paper-grid { gap: 4px; }
+}
+
+/* =====================================================================
+   Bewegung: kurze, federnde Übergänge; bei „Bewegung reduzieren“ aus
+   ===================================================================== */
+@keyframes view-in { from { opacity: 0; transform: translateY(10px) scale(0.995); } }
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.9); } 60% { opacity: 1; transform: scale(1.03); } 100% { transform: scale(1); } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(14px); } }
+@keyframes sheet-up { from { transform: translateY(100%); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes nib-bob { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(1px, -2px) rotate(-4deg); } }
+@keyframes typed-cycle { 0%, 18% { opacity: 1; } 28%, 88% { opacity: 0; } 100% { opacity: 1; } }
+@keyframes ink-cycle { 0%, 24% { stroke-dashoffset: 260; opacity: 1; } 62%, 88% { stroke-dashoffset: 0; opacity: 1; } 96% { opacity: 0; stroke-dashoffset: 0; } 100% { stroke-dashoffset: 260; opacity: 0; } }
+
+.view.view-enter { animation: view-in .42s var(--ease-spring) both; }
+.page { animation: rise-in .5s var(--ease-spring) both; }
+.tour { animation: pop-in .45s var(--ease-spring) both; }
+.tour-dots span { transition: width .35s var(--ease-spring), background .25s; }
+.sheet { animation: sheet-up .42s var(--ease-spring) both; }
+.toast { animation: rise-in .35s var(--ease-spring) both; }
+.write-empty-card, .demo-note { animation: pop-in .5s var(--ease-spring) both; }
+.fill-steps li { animation: rise-in .5s var(--ease-spring) both; }
+.fill-steps li:nth-child(2) { animation-delay: .08s; }
+.fill-steps li:nth-child(3) { animation-delay: .16s; }
+.banner:not([hidden]) { animation: rise-in .35s var(--ease-spring) both; }
+.brand-icon { animation: nib-bob 4s ease-in-out 1s infinite; transform-origin: 30% 70%; }
+.write-empty-card .empty-icon, .demo-note .empty-icon { animation: nib-bob 2.4s ease-in-out infinite; }
+.fd-typed { animation: typed-cycle 6s var(--ease-out) infinite; }
+.fd-ink { animation: ink-cycle 6s var(--ease-out) infinite; }
+.fd-typed2, .fd-ink2 { animation-delay: .6s; }
+.pop { animation: pop-in .4s var(--ease-pop); }
+details[open] > :not(summary) { animation: rise-in .3s var(--ease-spring) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .fd-ink { stroke-dashoffset: 0; }
+  .fd-typed { opacity: 0; }
+  button:active { transform: none; }
+}

@@ -9,27 +9,51 @@ import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { initKiTab } from './kiui.js';
 import { cleanPasted } from './einfuegen.js';
-import { setupDemo, isDemo, ownProfile } from './demo.js';
+import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
 import { showTutorial, tutorialSeen } from './tutorial.js';
 
 // Läuft die App als Artifact auf claude.ai? Dort gibt es Claude (KI-Tab), aber keinen Service Worker.
 const inClaude = typeof window.claude?.use === 'function';
 
-// Navigation zwischen den Modulen; letzter Tab wird gemerkt.
+// Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
 
 let profile;
 
+// Gleitende Markierung hinter dem gewählten Tab (iPad); auf dem Handy per CSS ausgeblendet
+const tabBar = document.querySelector('.tabs');
+const indicator = document.createElement('span');
+indicator.className = 'tab-indicator';
+indicator.setAttribute('aria-hidden', 'true');
+tabBar.prepend(indicator);
+function moveIndicator() {
+  const t = tabBar.querySelector('[aria-selected="true"]');
+  if (!t || !t.offsetWidth) return;
+  indicator.style.width = t.offsetWidth + 'px';
+  indicator.style.transform = `translateX(${t.offsetLeft}px)`;
+}
+new ResizeObserver(moveIndicator).observe(tabBar);
+
+let currentView = null;
 function showView(name) {
   // Beim Tabwechsel frisch geschriebene Zeichen ausrichten, damit „Schreiben“ sie schon gerade sieht.
   if (profile && alignAll(profile)) saveProfile(profile);
   for (const tab of tabs) {
     const active = tab.dataset.view === name;
     tab.setAttribute('aria-selected', active);
-    document.getElementById('view-' + tab.dataset.view).hidden = !active;
+    const view = document.getElementById('view-' + tab.dataset.view);
+    view.hidden = !active;
+    // Sanft einblenden, wenn ein anderer Bereich gewählt wird
+    if (active && currentView && currentView !== name) {
+      view.classList.remove('view-enter');
+      void view.offsetWidth;
+      view.classList.add('view-enter');
+    }
   }
-  try { localStorage.setItem('lastView', name); } catch {}
+  currentView = name;
+  moveIndicator();
 }
+document.addEventListener('animationend', e => { if (e.target.classList?.contains('view-enter')) e.target.classList.remove('view-enter'); });
 
 for (const tab of tabs) tab.addEventListener('click', () => showView(tab.dataset.view));
 // Pfeiltasten in der Tab-Leiste (Tastatur, VoiceOver)
@@ -51,10 +75,13 @@ await setupDemo();
 const demo = isDemo();
 if (demo) document.getElementById('view-aufnahme').classList.add('is-demo');
 
-let last = null;
-try { last = localStorage.getItem('lastView'); } catch {}
-if (last === 'ki' && !inClaude) last = 'schreiben';
-showView(last && document.getElementById('view-' + last) ? last : demo ? 'schreiben' : 'aufnahme');
+// Erstes Öffnen: eine Seite Beispieltext, damit die Vorschau sofort etwas zeigt
+seedSampleText(getSettings().text);
+
+// Start immer in „Schreiben“; nur nach „Eigene Schrift aufnehmen“ (Neuladen) direkt in die Aufnahme
+let start = 'schreiben';
+try { start = sessionStorage.getItem('startView') || start; sessionStorage.removeItem('startView'); } catch {}
+showView(document.getElementById('view-' + start) ? start : 'schreiben');
 
 try {
   profile = await loadProfile();
@@ -80,7 +107,7 @@ document.getElementById('demo-note').hidden = !demo;
 document.getElementById('demo-own').addEventListener('click', () => {
   const own = ownProfile() || { id: createProfile({ name: 'Meine Schrift' }) };
   setActiveProfile(own.id);
-  try { localStorage.setItem('lastView', 'aufnahme'); } catch {}
+  try { sessionStorage.setItem('startView', 'aufnahme'); } catch {}
   location.reload();
 });
 
@@ -103,12 +130,12 @@ function safetyHint() {
   let key, days2;
   if (apple && !standalone && !later('hinweis-home')) {
     key = 'hinweis-home'; days2 = 14;
-    $('safety-text').textContent = 'Füge Schriftbot zum Home-Bildschirm hinzu – sonst darf Safari deine Schrift nach 7 Tagen ohne Nutzung löschen.';
+    $('safety-text').textContent = 'Füge DeineSchrift zum Home-Bildschirm hinzu – sonst darf Safari deine Schrift nach 7 Tagen ohne Nutzung löschen.';
     $('safety-action').textContent = 'So geht’s';
     $('safety-action').onclick = () => info(
-      '1. Sichere zuerst deine Schrift: Tab „Profil“ → „Alle Profile sichern“, z. B. in „Dateien“.\n' +
+      '1. Sichere zuerst deine Schrift: Profil → „Alle Profile sichern“, z. B. in „Dateien“.\n' +
       '2. Tippe in Safari auf „Teilen“ (Quadrat mit Pfeil) und dann auf „Zum Home-Bildschirm“.\n' +
-      '3. Öffne Schriftbot ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Profil → Importieren).\n\n' +
+      '3. Öffne DeineSchrift ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Profil → Importieren).\n\n' +
       'Die App auf dem Home-Bildschirm hat einen eigenen Speicher, deshalb der Umweg über die Sicherung.',
       { title: 'Zum Home-Bildschirm hinzufügen' });
   } else if (done >= 10 && (days == null || days > 7) && !later('hinweis-backup')) {

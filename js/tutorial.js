@@ -4,35 +4,35 @@ const DONE_KEY = 'tutorial-gesehen';
 
 const STEPS = demo => [
   {
-    view: demo ? 'schreiben' : 'aufnahme',
-    title: 'Willkommen bei Schriftbot',
-    text: 'Schriftbot schreibt getippten Text in deiner eigenen Handschrift – als PDF, Bild oder GoodNotes-Datei. ' +
+    view: 'schreiben',
+    title: 'Willkommen bei DeineSchrift',
+    text: 'DeineSchrift schreibt getippten Text in Handschrift – als PDF, Bild oder GoodNotes-Datei. ' +
       'Alles bleibt auf deinem Gerät, ohne Konto.' +
-      (demo ? '\n\nZum Ausprobieren ist eine Demo-Schrift aktiv. Tipp einfach etwas in das Textfeld.' : ''),
-  },
-  {
-    view: 'aufnahme',
-    title: '1. Schrift aufnehmen',
-    text: 'Im Tab „Aufnahme“ schreibst du jedes Zeichen dreimal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
-      'Schneller geht „Als Text“: Du schreibst einfach einen vorgegebenen Absatz ab.\n\nPlane etwa 20 bis 30 Minuten ein. Du kannst jederzeit aufhören und später weitermachen.',
+      (demo ? '\n\nGerade ist eine Beispielschrift ausgewählt. Tipp einfach etwas in das Textfeld.' : ''),
   },
   {
     view: 'schreiben',
-    title: '2. Text schreiben lassen',
-    text: 'Im Tab „Schreiben“ tippst oder fügst du deinen Text ein. Wähle eine Stil-Vorlage von „sehr ordentlich“ bis „sehr unordentlich“, ' +
-      'dazu Papier und Tinte. Unten exportierst du als GoodNotes-Datei, PDF oder PNG.',
+    title: '1. Schreiben',
+    text: 'Tippe oder füge deinen Text ein, daneben erscheint er sofort in Handschrift. Wähle einen Stil von „sehr ordentlich“ bis „sehr unordentlich“, ' +
+      'dazu Papier und Tinte. Unten exportierst du als GoodNotes-Datei, PDF oder Bild.',
   },
   {
     view: 'blatt',
-    title: '3. Formulare ausfüllen',
-    text: 'Im Tab „Blatt“ öffnest du ein PDF oder Foto. Text, den du vorher in Blau eingetippt hast, setzt Schriftbot an derselben Stelle in deiner Handschrift ein. ' +
-      'Eigene Felder ziehst du mit „Textfeld“ auf.',
+    title: '2. Ausfüllen',
+    text: 'Hier füllst du PDFs und Arbeitsblätter in Handschrift aus: Tippe deine Einträge vorher in Blau in das PDF und öffne es hier. ' +
+      'DeineSchrift ersetzt den blauen Text an derselben Stelle durch Handschrift.',
+  },
+  {
+    view: 'aufnahme',
+    title: '3. Eigene Schrift aufnehmen',
+    text: 'Unter „Aufnehmen“ schreibst du jedes Zeichen ein paar Mal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
+      'Plane etwa 20 bis 30 Minuten ein; du kannst jederzeit aufhören und später weitermachen.',
   },
   {
     view: 'profil',
     title: 'Wichtig: Schrift sichern',
-    text: 'Deine Handschrift liegt nur in diesem Browser. Füge Schriftbot zum Home-Bildschirm hinzu (Safari: Teilen → „Zum Home-Bildschirm“), ' +
-      'dann löscht Safari nichts. Und sichere ab und zu im Tab „Profil“ mit „Alle Profile sichern“.',
+    text: 'Deine Handschrift liegt nur in diesem Browser. Füge DeineSchrift zum Home-Bildschirm hinzu (Safari: Teilen → „Zum Home-Bildschirm“) ' +
+      'und sichere ab und zu im Bereich „Profil“ mit „Alle Profile sichern“.',
     link: true,
   },
 ];
@@ -51,6 +51,9 @@ export function showTutorial({ goTo, demo = false, onClose = () => {} }) {
   box.setAttribute('aria-modal', 'true');
   box.setAttribute('aria-labelledby', 'tour-title');
   bg.append(box);
+  // Gilt als gesehen, sobald sie einmal erschienen ist (auch wenn die App mittendrin geschlossen wird)
+  try { localStorage.setItem(DONE_KEY, '1'); } catch {}
+  bg.addEventListener('click', e => { if (e.target === bg) close(); });
 
   const close = () => {
     try { localStorage.setItem(DONE_KEY, '1'); } catch {}
@@ -109,7 +112,7 @@ export function showTutorial({ goTo, demo = false, onClose = () => {} }) {
     next.className = 'primary';
     next.textContent = last ? 'Los geht’s' : 'Weiter';
     next.addEventListener('click', () => {
-      if (last) { close(); goTo(demo ? 'schreiben' : 'aufnahme'); } else { i++; draw(); }
+      if (last) { close(); goTo('schreiben'); } else { i++; draw(); }
     });
     row.append(next);
     box.append(dots, row);

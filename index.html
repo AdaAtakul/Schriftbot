@@ -2,30 +2,32 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
+  <script>/* Nur eine Adresse: www leitet auf die Hauptadresse um (sonst getrennte Speicher für Schrift und Einstellungen) */
+    if (location.hostname === 'www.deineschrift.de') location.replace('https://deineschrift.de' + location.pathname + location.search + location.hash);</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Schriftbot – getippten Text in deine eigene Handschrift verwandeln</title>
-  <meta name="description" content="Schriftbot verwandelt getippten Text in deine eigene Handschrift: einmal mit Apple Pencil oder Finger aufnehmen, dann als PDF, PNG oder GoodNotes-Datei exportieren. Kostenlos, ohne Anmeldung, alles bleibt auf deinem Gerät.">
+  <title>DeineSchrift – getippten Text in deine eigene Handschrift verwandeln</title>
+  <meta name="description" content="DeineSchrift verwandelt getippten Text in deine eigene Handschrift: einmal mit Apple Pencil oder Finger aufnehmen, dann als PDF, PNG oder GoodNotes-Datei exportieren. Kostenlos, ohne Anmeldung, alles bleibt auf deinem Gerät.">
   <link rel="canonical" href="https://deineschrift.de/">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="author" content="adaatakul">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
-  <meta property="og:site_name" content="Schriftbot">
-  <meta property="og:title" content="Schriftbot – Text in deine eigene Handschrift">
+  <meta property="og:site_name" content="DeineSchrift">
+  <meta property="og:title" content="DeineSchrift – Text in deine eigene Handschrift">
   <meta property="og:description" content="Einmal deine Handschrift aufnehmen, dann jeden Text darin schreiben lassen – als PDF, PNG oder für GoodNotes. Kostenlos und ohne Anmeldung.">
   <meta property="og:url" content="https://deineschrift.de/">
   <meta property="og:image" content="https://deineschrift.de/icons/og.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Schriftbot: getippter Text wird zu Handschrift auf liniertem Papier">
+  <meta property="og:image:alt" content="DeineSchrift: getippter Text wird zu Handschrift auf liniertem Papier">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#0e0f13" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f4f5f9" media="(prefers-color-scheme: light)">
   <meta name="color-scheme" content="dark light">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Schriftbot">
+  <meta name="apple-mobile-web-app-title" content="DeineSchrift">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="icon" href="icons/icon-192.png">
@@ -38,7 +40,7 @@
       {
         "@type": "WebApplication",
         "@id": "https://deineschrift.de/#app",
-        "name": "Schriftbot",
+        "name": "DeineSchrift",
         "alternateName": "Handschrift-Tool",
         "url": "https://deineschrift.de/",
         "description": "Web-App, die getippten Text in die eigene, vorher aufgenommene Handschrift umwandelt und als PDF, PNG oder GoodNotes-Datei exportiert. Läuft im Browser, offline nutzbar, ohne Konto; alle Daten bleiben auf dem Gerät.",
@@ -109,12 +111,12 @@
   <header class="topbar">
     <h1 class="brand">
       <svg class="icon brand-icon" aria-hidden="true"><use href="#i-nib"/></svg>
-      <span>Schriftbot</span>
+      <span>Deine<b>Schrift</b></span>
     </h1>
     <nav class="tabs" role="tablist" aria-label="Bereiche">
-      <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span>Aufnahme</span></button>
-      <button role="tab" id="tab-schreiben" data-view="schreiben" aria-controls="view-schreiben" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span>Schreiben</span></button>
-      <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span>Blatt</span></button>
+      <button role="tab" id="tab-schreiben" data-view="schreiben" aria-controls="view-schreiben" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span>Schreiben</span></button>
+      <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span>Ausfüllen</span></button>
+      <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span>Aufnehmen</span></button>
       <button role="tab" id="tab-ki" data-view="ki" aria-controls="view-ki" aria-selected="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>KI</span></button>
       <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span>Profil</span></button>
     </nav>
@@ -135,14 +137,14 @@
     <button id="update-reload" class="primary">Neu laden</button>
   </div>
 
-  <noscript><p class="noscript">Schriftbot verwandelt getippten Text in deine eigene Handschrift. Die App braucht JavaScript. <a href="anleitung">Zur Anleitung</a></p></noscript>
+  <noscript><p class="noscript">DeineSchrift verwandelt getippten Text in deine eigene Handschrift. Die App braucht JavaScript. <a href="anleitung">Zur Anleitung</a></p></noscript>
 
   <main>
-    <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel" aria-labelledby="tab-aufnahme">
+    <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel" aria-labelledby="tab-aufnahme" hidden>
       <div id="demo-note" class="demo-note" hidden>
         <svg class="icon empty-icon" aria-hidden="true"><use href="#i-nib"/></svg>
-        <h2>Das ist die Demo-Schrift</h2>
-        <p>Mit ihr kannst du Schriftbot sofort ausprobieren. Für deine eigene Handschrift wechselst du in dein eigenes Profil und nimmst dort jedes Zeichen auf.</p>
+        <h2>Das ist die Beispielschrift</h2>
+        <p>Mit ihr kannst du DeineSchrift sofort ausprobieren. Für deine eigene Handschrift wechselst du in dein eigenes Profil und nimmst dort jedes Zeichen auf.</p>
         <button id="demo-own" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg>Eigene Schrift aufnehmen</button>
       </div>
       <aside class="panel charlist" aria-labelledby="charlist-title">
@@ -192,7 +194,7 @@
       </div>
     </section>
 
-    <section id="view-schreiben" class="view view-schreiben" role="tabpanel" aria-labelledby="tab-schreiben" hidden>
+    <section id="view-schreiben" class="view view-schreiben" role="tabpanel" aria-labelledby="tab-schreiben">
       <div class="panel editor">
         <div class="text-wrap">
           <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
@@ -212,11 +214,18 @@
           </details>
           <p id="style-note" class="hint small"></p>
           <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
-          <label class="field">Papier
-            <select id="paper"></select>
-          </label>
+          <div class="field">Papier
+            <div id="paper" class="paper-grid" role="radiogroup" aria-label="Papier"></div>
+          </div>
           <div class="field">Papierfarbe
             <div id="paper-color" class="swatches"></div>
+          </div>
+          <div class="field">Im Export
+            <div id="export-bg" class="seg" role="radiogroup" aria-label="Hintergrund im Export">
+              <button type="button" role="radio" data-bg="paper" aria-checked="true">Mit Papier</button>
+              <button type="button" role="radio" data-bg="none" aria-checked="false">Nur Schrift</button>
+            </div>
+            <span id="export-bg-hint" class="hint small"></span>
           </div>
           <div class="field">Tintenfarbe
             <div id="ink" class="swatches"></div>
@@ -237,13 +246,19 @@
       </div>
       <div class="stage">
         <div id="pages" class="pages" role="region" aria-label="Vorschau der Seiten" tabindex="0"></div>
+        <div id="write-empty" class="write-empty" hidden>
+          <div class="write-empty-card">
+            <svg class="icon empty-icon" aria-hidden="true"><use href="#i-nib"/></svg>
+            <h2>Noch keine Handschrift</h2>
+            <p>Dein Text ist schon gesetzt – es fehlt nur noch eine Schrift. Nimm deine eigene unter „Aufnehmen“ auf oder hole eine Sicherung unter „Profil“ zurück.</p>
+            <button id="write-empty-record" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg>Eigene Schrift aufnehmen</button>
+          </div>
+        </div>
         <div class="floatbar export" role="toolbar" aria-label="Exportieren">
           <button id="export-goodnotes" class="primary"><svg class="icon"><use href="#i-book"/></svg>GoodNotes</button>
           <button id="export-pdf"><svg class="icon"><use href="#i-file"/></svg>PDF</button>
           <button id="export-png"><svg class="icon"><use href="#i-image"/></svg>PNG</button>
           <button id="share-again" class="primary" hidden><svg class="icon"><use href="#i-share"/></svg>Jetzt teilen</button>
-          <span class="floatbar-sep"></span>
-          <label class="check" title="Linien, Karos oder Punkte und die Papierfarbe mit ins PDF/PNG übernehmen"><input type="checkbox" id="export-paper"> Mit Papier</label>
         </div>
       </div>
     </section>
@@ -251,8 +266,8 @@
     <section id="view-blatt" class="view view-blatt" role="tabpanel" aria-labelledby="tab-blatt" hidden>
       <div class="panel inspector">
         <div class="panel-head">
-          <h2>Formular &amp; Blatt</h2>
-          <p id="sheet-info" class="hint">Formulare und Arbeitsblätter in deiner Handschrift ausfüllen.</p>
+          <h2>Ausfüllen</h2>
+          <p id="sheet-info" class="hint">PDFs und Arbeitsblätter in deiner Handschrift ausfüllen.</p>
         </div>
         <button id="sheet-open" class="primary wide"><svg class="icon"><use href="#i-upload"/></svg>PDF oder Foto öffnen</button>
         <input type="file" id="sheet-file" accept="application/pdf,.pdf,image/*" class="visually-hidden" aria-label="PDF oder Foto auswählen" tabindex="-1">
@@ -275,13 +290,28 @@
             <button id="field-delete" class="danger"><svg class="icon"><use href="#i-trash"/></svg>Feld löschen</button>
           </div>
         </div>
-        <p class="hint small">Tinte, Strichdicke und Stil stellst du im Tab „Schreiben“ ein. Löschst du ein erkanntes Feld, erscheint der blaue Text wieder.</p>
+        <p class="hint small">Tinte, Strichdicke und Stil stellst du unter „Schreiben“ ein. Löschst du ein erkanntes Feld, erscheint der blaue Text wieder.</p>
       </div>
       <div class="stage">
-        <div id="sheet-empty" class="empty">
-          <svg class="icon empty-icon"><use href="#i-sheet"/></svg>
-          <h2>Formular oder Blatt öffnen</h2>
-          <p>Öffne ein PDF oder Foto. Text, den du vorher in <strong>Blau</strong> eingetippt hast, wird erkannt, vom Blatt entfernt und an derselben Stelle in deiner Handschrift eingesetzt. Eigene Textfelder ziehst du mit „Textfeld“ auf.</p>
+        <div id="sheet-empty" class="empty fill-intro">
+          <svg class="fill-demo" viewBox="0 0 240 150" aria-hidden="true">
+            <rect class="fd-sheet" x="40" y="8" width="160" height="134" rx="6"/>
+            <rect class="fd-q" x="56" y="24" width="98" height="6" rx="3"/>
+            <rect class="fd-q" x="56" y="36" width="72" height="6" rx="3"/>
+            <path class="fd-line" d="M56 70 H184"/>
+            <text class="fd-typed" x="58" y="65">Berlin liegt an der Spree</text>
+            <path class="fd-ink" d="M58 64c3-9 6-9 7 0s3 1 6-4 4 4 7 3 2-7 5-4 1 6 5 4 3-6 6-3 2 5 5 3 4-7 7-2 3 4 6 1 2-5 5-2 4 4 7 1 3-6 6-2 2 5 6 2 3-5 6-1 3 3 6 0 4-4 7 1"/>
+            <rect class="fd-q" x="56" y="88" width="110" height="6" rx="3"/>
+            <path class="fd-line" d="M56 126 H184"/>
+            <text class="fd-typed fd-typed2" x="58" y="121">im Jahr 1237</text>
+            <path class="fd-ink fd-ink2" d="M58 120c3-8 5-8 7-1s3 2 6-3 4 3 7 2 3-6 6-3 2 5 5 2 4-6 7-1 3 3 6 0"/>
+          </svg>
+          <h2>PDFs und Arbeitsblätter in deiner Handschrift ausfüllen</h2>
+          <ol class="fill-steps">
+            <li><strong>Antworten in Blau eintippen</strong><span>zum Beispiel mit der Textfunktion in GoodNotes oder einem PDF-Programm</span></li>
+            <li><strong>PDF oder Foto hier öffnen</strong><span>DeineSchrift findet den blauen Text von selbst</span></li>
+            <li><strong>Fertig</strong><span>der blaue Text wird an derselben Stelle durch Handschrift ersetzt – eigene Felder ziehst du mit „Textfeld“ auf</span></li>
+          </ol>
           <button id="sheet-open-empty" class="primary"><svg class="icon"><use href="#i-upload"/></svg>PDF oder Foto öffnen</button>
         </div>
         <div id="sheet-pages" class="pages sheet-pages" hidden></div>
