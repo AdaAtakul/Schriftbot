@@ -4,6 +4,7 @@
 // Fehlt sie, passiert nichts.
 import { parseCollection } from './sammlung.js';
 import { progress } from './profile.js';
+import { DEFAULT_STYLE } from './stil.js';
 import {
   profilesMeta, activeProfile, createProfile, setActiveProfile, saveGlyphs, loadGlyphs, seedSettings,
 } from './storage.js';
@@ -47,7 +48,8 @@ export async function setupDemo() {
     if (!entry?.handwriting) return false;
     const id = createProfile({ name: 'Beispielschrift', from: null, demo: true });
     await saveGlyphs(id, entry.handwriting);
-    seedSettings(id, { style: 'normal', styles: {}, ...entry.settings });
+    // Standard für den ersten Eindruck: ordentlich, schwarze Tinte, liniertes weißes Papier
+    seedSettings(id, { ...entry.settings, style: DEFAULT_STYLE, styles: {}, ink: 'schwarz' });
     setActiveProfile(id);
     localStorage.setItem(DONE_KEY, '1');
     return true;

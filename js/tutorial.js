@@ -13,8 +13,8 @@ const STEPS = demo => [
   {
     view: 'schreiben',
     title: '1. Schreiben',
-    text: 'Tippe oder füge deinen Text ein, daneben erscheint er sofort in Handschrift. Wähle einen Stil von „sehr ordentlich“ bis „sehr unordentlich“, ' +
-      'dazu Papier und Tinte. Unten exportierst du als GoodNotes-Datei, PDF oder Bild.',
+    text: 'Links tippst oder fügst du deinen Text ein, rechts erscheint er sofort in Handschrift. In der Leiste über der Seite wählst du Stil, Papier und Tinte. ' +
+      'Oben rechts unter „Exportieren“ sicherst du alles als GoodNotes-Datei, PDF oder Bild.',
   },
   {
     view: 'blatt',

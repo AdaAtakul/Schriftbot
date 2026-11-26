@@ -2,13 +2,13 @@
 import { layout, lineMetrics, DEFAULTS } from './layout.js';
 import { drawPage, drawPaper } from './render.js';
 import { paperShapes } from './paper.js';
-import { getSettings, setSetting, saveProfile } from './storage.js';
+import { getSettings, setSetting, saveProfile, activeProfile } from './storage.js';
 import { equalize, progress } from './profile.js';
 import { PEN_SIZE } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
-import { PRESETS, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
+import { PRESETS, DEFAULT_STYLE, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
 import { ask, info } from './dialog.js';
 import { isDemo } from './demo.js';
 
@@ -24,10 +24,10 @@ export const INKS = {
 };
 
 // Tintenfarbe: feste Farbe oder eigene über den Farbton-Regler
-export const inkColor = s => (s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.blau).color);
+export const inkColor = s => (s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.schwarz).color);
 
 const STANDARD = {
-  paper: 'liniert-breit', ink: 'blau', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
+  paper: 'liniert-breit', ink: 'schwarz', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, paperColor: 'weiss',
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
@@ -134,6 +134,34 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   const styleSel = $('style');
   for (const [key, p] of Object.entries(PRESETS)) styleSel.add(new Option(p.label, key));
   styleSel.addEventListener('change', () => { setSetting('style', styleSel.value); syncControls(); render(); });
+  // Schnellwahl in der Leiste: Ordentlich / Normal / Locker (alle Vorlagen unter „Feineinstellungen“)
+  const styleSeg = $('style-seg');
+  for (const b of styleSeg.children) b.addEventListener('click', () => { setSetting('style', b.dataset.style); syncControls(); render(); });
+
+  // Aufklapp-Menüs der Leiste (Papier, Tinte, Feineinstellungen): eins zur Zeit, schließen mit Esc oder Tipp daneben
+  const popBtns = [...document.querySelectorAll('.lookbar [data-pop]')];
+  const closePops = except => {
+    for (const b of popBtns) {
+      if (b === except) continue;
+      b.setAttribute('aria-expanded', 'false');
+      $(b.dataset.pop).hidden = true;
+    }
+  };
+  for (const b of popBtns) b.addEventListener('click', e => {
+    e.stopPropagation();
+    const pop = $(b.dataset.pop), open = pop.hidden;
+    closePops(b);
+    pop.hidden = !open;
+    b.setAttribute('aria-expanded', String(open));
+    if (open) {
+      // unter dem Knopf ausrichten, aber nicht über den Rand der Bühne hinaus
+      const wrap = pop.parentElement.getBoundingClientRect(), r = b.getBoundingClientRect();
+      const left = Math.max(8, Math.min(r.left - wrap.left + r.width / 2 - pop.offsetWidth / 2, wrap.width - pop.offsetWidth - 8));
+      pop.style.left = left + 'px';
+    }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.pop, .lookbar [data-pop]')) closePops(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closePops(); });
   $('style-reset').addEventListener('click', () => {
     const s = current(), styles = { ...(s.styles || {}) };
     delete styles[s.style];
@@ -202,7 +230,9 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     inkEl.querySelector('[data-ink="eigen"]').style.setProperty('--c', hueColor(+s.inkHue));
     hue.value = s.inkHue;
     $('ink-hue-out').textContent = s.ink === 'eigen' ? `${s.inkHue}°` : 'aus';
-    styleSel.value = PRESETS[s.style] ? s.style : 'normal';
+    styleSel.value = PRESETS[s.style] ? s.style : DEFAULT_STYLE;
+    for (const b of styleSeg.children) b.setAttribute('aria-checked', b.dataset.style === styleSel.value);
+    $('ink-dot').style.background = inkColor(s);
     $('style-desc').textContent = PRESETS[styleSel.value].desc;
     const modified = isModified(s);
     $('style-reset').hidden = !modified;
@@ -224,7 +254,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const result = layout(input.value, profile, o, seed);
     const color = inkColor(s);
     const dpr = window.devicePixelRatio || 1;
-    const cssW = Math.min(pagesEl.clientWidth - 32, 900);
+    const cssW = pageWidth(o);
     const pxPerMm = cssW / o.pageW;
 
     // Vorhandene Canvas wiederverwenden, damit die Vorschau beim Tippen nicht flackert.
@@ -247,15 +277,63 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       drawPage(ctx, page, color, o.penSize);
     });
 
-    const notes = [`${result.pages.length} ${result.pages.length === 1 ? 'Seite' : 'Seiten'}`];
+    pageCount = result.pages.length;
+    const words = input.value.trim() ? input.value.trim().split(/\s+/).length : 0;
+    const notes = [`${words} ${words === 1 ? 'Wort' : 'Wörter'}`, `${pageCount} ${pageCount === 1 ? 'Seite' : 'Seiten'}`];
     const shown = result.missing.filter(ch => ch !== ' ');
     const noGlyphs = progress(profile).done === 0; // dann erklärt der Hinweis über der Vorschau alles
     if (shown.length && !noGlyphs) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
-    if (isDemo()) notes.push('Beispielschrift – deine eigene nimmst du unter „Aufnehmen“ auf');
+    if (isDemo()) notes.push('Eigene Schrift: unter „Aufnehmen“');
     statusEl.textContent = notes.join(' · ');
     $('write-empty').hidden = progress(profile).done > 0;
     statusEl.classList.toggle('warn', shown.length > 0 && !noGlyphs);
+    updatePageInfo();
   }
+
+  // ---------- Zoom und Blättern ----------
+  // 100 % = ganze Seite passt in die Bühne (Handy: volle Breite); Stufen wie in Vorschau-Apps
+  const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
+  let zoom = 1, pageCount = 1, pageIndex = 0;
+  const barWrap = document.querySelector('.view-schreiben .lookbar-wrap');
+  function pageWidth(o) {
+    // Platz für die schwebende Leiste oben (sie bricht auf schmalen Bildschirmen in zwei Zeilen um)
+    const floating = getComputedStyle(barWrap).position === 'absolute';
+    pagesEl.style.paddingTop = floating ? barWrap.offsetTop + barWrap.offsetHeight + 16 + 'px' : '';
+    const st = getComputedStyle(pagesEl);
+    const availW = pagesEl.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight);
+    const availH = pagesEl.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom);
+    const narrow = matchMedia('(max-width: 700px)').matches;
+    const fit = narrow || availH < 200 ? availW : Math.min(availW, availH * o.pageW / o.pageH);
+    return Math.max(120, Math.round(Math.min(fit, 1000) * zoom));
+  }
+  const zoomVal = $('zoom-reset');
+  function setZoom(z) {
+    zoom = z;
+    zoomVal.textContent = Math.round(z * 100) + ' %';
+    $('zoom-out').disabled = z <= ZOOMS[0];
+    $('zoom-in').disabled = z >= ZOOMS[ZOOMS.length - 1];
+    render();
+  }
+  $('zoom-in').addEventListener('click', () => setZoom(ZOOMS.find(z => z > zoom + 1e-6) ?? zoom));
+  $('zoom-out').addEventListener('click', () => setZoom([...ZOOMS].reverse().find(z => z < zoom - 1e-6) ?? zoom));
+  zoomVal.addEventListener('click', () => setZoom(1));
+  function updatePageInfo() {
+    const c = pagesEl.getBoundingClientRect(), mid = c.top + c.height / 2;
+    let best = 0, dist = Infinity;
+    [...pagesEl.children].forEach((pg, i) => {
+      const r = pg.getBoundingClientRect(), d = mid < r.top ? r.top - mid : mid > r.bottom ? mid - r.bottom : 0;
+      if (d < dist) { dist = d; best = i; }
+    });
+    pageIndex = Math.min(best, pageCount - 1);
+    $('page-info').textContent = `Seite ${pageIndex + 1} von ${pageCount}`;
+    $('page-prev').disabled = pageIndex === 0;
+    $('page-next').disabled = pageIndex >= pageCount - 1;
+  }
+  const goPage = i => pagesEl.children[i]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start', inline: 'nearest' });
+  $('page-prev').addEventListener('click', () => goPage(pageIndex - 1));
+  $('page-next').addEventListener('click', () => goPage(pageIndex + 1));
+  let scrollRaf = 0;
+  pagesEl.addEventListener('scroll', () => { cancelAnimationFrame(scrollRaf); scrollRaf = requestAnimationFrame(updatePageInfo); }, { passive: true });
 
   let timer;
   // Ganzen Text löschen (mit Rückfrage) oder durch eine Claude-Antwort ersetzen;
@@ -298,7 +376,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   $('reset-settings').addEventListener('click', async () => {
     if (!await ask('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
-    setSetting('style', 'normal');
+    setSetting('style', DEFAULT_STYLE);
     setSetting('styles', {});
     syncControls();
     render();
@@ -331,7 +409,26 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
   // ---------- Export ----------
   const shareAgain = $('share-again');
-  const exportButtons = [$('export-goodnotes'), $('export-pdf'), $('export-png')];
+  // Ein Knopf „Exportieren“ (Kopfzeile) öffnet das Export-Fenster: Format und Hintergrund an einem Ort
+  const dlg = $('export-dlg'), kindEl = $('export-kind'), go = $('export-go'), openBtn = $('export-open');
+  const exportButtons = [go, openBtn];
+  const KIND_LABEL = { goodnotes: 'Für GoodNotes sichern', pdf: 'Als PDF sichern', png: 'Als Bild sichern' };
+  const exportKind = () => (KIND_LABEL[getSettings().exportKind] ? getSettings().exportKind : 'goodnotes');
+  function syncExport() {
+    const kind = exportKind();
+    for (const b of kindEl.children) b.setAttribute('aria-checked', b.dataset.kind === kind);
+    go.textContent = KIND_LABEL[kind];
+    const name = activeProfile()?.name || 'Handschrift';
+    $('export-summary').textContent = `${pageCount} ${pageCount === 1 ? 'Seite' : 'Seiten'} · A4 · ${name}`;
+  }
+  for (const b of kindEl.children) b.addEventListener('click', () => { setSetting('exportKind', b.dataset.kind); syncExport(); });
+  openBtn.addEventListener('click', () => {
+    if (!input.value.trim()) return info('Bitte zuerst Text eingeben.');
+    syncControls();
+    syncExport();
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+  });
+  go.addEventListener('click', () => { dlg.close?.(); doExport(exportKind()); });
   $('write-empty-record').addEventListener('click', () => document.getElementById('tab-aufnahme').click());
   let pending = null;
 
@@ -370,9 +467,6 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
   }
-  $('export-goodnotes').addEventListener('click', () => doExport('goodnotes'));
-  $('export-pdf').addEventListener('click', () => doExport('pdf'));
-  $('export-png').addEventListener('click', () => doExport('png'));
   shareAgain.addEventListener('click', async () => {
     shareAgain.hidden = true;
     try { await shareFiles(pending); } catch (err) { info('Teilen fehlgeschlagen: ' + err.message); }

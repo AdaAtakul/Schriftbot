@@ -9,6 +9,7 @@ import { shareFiles } from './export.js';
 import { ask, info } from './dialog.js';
 import { nonPenAllowed } from './pen.js';
 import { isDemo } from './demo.js';
+import { DEFAULT_STYLE } from './stil.js';
 
 const fileName = name => name.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'profil';
 const jsonFile = (data, name) => new File([JSON.stringify(data)], name, { type: 'application/json' });
@@ -98,7 +99,7 @@ export function initProfil(profile) {
     }
     for (const [i, e] of entries.entries()) {
       if (e.handwriting) await saveGlyphs(ids[i], e.handwriting);
-      seedSettings(ids[i], { style: 'normal', styles: {}, ...e.settings });
+      seedSettings(ids[i], { style: DEFAULT_STYLE, styles: {}, ...e.settings });
     }
     if (lone) await deleteProfile(lone.id);
     setActiveProfile(ids[0]);

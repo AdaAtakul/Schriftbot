@@ -20,15 +20,15 @@ assert.equal(styleValues({ ...s, style: 'ordentlich' }).weight, PRESETS.ordentli
 assert.equal(styleValues({ ...s, style: 'ordentlich', styles: s.styles }).weight, 100);
 s = { ...s, styles: withStyleValue(s, 'weight', PRESETS.unordentlich.weight) };
 assert.ok(!isModified(s), 'Vorlagenwert = keine Anpassung');
-// Unbekannte Vorlage → Normal
-assert.equal(styleValues({ style: 'gibtsnicht' }).chaos, PRESETS.normal.chaos);
+// Unbekannte Vorlage → Standard (Ordentlich)
+assert.equal(styleValues({ style: 'gibtsnicht' }).chaos, PRESETS.ordentlich.chaos);
 
 // Alte Einstellungen bleiben optisch gleich: Regler-Werte als Anpassung von „Normal“, Schreibfehler → beide neuen Regler, keine Ränder
 const mig = migrateStyle({ connect: 30, chaos: 50, weight: 140, mistakes: 40, text: 'x' });
 const v = styleValues(mig);
 assert.deepEqual([v.connect, v.chaos, v.weight, v.strike, v.wobble, v.edges], [30, 50, 140, 40, 40, 0]);
 assert.equal(migrateStyle({ style: 'locker' }), null, 'schon umgestellt');
-assert.deepEqual(migrateStyle({ text: 'nur Geräte-Werte' }), { style: 'normal', styles: {} }, 'neues Profil startet mit Normal');
+assert.deepEqual(migrateStyle({ text: 'nur Geräte-Werte' }), { style: 'ordentlich', styles: {} }, 'neues Profil startet mit Ordentlich');
 
 // Farbton → kräftige, dunkle Tinte
 assert.equal(hueColor(0), '#9e1a1a');

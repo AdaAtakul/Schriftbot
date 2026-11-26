@@ -12,7 +12,8 @@ export const PRESETS = {
   'unordentlich':      { label: 'Unordentlich',      desc: 'Eilig mitgeschrieben: schiefe Zeilen, Korrekturen, wird zum Ende hin krakeliger.', connect: 90,  chaos: 100, strike: 40, fix: 35, fatigue: 60, wobble: 80,  edges: 75,  weight: 120 },
   'sehr-unordentlich': { label: 'Sehr unordentlich', desc: 'Schnell hingekritzelt.', connect: 100, chaos: 140, strike: 70, fix: 60, fatigue: 85, wobble: 100, edges: 100, weight: 135 },
 };
-export const DEFAULT_STYLE = 'normal';
+export const DEFAULT_STYLE = 'ordentlich'; // neue Profile: ordentlich, wenig Unordnung
+const LEGACY_STYLE = 'normal'; // alte Regler-Werte wurden als „Normal“ übernommen
 
 const styleKey = s => (PRESETS[s.style] ? s.style : DEFAULT_STYLE);
 const pick = obj => Object.fromEntries(STYLE_KEYS.filter(k => k in obj).map(k => [k, obj[k]]));
@@ -39,11 +40,11 @@ export function withStyleValue(s, key, value) {
 // (als angepasste Vorlage „Normal“, ohne Ränder). Gibt { style, styles } zurück oder null, wenn nichts zu tun ist.
 export function migrateStyle(raw) {
   if (raw.style) return null;
-  if (!['connect', 'chaos', 'weight', 'mistakes'].some(k => k in raw)) return { style: DEFAULT_STYLE, styles: {} }; // neu: Vorlage „Normal“
+  if (!['connect', 'chaos', 'weight', 'mistakes'].some(k => k in raw)) return { style: DEFAULT_STYLE, styles: {} }; // neu: Vorlage „Ordentlich“
   const m = raw.mistakes ?? 0;
   const own = { connect: raw.connect ?? 70, chaos: raw.chaos ?? 50, weight: raw.weight ?? 100, strike: m, wobble: m, edges: 0 };
-  for (const k of STYLE_KEYS) if (own[k] === PRESETS[DEFAULT_STYLE][k]) delete own[k];
-  return { style: DEFAULT_STYLE, styles: { [DEFAULT_STYLE]: own } };
+  for (const k of STYLE_KEYS) if (own[k] === PRESETS[LEGACY_STYLE][k]) delete own[k];
+  return { style: LEGACY_STYLE, styles: { [LEGACY_STYLE]: own } };
 }
 
 // Tinte aus dem Farbton-Regler: kräftig und dunkel genug für Papier (wie echte Tinte).

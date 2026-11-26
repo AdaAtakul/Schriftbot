@@ -51,8 +51,29 @@ function showView(name) {
     }
   }
   currentView = name;
+  // „Exportieren“ in der Kopfzeile gehört zum Schreiben (Ausfüllen hat eigene Export-Knöpfe)
+  document.getElementById('export-open').hidden = name !== 'schreiben';
   moveIndicator();
 }
+
+// Hell/Dunkel: Schalter in der Kopfzeile, Standard hell, wird auf dem Gerät gemerkt
+const themeBtn = document.getElementById('theme-btn');
+function applyTheme(dark) {
+  const root = document.documentElement;
+  if (dark) root.dataset.theme = 'dark'; else delete root.dataset.theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#23292c' : '#ffffff');
+  document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', dark ? 'dark' : 'light');
+  const label = dark ? 'Helles Design' : 'Dunkles Design';
+  themeBtn.setAttribute('aria-label', label);
+  themeBtn.title = label;
+  themeBtn.querySelector('use').setAttribute('href', dark ? '#i-sun' : '#i-moon');
+}
+applyTheme(document.documentElement.dataset.theme === 'dark');
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme !== 'dark';
+  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch {}
+  applyTheme(dark);
+});
 document.addEventListener('animationend', e => { if (e.target.classList?.contains('view-enter')) e.target.classList.remove('view-enter'); });
 
 for (const tab of tabs) tab.addEventListener('click', () => showView(tab.dataset.view));

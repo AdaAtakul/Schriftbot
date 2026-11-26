@@ -21,9 +21,10 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="DeineSchrift: getippter Text wird zu Handschrift auf liniertem Papier">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-  <meta name="theme-color" content="#f4f5f9" media="(prefers-color-scheme: light)">
-  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <script>/* Hell oder dunkel: Schalter in der App (Standard hell), vor dem ersten Zeichnen setzen, sonst blitzt es */
+    try { if (localStorage.getItem('theme') === 'dark') { document.documentElement.dataset.theme = 'dark'; document.querySelector('meta[name="theme-color"]').content = '#23292c'; } } catch (e) {}</script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -104,6 +105,10 @@
       <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></symbol>
       <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4z"/><path d="M19 5v14"/></symbol>
       <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
       <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></symbol>
     </defs>
   </svg>
@@ -121,8 +126,9 @@
       <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span>Profil</span></button>
     </nav>
     <div class="topbar-end">
-      <label class="profile-switch"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><select id="profile-switch" aria-label="Profil wechseln"></select></label>
-      <button id="help-btn" class="icon-btn" aria-label="Kurze Anleitung zeigen" title="Kurze Anleitung"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
+      <button id="theme-btn" class="icon-btn round" aria-label="Dunkles Design" title="Dunkles Design"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></button>
+      <button id="help-btn" class="icon-btn round" aria-label="Kurze Anleitung zeigen" title="Kurze Anleitung"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
+      <button id="export-open" class="primary pill" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg><span>Exportieren</span></button>
     </div>
   </header>
   <div id="safety-banner" class="banner safety" role="status" hidden>
@@ -196,55 +202,61 @@
 
     <section id="view-schreiben" class="view view-schreiben" role="tabpanel" aria-labelledby="tab-schreiben">
       <div class="panel editor">
-        <div class="text-wrap">
-          <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
-          <button id="text-delete" class="trash" aria-label="Ganzen Text löschen" title="Ganzen Text löschen"><svg class="icon"><use href="#i-trash"/></svg></button>
+        <div class="editor-head">
+          <label for="text-input">Dein Text</label>
+          <button id="text-delete" class="ghost small" title="Ganzen Text löschen"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Leeren</button>
         </div>
+        <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
         <button id="text-restore" hidden><svg class="icon"><use href="#i-reset"/></svg><span>Gelöschten Text wiederherstellen</span></button>
         <p id="schreiben-status" class="status"></p>
-        <details class="settings" open>
-          <summary>Stil &amp; Papier</summary>
-          <label class="field">Stil-Vorlage
-            <select id="style"></select>
-          </label>
-          <p id="style-desc" class="hint small"></p>
-          <details class="fine" id="style-fine">
-            <summary>Feineinstellungen der Vorlage</summary>
-            <div id="style-controls" class="group"></div>
-          </details>
-          <p id="style-note" class="hint small"></p>
-          <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
-          <div class="field">Papier
-            <div id="paper" class="paper-grid" role="radiogroup" aria-label="Papier"></div>
-          </div>
-          <div class="field">Papierfarbe
-            <div id="paper-color" class="swatches"></div>
-          </div>
-          <div class="field">Im Export
-            <div id="export-bg" class="seg" role="radiogroup" aria-label="Hintergrund im Export">
-              <button type="button" role="radio" data-bg="paper" aria-checked="true">Mit Papier</button>
-              <button type="button" role="radio" data-bg="none" aria-checked="false">Nur Schrift</button>
-            </div>
-            <span id="export-bg-hint" class="hint small"></span>
-          </div>
-          <div class="field">Tintenfarbe
-            <div id="ink" class="swatches"></div>
-          </div>
-          <label class="slider hue">Farbton <output id="ink-hue-out"></output>
-            <input type="range" id="ink-hue" min="0" max="359" step="1">
-          </label>
-          <div id="controls"></div>
-          <div class="row">
-            <button id="reroll"><svg class="icon"><use href="#i-shuffle"/></svg>Neu würfeln</button>
-            <button id="reset-settings"><svg class="icon"><use href="#i-reset"/></svg>Standard</button>
-          </div>
-          <div class="row">
-            <button id="equalize"><svg class="icon"><use href="#i-ruler"/></svg>Größen angleichen</button>
-            <button id="equalize-undo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Angleichen rückgängig</button>
-          </div>
-        </details>
       </div>
       <div class="stage">
+        <div class="lookbar-wrap">
+          <div class="lookbar" role="toolbar" aria-label="Aussehen">
+            <label class="lb-font"><span>Schrift</span><select id="profile-switch" aria-label="Handschrift (Profil) wählen"></select></label>
+            <span class="lb-sep" aria-hidden="true"></span>
+            <div id="style-seg" class="seg" role="radiogroup" aria-label="Stil">
+              <button type="button" role="radio" data-style="ordentlich" aria-checked="false">Ordentlich</button>
+              <button type="button" role="radio" data-style="normal" aria-checked="false">Normal</button>
+              <button type="button" role="radio" data-style="locker" aria-checked="false">Locker</button>
+            </div>
+            <button type="button" class="lb-btn" data-pop="pop-paper" aria-expanded="false" aria-controls="pop-paper">Papier<svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></button>
+            <button type="button" class="lb-btn" data-pop="pop-ink" aria-expanded="false" aria-controls="pop-ink">Tinte<span id="ink-dot" class="ink-dot" aria-hidden="true"></span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></button>
+            <button type="button" class="lb-btn" data-pop="pop-more" aria-expanded="false" aria-controls="pop-more" aria-label="Feineinstellungen" title="Feineinstellungen"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>
+            <span class="lb-sep" aria-hidden="true"></span>
+            <button type="button" id="reroll" class="lb-btn" aria-label="Neu würfeln" title="Neu würfeln: jede Version sieht etwas anders aus"><svg class="icon" aria-hidden="true"><use href="#i-shuffle"/></svg></button>
+          </div>
+
+          <div id="pop-paper" class="pop" role="dialog" aria-label="Papier" hidden>
+            <div id="paper" class="paper-grid" role="radiogroup" aria-label="Papier"></div>
+            <div class="pop-row"><span>Papierfarbe</span><div id="paper-color" class="swatches"></div></div>
+          </div>
+          <div id="pop-ink" class="pop" role="dialog" aria-label="Tinte" hidden>
+            <div id="ink" class="swatches" role="group" aria-label="Tintenfarbe"></div>
+            <label class="slider hue">Eigener Farbton <output id="ink-hue-out"></output>
+              <input type="range" id="ink-hue" min="0" max="359" step="1">
+            </label>
+          </div>
+          <div id="pop-more" class="pop pop-wide" role="dialog" aria-label="Feineinstellungen" hidden>
+            <label class="field">Alle Stil-Vorlagen
+              <select id="style"></select>
+            </label>
+            <p id="style-desc" class="hint small"></p>
+            <details class="fine" id="style-fine">
+              <summary>Regler der Vorlage</summary>
+              <div id="style-controls" class="group"></div>
+            </details>
+            <p id="style-note" class="hint small"></p>
+            <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
+            <div id="controls"></div>
+            <div class="row">
+              <button id="reset-settings"><svg class="icon"><use href="#i-reset"/></svg>Standard</button>
+              <button id="equalize"><svg class="icon"><use href="#i-ruler"/></svg>Größen angleichen</button>
+              <button id="equalize-undo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Angleichen rückgängig</button>
+            </div>
+          </div>
+        </div>
+
         <div id="pages" class="pages" role="region" aria-label="Vorschau der Seiten" tabindex="0"></div>
         <div id="write-empty" class="write-empty" hidden>
           <div class="write-empty-card">
@@ -254,13 +266,47 @@
             <button id="write-empty-record" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg>Eigene Schrift aufnehmen</button>
           </div>
         </div>
-        <div class="floatbar export" role="toolbar" aria-label="Exportieren">
-          <button id="export-goodnotes" class="primary"><svg class="icon"><use href="#i-book"/></svg>GoodNotes</button>
-          <button id="export-pdf"><svg class="icon"><use href="#i-file"/></svg>PDF</button>
-          <button id="export-png"><svg class="icon"><use href="#i-image"/></svg>PNG</button>
-          <button id="share-again" class="primary" hidden><svg class="icon"><use href="#i-share"/></svg>Jetzt teilen</button>
+        <div class="pagebar" role="toolbar" aria-label="Seiten und Zoom">
+          <button id="page-prev" class="icon-btn ghost" aria-label="Vorherige Seite"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg></button>
+          <span id="page-info" class="page-info" aria-live="polite">Seite 1 von 1</span>
+          <button id="page-next" class="icon-btn ghost" aria-label="Nächste Seite"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+          <span class="lb-sep" aria-hidden="true"></span>
+          <button id="zoom-out" class="icon-btn ghost" aria-label="Verkleinern">−</button>
+          <button id="zoom-reset" class="ghost zoom-val" aria-label="Zoom zurücksetzen" title="Ganze Seite zeigen">100 %</button>
+          <button id="zoom-in" class="icon-btn ghost" aria-label="Vergrößern">+</button>
         </div>
+        <button id="share-again" class="primary share-again" hidden><svg class="icon"><use href="#i-share"/></svg>Jetzt teilen</button>
       </div>
+
+      <dialog id="export-dlg" class="export-dlg" aria-labelledby="export-title">
+        <form method="dialog" class="export-form">
+          <div class="dlg-head">
+            <h2 id="export-title">Exportieren</h2>
+            <button value="cancel" class="icon-btn round ghost" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+          </div>
+          <div class="dlg-field">
+            <span class="dlg-label" id="fmt-label">Format</span>
+            <div id="export-kind" class="fmt-grid" role="radiogroup" aria-labelledby="fmt-label">
+              <button type="button" role="radio" data-kind="goodnotes" aria-checked="true"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg><strong>GoodNotes</strong><span>Direkt als Notizbuch</span></button>
+              <button type="button" role="radio" data-kind="pdf" aria-checked="false"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><strong>PDF</strong><span>Drucken, teilen</span></button>
+              <button type="button" role="radio" data-kind="png" aria-checked="false"><svg class="icon" aria-hidden="true"><use href="#i-image"/></svg><strong>Bild</strong><span>PNG je Seite</span></button>
+            </div>
+          </div>
+          <div class="dlg-field">
+            <span class="dlg-label" id="bg-label">Hintergrund</span>
+            <div id="export-bg" class="seg" role="radiogroup" aria-labelledby="bg-label">
+              <button type="button" role="radio" data-bg="paper" aria-checked="true">Mit Papier</button>
+              <button type="button" role="radio" data-bg="none" aria-checked="false">Nur Schrift</button>
+            </div>
+            <span id="export-bg-hint" class="hint small"></span>
+          </div>
+          <p id="export-summary" class="hint"></p>
+          <div class="dlg-actions">
+            <button value="cancel">Abbrechen</button>
+            <button type="button" id="export-go" class="primary">Für GoodNotes sichern</button>
+          </div>
+        </form>
+      </dialog>
     </section>
 
     <section id="view-blatt" class="view view-blatt" role="tabpanel" aria-labelledby="tab-blatt" hidden>
