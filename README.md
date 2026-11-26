@@ -1,6 +1,6 @@
 # Handschrift-Tool
 
-Eine Web-App für das iPad: Sie nimmt deine eigene Handschrift mit dem Apple Pencil auf und verwandelt getippten Text in diese Handschrift. Das Ergebnis gibst du als PDF (oder PNG) über das Teilen-Menü an GoodNotes weiter.
+Eine Web-App für das iPad: Sie nimmt deine eigene Handschrift mit dem Apple Pencil auf und verwandelt getippten Text in diese Handschrift – als eigene Seiten oder direkt auf einem Arbeitsblatt. Das Ergebnis gibst du als GoodNotes-Notizbuch, PDF oder PNG über das Teilen-Menü weiter.
 
 - Läuft im Safari auf dem iPad, optimiert fürs Querformat
 - Funktioniert nach dem ersten Öffnen komplett offline
@@ -25,7 +25,7 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
    css/
    icons/
    js/
-   vendor/
+   vendor/       (mit vendor/pdfjs/ – wird zum Öffnen von Arbeitsblättern gebraucht)
    tests/        (optional, wird für die App nicht gebraucht)
    ```
    Wichtig: die Ordnerstruktur muss erhalten bleiben (`js/app.js`, nicht nur `app.js`).
@@ -51,7 +51,7 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Verbundene Paare** (ch, sch, ei …): so schreiben, wie du sie wirklich verbindest. Eigene Paare fügst du unten links hinzu.
 - Farben in der Liste: weiß = fehlt, gelb = 1–2 Varianten, grün = fertig.
 - **Nächstes fehlendes ⏭** springt zum nächsten unvollständigen Zeichen.
-- **📐 Kästchen an meine Schrift anpassen** (links oben): Misst, wie groß du Kleinbuchstaben wirklich schreibst, und verkleinert Kästchen und Hilfslinien passend. Deine Aufnahmen bleiben gleich groß und das PDF auch (die Schriftgröße im Schreiben-Tab wird ausgeglichen). Gilt auch für die Aufnahme als Text.
+- **Kästchen an meine Schrift anpassen** (links oben): Misst, wie groß du Kleinbuchstaben wirklich schreibst, und verkleinert Kästchen und Hilfslinien passend. Deine Aufnahmen bleiben gleich groß und das PDF auch (die Schriftgröße im Schreiben-Tab wird ausgeglichen). Gilt auch für die Aufnahme als Text.
 - Nur der Apple Pencil zeichnet. Finger und Handballen werden ignoriert, damit du die Hand ablegen kannst.
 
 - Unter den Kästchen zeigt **„So sieht es im Text aus“** Beispielwörter mit dem aktuellen Zeichen in deiner Schrift. So fällt ein zu großer oder schiefer Buchstabe sofort auf.
@@ -75,24 +75,44 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - **Papier**: Liniert breit / schmal, Kariert 5 mm oder Blanko. Auf liniertem und kariertem Papier steht jede Zeile genau auf einer Linie.
 - **Verbindungen**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
 - **Unordnung**: kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage – wie echte Handschrift.
+- **Schreibfehler** (Standard 0 %): Ab und zu wird ein Wort erst falsch angefangen (Buchstabendreher oder falscher Buchstabe), durchgestrichen und daneben richtig geschrieben. Dazu schwanken die Zeilen leicht, der Druck wechselt von Wort zu Wort und lässt zum Zeilenende etwas nach. Je höher der Regler, desto öfter (bei 100 % etwa alle 20–25 Wörter, nie zwei Verschreiber dicht hintereinander). Verschreiber nutzen nur aufgenommene Zeichen, **Neu würfeln** verteilt sie neu. In GoodNotes ist der Streichstrich ein eigener Strich, den du wegradieren kannst.
 - **Strichdicke**: dünner oder kräftiger schreiben (40–250 %), gilt für Vorschau und alle Exporte.
 - **Schriftgröße, Zeilenabstand, Rand, Tintenfarbe** nach Geschmack.
-- **🎲 Neu würfeln**: andere Mischung der Varianten.
-- **📏 Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **↶ Angleichen rückgängig** geht, bis du die App schließt.
+- **Neu würfeln**: andere Mischung der Varianten.
+- **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **↶ Angleichen rückgängig** geht, bis du die App schließt.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
 - Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
 
+### Arbeitsblatt ausfüllen (Tab „Blatt“)
+
+Du hast ein Arbeitsblatt als PDF, in das die Antworten blau hineingetippt sind? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
+
+1. **PDF oder Foto öffnen** antippen und das Arbeitsblatt wählen (aus Dateien, iCloud Drive …).
+2. Die App findet jede **blaue Antwort**, entfernt sie vom Blatt und schreibt denselben Text an dieselbe Stelle in deiner Handschrift. Das Feld reicht nach unten bis kurz vor die nächste Aufgabe, so ist Platz für die größere Handschrift.
+3. Felder anpassen:
+   - **Antippen** wählt ein Feld. Links kannst du den Text ändern.
+   - **Ziehen** verschiebt das Feld, der **Punkt unten rechts** ändert die Größe.
+   - **Automatisch einpassen** (Standard): Die Schrift wird nur so weit verkleinert, wie nötig ist, damit alles ins Feld passt. Ausgeschaltet stellst du die Größe selbst ein.
+   - **＋ Textfeld**, dann ein Rechteck aufziehen: neues Feld, z. B. auf einem leeren Arbeitsblatt.
+   - **Feld löschen**: Bei einem erkannten Feld erscheint dann wieder der blaue Text.
+4. Exportieren über die Leiste unten: **GoodNotes** (Blatt als Hintergrund, die Schrift radierbar darüber), **PDF** oder **PNG**.
+
+- Tinte, Strichdicke, Unordnung und Schreibfehler kommen aus dem Tab „Schreiben“.
+- Bei einem **Foto** oder einem eingescannten PDF gibt es keinen lesbaren Text. Dann werden die blauen Stellen trotzdem gefunden, und du trägst den Text selbst ein (z. B. per KI-Assistent im Tab „Schreiben“ erzeugen und hineinkopieren).
+- Als Antwort zählt nur deutlich blaue Schrift. Schwarzer Aufgabentext bleibt unangetastet, auch wenn er direkt über der Antwort steht.
+- Das zuletzt geöffnete Blatt bleibt mit allen Feldern gespeichert, auch nach dem Schließen der App.
+
 ### KI-Assistent (Claude oder eine andere KI)
 
-Im Tab **Schreiben** unter **✨ KI-Assistent** schreibst du einen Auftrag, z. B. „Fasse die Photosynthese in 5 Sätzen zusammen“. Die Antwort ersetzt den Text im Textfeld und erscheint sofort in deiner Handschrift. **Korrigieren**, **Kürzen** und **Stichpunkte** bearbeiten den vorhandenen Text. **↶ Vorherigen Text zurückholen** macht die letzte Änderung rückgängig.
+Im Tab **Schreiben** unter **KI-Assistent** schreibst du einen Auftrag, z. B. „Fasse die Photosynthese in 5 Sätzen zusammen“. Die Antwort ersetzt den Text im Textfeld und erscheint sofort in deiner Handschrift. **Korrigieren**, **Kürzen** und **Stichpunkte** bearbeiten den vorhandenen Text. **↶ Vorherigen Text zurückholen** macht die letzte Änderung rückgängig.
 
 **Kostenlos über dein Claude-Abo (ohne API-Schlüssel):**
 
-1. Auftrag eintippen und **📋 In Claude-App fragen** antippen. Auftrag, dein Text und die Zeichenvorgaben landen in der Zwischenablage, und die Claude-App (oder claude.ai) öffnet sich.
+1. Auftrag eintippen und **In Claude-App fragen** antippen. Auftrag, dein Text und die Zeichenvorgaben landen in der Zwischenablage, und die Claude-App (oder claude.ai) öffnet sich.
 2. Dort ins Eingabefeld einfügen und senden.
-3. Die Antwort kopieren (lange drücken → Kopieren), zurück zur Handschrift-App wechseln und **📥 Antwort einfügen** antippen. Safari fragt einmal mit „Einfügen“ nach.
+3. Die Antwort kopieren (lange drücken → Kopieren), zurück zur Handschrift-App wechseln und **Antwort einfügen** antippen. Safari fragt einmal mit „Einfügen“ nach.
 
-**Direkt mit API-Schlüssel** (schneller, aber pro Anfrage kostenpflichtig): **✨ Ausführen** und die Schnellknöpfe. Einrichten im Tab **Profil → KI-Assistent**:
+**Direkt mit API-Schlüssel** (schneller, aber pro Anfrage kostenpflichtig): **Ausführen** und die Schnellknöpfe. Einrichten im Tab **Profil → KI-Assistent**:
 
 - **Claude**: Unter [console.anthropic.com](https://console.anthropic.com) → *API Keys* einen Schlüssel anlegen und Guthaben aufladen, dann den Schlüssel einfügen. Voreingestellt ist `claude-opus-5-5`; `claude-haiku-5-5` ist deutlich günstiger.
 - **Andere KI**: „Andere KI (OpenAI-kompatibel)“ wählen und Adresse, Modellname und Schlüssel des Anbieters eintragen (z. B. OpenAI `https://api.openai.com/v1`, OpenRouter `https://openrouter.ai/api/v1`). Manche Anbieter erlauben keinen Zugriff direkt aus dem Browser. Dann erscheint „Keine Verbindung“.
@@ -108,7 +128,7 @@ Gut zu wissen:
 
 **Als GoodNotes-Notizbuch (radierbar):**
 
-1. **📓 GoodNotes** antippen.
+1. **GoodNotes** antippen.
 2. Im Teilen-Menü **GoodNotes** wählen. Fehlt GoodNotes dort, „In Dateien sichern“ wählen und die Datei in der Dateien-App antippen → „Öffnen in GoodNotes“ (oder in GoodNotes über **Importieren**).
 3. GoodNotes legt ein neues Notizbuch an. Jeder Strich ist ein echter Kugelschreiber-Strich: mit dem **Radierer** einzelne Buchstaben löschen, mit dem **Lasso** verschieben, umfärben oder löschen. Buchstaben aus mehreren Strichen (t, ä, i …) brauchen einen Radierer-Tipp pro Strich.
 
@@ -118,13 +138,13 @@ Gut zu wissen:
 
 **Als PDF (Seitenhintergrund, nicht radierbar):**
 
-1. **📄 PDF** antippen.
+1. **PDF** antippen.
 2. Im Teilen-Menü **GoodNotes** wählen (ggf. unter „Mehr“). GoodNotes legt ein neues Dokument an oder fügt die Seiten an.
-3. Erscheint stattdessen der Knopf **📤 Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
+3. Erscheint stattdessen der Knopf **Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
 
 - Das PDF ist A4, mehrseitig und in Vektorqualität – die Schrift bleibt bei jedem Zoom scharf.
 - **Linien mitexportieren**: Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommen die Linien standardmäßig mit ins PDF.
-- **🖼 PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne „Linien mitexportieren“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
+- **PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne „Linien mitexportieren“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
 
 ### Linien an GoodNotes anpassen
 
@@ -141,7 +161,7 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v19';` hochzählen (z. B. auf `'v20'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v21';` hochzählen (z. B. auf `'v22'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -159,11 +179,14 @@ Dein Handschrift-Profil liegt nur im Speicher von Safari auf diesem iPad. Wird d
 Projektstruktur:
 
 ```
-index.html              Oberfläche (drei Tabs)
+index.html              Oberfläche (vier Tabs), Icons
 css/app.css             Gestaltung, Touch-Größen
 js/app.js               Start, Navigation, Offline/Updates
 js/aufnahme.js          Modul 1: Pencil-Aufnahme
 js/schreiben.js         Modul 2: Textfeld, Vorschau, Einstellungen, Export-Knöpfe
+js/blatt.js             Arbeitsblatt: blaue Antworten finden/entfernen, Felder, Einpassen
+js/blattui.js           Tab Blatt: Felder verschieben, aufziehen, bearbeiten, Export
+js/pdfimport.js         PDF (pdf.js) und Fotos einlesen, 200 dpi
 js/layout.js            Satz: Paare, Varianten, Unordnung, Umbruch, Seiten, Linien
 js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
 js/export.js            PDF (Vektor), PNG, Teilen
@@ -175,7 +198,7 @@ js/storage.js           IndexedDB und Einstellungen
 js/ki.js                KI-Aufruf: Claude (Messages-API) oder OpenAI-kompatibel
 js/kiui.js              KI-Assistent: Einstellungen und Aufträge
 sw.js                   Service Worker (Offline-Cache)
-vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT-Lizenz)
+vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0)
 tests/                  Selbsttests
 ```
 
@@ -190,6 +213,7 @@ node tests/export.test.mjs
 node tests/goodnotes.test.mjs
 node tests/textplan.test.mjs
 node tests/ki.test.mjs
+node tests/blatt.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):

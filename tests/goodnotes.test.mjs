@@ -137,3 +137,16 @@ pages.forEach((e, i) => {
 const expected = result.pages.flatMap(pg => pg.items.filter(it => !it.missing).flatMap(it => it.strokes)).length;
 assert.equal(strokes, expected, 'jeder Strich einzeln');
 console.log(`OK – GoodNotes: ${pages.length} Seiten, ${strokes} einzelne Striche, ${Math.round(file.length / 1024)} KB`);
+
+// Arbeitsblatt: eigenes Papier-PDF je Seite, jede Seite verweist auf ihre eigene Papierebene
+const sheet = { pages: result.pages.slice(0, 2).map(pg => ({ ...pg, size: [210, 297] })) };
+const papers = sheet.pages.map(() => paper);
+const sf = unzip(buildGoodnotes(sheet, o, '#1f4fbf', papers, 'Blatt'));
+const sev = records(sf.get('index.events.pb'));
+assert.equal(records(sf.get('index.attachments.pb')).length, 2, 'ein Anhang je Seite');
+const layers = sev.filter(e => kind(e) === 2).map(e => str(parse(get(e, 2)), 2));
+const used = sev.filter(e => kind(e) === 54).map(e => str(parse(get(parse(get(e, 54)), 3)), 1));
+assert.equal(new Set(layers).size, 2);
+assert.deepEqual(new Set(used), new Set(layers), 'jede Seite hat ihre Ebene');
+for (const [name] of records(sf.get('index.attachments.pb')).map(r => [str(r, 2)])) assert.ok(sf.has(name));
+console.log('OK – GoodNotes mit Papier je Seite');

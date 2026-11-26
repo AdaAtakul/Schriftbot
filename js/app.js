@@ -5,6 +5,7 @@ import { initTextAufnahme } from './textaufnahme.js';
 import { initProfil } from './profil.js';
 import { initSchreiben } from './schreiben.js';
 import { initKi } from './kiui.js';
+import { initBlatt } from './blattui.js';
 
 // Navigation zwischen den Modulen; letzter Tab wird gemerkt.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -42,6 +43,7 @@ initTextAufnahme(profile, aufnahme.refresh);
 schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(profile);
 initKi(profile);
+initBlatt(profile);
 
 // PWA: Service Worker für Offline-Betrieb.
 const offlineStatus = document.getElementById('status-offline');

@@ -24,7 +24,7 @@ export const INKS = {
 };
 
 const STANDARD = {
-  paper: 'liniert-breit', ink: 'blau', connect: 70, chaos: 50,
+  paper: 'liniert-breit', ink: 'blau', connect: 70, chaos: 50, mistakes: 0,
   weight: 100, xHeight: 3, lineHeight: 8.8, margin: 20, lineSpacing: 8.8, lineTop: 20,
 };
 
@@ -32,6 +32,7 @@ const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) 
 const SLIDERS = [
   { key: 'connect', label: 'Verbindungen', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
   { key: 'chaos', label: 'Unordnung', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
+  { key: 'mistakes', label: 'Schreibfehler', min: 0, max: 100, step: 5, fmt: v => v + ' %' },
   { key: 'weight', label: 'Strichdicke', min: 40, max: 250, step: 5, fmt: v => v + ' %' },
   { key: 'xHeight', label: 'Schriftgröße (x-Höhe)', min: 1.5, max: 6, step: 0.1, fmt: mm },
   { key: 'lineHeight', label: 'Zeilenabstand', min: 4, max: 20, step: 0.1, fmt: (v, s) => {
@@ -53,7 +54,7 @@ export function options(s = current()) {
   const paper = PAPERS[s.paper] || PAPERS[STANDARD.paper];
   return {
     xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, penSize: PEN_SIZE * s.weight / 100,
-    connect: s.connect / 100, chaos: s.chaos / 100,
+    connect: s.connect / 100, chaos: s.chaos / 100, mistakes: s.mistakes / 100,
     ruled: paper.ruled, grid: !!paper.grid, lineSpacing: +s.lineSpacing, lineTop: +s.lineTop,
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,
   };
@@ -213,8 +214,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
     const color = (INKS[s.ink] || INKS.blau).color;
     const date = new Date().toISOString().slice(0, 10);
-    const labels = exportButtons.map(b => b.textContent);
-    exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ Wird erstellt …'; });
+    const labels = exportButtons.map(b => b.innerHTML);
+    exportButtons.forEach(b => { b.disabled = true; b.textContent = '⏳ …'; });
     shareAgain.hidden = true;
     try {
       let files;
@@ -236,7 +237,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     } catch (err) {
       alert('Export fehlgeschlagen: ' + err.message);
     } finally {
-      exportButtons.forEach((b, i) => { b.disabled = false; b.textContent = labels[i]; });
+      exportButtons.forEach((b, i) => { b.disabled = false; b.innerHTML = labels[i]; });
     }
   }
   $('export-goodnotes').addEventListener('click', () => doExport('goodnotes'));

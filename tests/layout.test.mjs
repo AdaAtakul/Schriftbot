@@ -1,7 +1,7 @@
 // Selbsttest für das Layout: node tests/layout.test.mjs
 import assert from 'node:assert/strict';
 import { emptyProfile, variantsOf } from '../js/profile.js';
-import { layout, bounds, lineMetrics, DEFAULTS } from '../js/layout.js';
+import { layout, bounds, lineMetrics, DEFAULTS, misspell, rng } from '../js/layout.js';
 
 const p = emptyProfile();
 const line = (x0, x1) => [[[x0, 0, 0.5, 0], [x1, -1, 0.5, 10]]];
@@ -94,4 +94,50 @@ const gapOf = s => { const [a, b] = layout(s, k).pages[0].items; return inkX(b, 
 const normal = (DEFAULTS.spacing + 0.13) * DEFAULTS.xHeight; // Abstand + Strichbreite
 assert.ok(Math.abs(gapOf('ll') - normal) < 1e-9, 'll unverändert');
 assert.ok(Math.abs(gapOf("'o") - normal) < 1e-9, "' o unverändert");
+
+// ---------- Schreibfehler ----------
+const w = emptyProfile();
+const LET = [...'abcdehilnrstu'];
+LET.forEach(ch => variantsOf(w, ch).forEach((v, i) => v.push(...line(0.2, 1 + i * 0.05))));
+variantsOf(w, ' ')[0].push([[0, 0, 0.5, 0], [1.2, 0, 0.5, 10]]);
+const words = 'dieser lesen schreiben rinde laster bilder handel stunde tisch'.split(' ');
+const essay = Array.from({ length: 400 }, (_, i) => words[(i * 7) % words.length]).join(' ');
+const glyphItems = r => r.pages.flatMap(pg => pg.items).filter(it => !it.strike);
+
+// 0 % ändert nichts am bisherigen Ergebnis
+assert.deepEqual(layout(essay, w, { chaos: 0.5, mistakes: 0 }, 5), layout(essay, w, { chaos: 0.5 }, 5));
+
+const wm = layout(essay, w, { chaos: 0, mistakes: 1 }, 5);
+const all = wm.pages.flatMap(pg => pg.items);
+const strikes = all.filter(it => it.strike);
+assert.ok(strikes.length >= 5, `${strikes.length} Verschreiber`);
+assert.ok(strikes.length <= 400 / 8, 'nicht öfter als alle 8 Wörter');
+assert.deepEqual(wm.missing, [], 'Verschreiber nutzen nur aufgenommene Zeichen');
+for (const st of strikes) {
+  const xs = st.strokes.flat().map(q => st.x + q[0] * st.s);
+  assert.ok(Math.max(...xs) <= right + 1e-9 && Math.min(...xs) >= DEFAULTS.margin - 1, 'Streichstrich im Rand');
+  // Der Strich liegt über Buchstaben derselben Zeile
+  const under = all.filter(it => !it.strike && Math.abs(it.y - st.y) < 1 && it.x >= Math.min(...xs) && it.x <= Math.max(...xs));
+  assert.ok(under.length >= 2, 'durchgestrichene Buchstaben darunter');
+}
+// Mehr Buchstaben als ohne Fehler (falscher Anfang kommt dazu), richtig geschriebenes Wort folgt
+assert.ok(glyphItems(wm).length > glyphItems(layout(essay, w, { chaos: 0 }, 5)).length);
+// Zeilen schwanken leicht, Druck wechselt in Grenzen
+const offs = glyphItems(wm).map(it => Math.abs(it.y - lineMetrics(DEFAULTS).first - Math.round((it.y - lineMetrics(DEFAULTS).first) / DEFAULTS.lineHeight) * DEFAULTS.lineHeight));
+assert.ok(Math.max(...offs) > 0.05 && Math.max(...offs) <= 0.1 * DEFAULTS.xHeight + 1e-9, `Welle ${Math.max(...offs).toFixed(3)} mm`);
+const inks = all.map(it => it.ink);
+assert.ok(Math.min(...inks) >= (1 - 0.18) * (1 - 0.12) - 1e-9 && Math.max(...inks) <= 1.18 + 1e-9);
+assert.ok(new Set(inks.map(v => v.toFixed(3))).size > 10, 'Druck wechselt');
+// Gleicher Startwert → gleiche Verschreiber
+assert.deepEqual(layout(essay, w, { mistakes: 1 }, 9), layout(essay, w, { mistakes: 1 }, 9));
+
+// misspell: anders als das Wort, gleich lang (Dreher) oder kürzer mit falschem letzten Buchstaben (Abbruch)
+for (let sd = 1; sd < 200; sd++) {
+  const r = rng(sd), out = misspell('Garten', ['a', 'x'], r);
+  assert.notEqual(out, 'Garten');
+  if (out.length === 6) assert.deepEqual([...out].sort(), [...'Garten'].sort(), out);
+  else assert.ok(out.length < 6 && 'Garten'.startsWith(out.slice(0, -1)) && 'ax'.includes(out.at(-1)), out);
+}
+assert.equal(misspell('aaaa', ['a'], rng(1)), null, 'kein sinnvoller Fehler möglich');
+
 console.log('OK – Layout');

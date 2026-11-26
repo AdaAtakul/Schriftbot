@@ -39,3 +39,13 @@ const width = pts => Math.max(...pts.map(q => q[1])) - Math.min(...pts.map(q => 
 const flat = { strokes: [[[0, 0, 0.5, 0], [1, 0, 0.5, 10]]], x: 0, y: 0, s: 1 };
 assert.ok(width(itemPolygons(flat, 0.26)[0]) > 1.8 * width(itemPolygons(flat, 0.13)[0]), 'Strichdicke');
 console.log('Strichdicke OK');
+
+// Schreibfehler: Druck des Wortes (ink) macht den Strich dicker oder dünner, PDF entsteht auch mit Streichstrichen
+assert.ok(width(itemPolygons({ ...flat, ink: 1.5 }, 0.13)[0]) > 1.3 * width(itemPolygons(flat, 0.13)[0]), 'Druck je Wort');
+const words = emptyProfile();
+[...'abcdehilnrst '].forEach(ch => variantsOf(words, ch).forEach((v, i) => v.push([[0.2, -0.5, 0.5, 0], [0.8 + i * 0.1, -0.9, 0.7, 10]])));
+const slips = layout(Array(80).fill('dieser lesen schreiben').join(' '), words, { ...o, mistakes: 1 });
+assert.ok(slips.pages.flatMap(pg => pg.items).some(it => it.strike));
+const slipPdf = Buffer.from(await buildPdf(slips, { ...o, penSize: 0.13 }, '#1f4fbf', true).arrayBuffer()).toString('latin1');
+assert.ok(slipPdf.startsWith('%PDF-'));
+console.log('Schreibfehler OK');

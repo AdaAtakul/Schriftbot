@@ -46,7 +46,14 @@ export function encode(msg) {
 const delimited = msgs => concat(msgs.flatMap(m => { const b = encode(m); return [Uint8Array.from(varint(b.length)), b]; }));
 
 // ---------- Hilfswerte wie GoodNotes sie schreibt ----------
-const uuid = () => crypto.randomUUID().toUpperCase();
+// randomUUID gibt es nur auf HTTPS-Seiten; sonst aus Zufallsbytes bauen (Version 4)
+const uuid = () => {
+  if (crypto.randomUUID) return crypto.randomUUID().toUpperCase();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+};
 const rand32 = () => crypto.getRandomValues(new Uint32Array(1))[0];
 const rand63 = () => { const [a, b] = crypto.getRandomValues(new Uint32Array(2)); return ((BigInt(a & 0x7fffffff) << 32n) | BigInt(b)) || 1n; };
 
@@ -162,11 +169,14 @@ export function zip(entries) {
 }
 
 // ---------- Dokument ----------
-// result: Layout-Ergebnis, o: Layout-Optionen (mm), color: '#rrggbb', paperPdf: einseitiges PDF als Seitenhintergrund.
+// result: Layout-Ergebnis, o: Layout-Optionen (mm), color: '#rrggbb'.
+// paperPdf: einseitiges PDF als Hintergrund aller Seiten, oder eine Liste mit einem PDF je Seite (Arbeitsblatt).
+// Jede Seite zeigt Seite 1 ihres Anhangs (Ebenen-Feld 5), so wie goodnotes-codec Hintergründe ablegt.
 export function buildGoodnotes(result, o, color, paperPdf, title) {
   const now = Date.now(), device = rand63();
-  const did = uuid(), tid = uuid(), aid = uuid(), folder = uuid();
-  const size = [o.pageW * UNITS_PER_MM, o.pageH * UNITS_PER_MM];
+  const did = uuid(), folder = uuid();
+  const sizeOf = page => (page?.size || [o.pageW, o.pageH]).map(v => v * UNITS_PER_MM);
+  const size = sizeOf(result.pages[0]);
   const ink = hexColor(color);
   const events = [];
   const tail = (body, versionField = 15) => [...body, d(10, now), s(11, uuid()), v(13, device), v(14, now), v(versionField, SCHEMA)];
@@ -185,21 +195,29 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
   events.push([s(1, did), s(30, [s(1, did), s(2, lww(title, 1)), s(3, lww(folder, 1)), s(6, lww(size[0] <= size[1] ? 'P' : 'L', 1)),
     s(7, lww(folder, 1)), s(9, 'auto'), d(10, now), s(11, uuid()), v(13, device), v(14, now), s(17, ''), s(18, ''),
     s(19, [s(2, stamp(1))]), v(20, SCHEMA)])]);
-  // Papier als PDF-Anhang
-  events.push([s(1, aid), s(6, [s(1, aid), s(2, aid), v(5, paperPdf.length), s(6, did), d(10, now), s(11, uuid()),
-    s(12, [v(1, 1), v(2, 1)]), v(14, device), v(15, now), v(16, SCHEMA)])]);
-  event(105, aid, [s(2, did), s(3, aid)]);
-  // Papierebene, von allen Seiten geteilt
-  const mx = 44 * size[0] / 834.24, my = 58.6667 * size[1] / 1078.825;
-  events.push([s(1, tid), s(2, [s(1, did), s(2, tid), s(4, aid), v(5, 1), v(6, 1), d(7, 29.33333396911621), s(8, point(...size)),
-    d(10, now), s(11, uuid()), s(12, [d(1, 29.33333396911621), s(2, stamp(1))]), s(13, lww(true, 1)), v(15, device), v(16, now),
-    s(17, lww(1, 1)), s(18, [s(1, [s(1, point(mx, my)), s(2, point(size[0] - 2 * mx, size[1] - 2 * my))]), f(2, 28.416668), f(3, 0.9166667), v(5, 1)]),
-    s(19, [s(2, stamp(1))]), v(21, SCHEMA)])]);
+  // Papier als PDF-Anhang plus Papierebene; gibt die Ebenen-ID zurück
+  const attachments = [];
+  const addPaper = (pdf, size) => {
+    const tid = uuid(), aid = uuid();
+    attachments.push([aid, pdf]);
+    events.push([s(1, aid), s(6, [s(1, aid), s(2, aid), v(5, pdf.length), s(6, did), d(10, now), s(11, uuid()),
+      s(12, [v(1, 1), v(2, 1)]), v(14, device), v(15, now), v(16, SCHEMA)])]);
+    event(105, aid, [s(2, did), s(3, aid)]);
+    const mx = 44 * size[0] / 834.24, my = 58.6667 * size[1] / 1078.825;
+    events.push([s(1, tid), s(2, [s(1, did), s(2, tid), s(4, aid), v(5, 1), v(6, 1), d(7, 29.33333396911621), s(8, point(...size)),
+      d(10, now), s(11, uuid()), s(12, [d(1, 29.33333396911621), s(2, stamp(1))]), s(13, lww(true, 1)), v(15, device), v(16, now),
+      s(17, lww(1, 1)), s(18, [s(1, [s(1, point(mx, my)), s(2, point(size[0] - 2 * mx, size[1] - 2 * my))]), f(2, 28.416668), f(3, 0.9166667), v(5, 1)]),
+      s(19, [s(2, stamp(1))]), v(21, SCHEMA)])]);
+    return tid;
+  };
+  const papers = Array.isArray(paperPdf) ? paperPdf : null;
+  const shared = papers ? null : addPaper(paperPdf, size); // eine Ebene für alle Seiten
 
   // Seiten
   let key = null, seq = 0, firstPage = null;
   const notes = [];
-  for (const page of result.pages) {
+  for (const [pi, page] of result.pages.entries()) {
+    const tid = shared || addPaper(papers[pi], sizeOf(page));
     const pid = uuid(), nid = uuidPlus(pid);
     key = nextKey(key);
     firstPage ??= pid;
@@ -214,7 +232,7 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
         const sid = uuid(), st0 = stamp();
         records.push(
           [s(1, sid), s(2, st0), v(8, device), v(9, ++seq), v(14, DJB2_EMPTY), v(16, SCHEMA)],
-          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), o.penSize * it.s * UNITS_PER_MM)), s(4, rgba(ink)), s(6, ''),
+          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), o.penSize * (it.ink || 1) * it.s * UNITS_PER_MM)), s(4, rgba(ink)), s(6, ''),
             s(7, [s(1, stamp())]), s(9, ''), s(15, st0), s(20, ''), v(21, SCHEMA)])],
         );
       }
@@ -228,9 +246,9 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
     ['schema.pb', encode([v(1, SCHEMA)])],
     ['document.info.pb', new Uint8Array()],
     ['index.notes.pb', delimited(notes.map(([nid]) => [s(1, nid), s(2, `notes/${nid}`)]))],
-    ['index.attachments.pb', delimited([[s(1, aid), s(2, `attachments/${aid}`)]])],
+    ['index.attachments.pb', delimited(attachments.map(([aid]) => [s(1, aid), s(2, `attachments/${aid}`)]))],
     ['index.events.pb', delimited(events)],
-    [`attachments/${aid}`, paperPdf],
+    ...attachments.map(([aid, pdf]) => [`attachments/${aid}`, pdf]),
     ...notes.map(([nid, records]) => [`notes/${nid}`, delimited(records)]),
   ]);
 }

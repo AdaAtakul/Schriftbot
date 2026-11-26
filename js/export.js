@@ -8,7 +8,7 @@ const PAPER_LINE = '#b8c7dc';
 // Umrisse eines Glyph-Items in Seitenkoordinaten (mm): Drehung und Skalierung schon angewendet.
 export function itemPolygons(it, size = PEN_SIZE) {
   const c = Math.cos(it.rot || 0), s = Math.sin(it.rot || 0);
-  return it.strokes.map(st => outline(st, size).map(([px, py]) => [
+  return it.strokes.map(st => outline(st, size * (it.ink || 1)).map(([px, py]) => [
     it.x + (px * c - py * s) * it.s,
     it.y + (px * s + py * c) * it.s,
   ]));
@@ -36,13 +36,20 @@ export function simplify(pts, tol = 0.02) {
   return pts.filter((_, i) => keep[i]);
 }
 
+// Seitengröße in mm: eigene Größe (Arbeitsblatt) oder die des Layouts.
+export const pageSize = (page, o) => page.size || [o.pageW, o.pageH];
+
+// page.background: JPEG (Uint8Array oder Data-URL) als Seitenhintergrund, z. B. ein Arbeitsblatt.
 export function buildPdf(result, o, color, withPaper) {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit: 'mm', format: [o.pageW, o.pageH], compress: true });
+  const [w0, h0] = pageSize(result.pages[0] || {}, o);
+  const doc = new jsPDF({ unit: 'mm', format: [w0, h0], orientation: w0 > h0 ? 'l' : 'p', compress: true });
   doc.setProperties({ title: 'Handschrift', creator: 'Handschrift-Tool' });
   result.pages.forEach((page, i) => {
-    if (i) doc.addPage([o.pageW, o.pageH]);
-    if (withPaper && o.ruled) {
+    const [w, h] = pageSize(page, o);
+    if (i) doc.addPage([w, h], w > h ? 'l' : 'p');
+    if (page.background) doc.addImage(page.background, 'JPEG', 0, 0, w, h, undefined, 'FAST');
+    else if (withPaper && o.ruled) {
       doc.setDrawColor(PAPER_LINE);
       doc.setLineWidth(0.2);
       for (let y = o.lineTop; y <= o.pageH; y += o.lineSpacing) doc.line(0, y, o.pageW, y);
@@ -74,18 +81,21 @@ export function buildPdf(result, o, color, withPaper) {
 }
 
 // Eine Seite als PNG (300 dpi). Ohne Linien mit transparentem Hintergrund zum Einfügen auf eine GoodNotes-Seite.
+// page.backgroundImage: Bild/Canvas des Arbeitsblatts, wird über die ganze Seite gezogen.
 export function buildPng(page, o, color, withPaper) {
   const pxPerMm = PNG_DPI / 25.4;
+  const [w, h] = pageSize(page, o);
   const canvas = document.createElement('canvas');
-  canvas.width = Math.round(o.pageW * pxPerMm);
-  canvas.height = Math.round(o.pageH * pxPerMm);
+  canvas.width = Math.round(w * pxPerMm);
+  canvas.height = Math.round(h * pxPerMm);
   const ctx = canvas.getContext('2d');
-  if (withPaper) {
+  if (withPaper || page.backgroundImage) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
+  if (page.backgroundImage) ctx.drawImage(page.backgroundImage, 0, 0, canvas.width, canvas.height);
   ctx.setTransform(pxPerMm, 0, 0, pxPerMm, 0, 0);
-  if (withPaper) drawPaper(ctx, o);
+  if (withPaper && !page.backgroundImage) drawPaper(ctx, o);
   drawPage(ctx, page, color, o.penSize);
   return new Promise((resolve, reject) => canvas.toBlob(blob => {
     canvas.width = canvas.height = 0; // Speicher auf dem iPad sofort freigeben
