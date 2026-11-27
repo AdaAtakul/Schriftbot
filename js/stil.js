@@ -13,11 +13,11 @@ export const PRESETS = {
   'sehr-unordentlich': { label: 'Sehr unordentlich', desc: 'Schnell hingekritzelt.', connect: 100, chaos: 140, strike: 70, fix: 60, fatigue: 85, wobble: 100, edges: 100, weight: 135 },
 };
 export const DEFAULT_STYLE = 'ordentlich'; // neue Profile: ordentlich, wenig Unordnung
-// Erster Besuch und „Alles auf Standard“: so ordentlich wie möglich, kräftiger Strich, liniert breit auf dunklem Papier (weiße Tinte)
+// Erster Besuch und „Alles auf Standard“: so ordentlich wie möglich, kräftiger Strich, liniert breit, weißes Papier, schwarze Tinte
 export const START_FONT = 'uji-w18';
 export const START_LOOK = {
   style: 'sehr-ordentlich', styles: { 'sehr-ordentlich': { weight: 135 } }, lineShift: 0,
-  paper: 'liniert-breit', paperColor: 'dunkel', ink: 'weiss', xHeight: 3, lineHeight: 8.8,
+  paper: 'liniert-breit', paperColor: 'weiss', ink: 'schwarz', xHeight: 3, lineHeight: 8.8,
 };
 const LEGACY_STYLE = 'normal'; // alte Regler-Werte wurden als „Normal“ übernommen
 
