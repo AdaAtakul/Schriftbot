@@ -44,8 +44,11 @@ export function drawPage(ctx, page, color, size = PEN_SIZE, pen) {
   }
 }
 
+// Sinus-Kurve: Tempo 0 am Anfang und Ende, am höchsten in der Mitte
+export const easeInOut = t => (1 - Math.cos(Math.PI * t)) / 2;
+
 // Seite sich selbst hinschreiben lassen: Striche in Schreibreihenfolge mit ihrer echten Aufnahmezeit,
-// beschleunigt auf höchstens maxMs. ctx wie bei drawPage (Papier schon gezeichnet). Gibt eine Abbruch-Funktion zurück.
+// beschleunigt auf höchstens maxMs, mit Ease-in-out. ctx wie bei drawPage (Papier schon gezeichnet). Gibt eine Abbruch-Funktion zurück.
 export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000) {
   const GAP = 70; // Stift absetzen zwischen zwei Strichen (ms)
   const steps = [];
@@ -60,12 +63,13 @@ export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000
     }
   }
   drawPage(ctx, { items: page.items.filter(it => it.missing) }, color, size, pen); // rote Lücken stehen sofort da
-  const speed = Math.max(1.5, total / maxMs);
+  const duration = total / Math.max(1.5, total / maxMs);
   const place = it => { ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.rot || 0); ctx.scale(it.s, it.s); ctx.fillStyle = color; };
   let i = 0, raf = 0, begin = 0;
   const frame = now => {
     begin ||= now;
-    const elapsed = (now - begin) * speed;
+    // Ease-in-out: langsam anfangen, in der Mitte am schnellsten, sanft auslaufen (Tempo wie eine Glocke)
+    const elapsed = total * easeInOut(Math.min(1, (now - begin) / duration));
     while (i < steps.length && steps[i].start + steps[i].dur <= elapsed) {
       const { it, st } = steps[i++];
       place(it); fillStrokesCached(ctx, [st], size * (it.ink || 1), pen); ctx.restore();
