@@ -2,7 +2,7 @@
 // Jeder Schritt zeigt im Hintergrund den passenden Tab.
 const DONE_KEY = 'tutorial-gesehen';
 
-// Ein echtes, handgeschriebenes „a“ (aus der Beispielschrift), das sich langsam selbst nachzeichnet
+// Ein echtes, handgeschriebenes „a“ (aus der mitgelieferten Beispiel-Schrift), das sich langsam selbst nachzeichnet
 const LETTER = {"w": 86, "h": 85, "paths": ["M64.6 20.0 L63.1 16.8 L59.5 15.9 L54.8 16.3 L51.2 17.2 L46.6 19.5 L41.2 22.3 L38.3 24.2 L35.6 26.0 L33.3 28.2 L28.7 32.8 L24.2 37.4 L21.9 39.7 L18.2 43.8 L16.0 47.5 L15.0 51.2 L15.0 54.8 L17.2 58.0 L21.4 60.4 L25.5 61.3 L30.2 61.3 L34.3 61.3 L39.3 59.9 L44.3 58.0 L49.4 55.7 L52.1 54.4 L55.7 51.6 L59.5 48.4 L63.1 44.8 L65.5 41.1 L67.3 37.9 L68.2 33.7 L68.2 30.1 L67.3 26.9 L66.4 23.6 L65.5 20.0 L64.6 16.3 L62.2 20.5 L62.2 23.6 L61.7 27.8 L61.7 32.3 L61.7 36.5 L61.7 41.5 L62.2 47.9 L63.1 53.0 L64.0 57.5 L65.5 61.7 L67.3 64.9 L69.6 67.2"]};
 function traceArt() {
   const ns = 'http://www.w3.org/2000/svg';
@@ -51,7 +51,7 @@ const STEPS = demo => [
     title: 'Willkommen bei DeineSchrift',
     text: 'DeineSchrift schreibt getippten Text in Handschrift – als PDF, Bild oder GoodNotes-Datei. ' +
       'Alles bleibt auf deinem Gerät, ohne Konto.' +
-      (demo ? '\n\nGerade ist eine Beispielschrift ausgewählt. Tipp einfach etwas in das Textfeld.' : ''),
+      (demo ? '\n\nGerade ist eine mitgelieferte Schrift ausgewählt. Tipp einfach etwas in das Textfeld.' : ''),
   },
   {
     view: 'schreiben',
@@ -166,26 +166,4 @@ export function showTutorial({ goTo, demo = false, onClose = () => {} }) {
   document.addEventListener('keydown', onKey);
   document.body.append(bg);
   draw();
-}
-
-// Erster Besuch: statt der Tour nur ein kleiner Hinweis an der Vorschau (die Tour bleibt hinter dem ?-Knopf).
-export function showFirstHint(anchor) {
-  try { localStorage.setItem(DONE_KEY, '1'); } catch {}
-  const hint = document.createElement('div');
-  hint.className = 'first-hint';
-  hint.setAttribute('role', 'status');
-  const text = document.createElement('span');
-  text.textContent = matchMedia('(max-width: 700px)').matches
-    ? 'Tippe oben deinen Text – hier schreibt er sich hin.'
-    : 'Tippe links deinen Text – hier schreibt er sich hin.';
-  const x = document.createElement('button');
-  x.type = 'button';
-  x.className = 'icon-btn ghost';
-  x.setAttribute('aria-label', 'Hinweis schließen');
-  x.textContent = '✕';
-  const close = () => hint.remove();
-  x.addEventListener('click', close);
-  hint.append(text, x);
-  anchor.append(hint);
-  document.getElementById('text-input')?.addEventListener('input', close, { once: true });
 }

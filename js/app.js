@@ -8,8 +8,8 @@ import { initBlatt } from './blattui.js';
 import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
-import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
-import { showTutorial, tutorialSeen, showFirstHint } from './tutorial.js';
+import { setupDemo, isDemo, ownProfile, renameDemo } from './demo.js';
+import { showTutorial } from './tutorial.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -60,8 +60,7 @@ function applyTheme(dark) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#23292c' : '#ffffff');
   document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', dark ? 'dark' : 'light');
   const label = dark ? 'Helles Design' : 'Dunkles Design';
-  themeBtn.setAttribute('aria-label', label);
-  themeBtn.title = label;
+  themeBtn.querySelector('span').textContent = label;
   themeBtn.querySelector('use').setAttribute('href', dark ? '#i-sun' : '#i-moon');
 }
 applyTheme(document.documentElement.dataset.theme === 'dark');
@@ -89,8 +88,7 @@ await setupDemo();
 const demo = isDemo();
 if (demo) document.getElementById('view-aufnahme').classList.add('is-demo');
 
-// Erstes Öffnen: eine Seite Beispieltext, damit die Vorschau sofort etwas zeigt
-seedSampleText(getSettings().text);
+renameDemo();
 
 // Start immer in „Schreiben“; nur nach „Eigene Schrift aufnehmen“ (Neuladen) direkt in die Aufnahme
 let start = 'schreiben';
@@ -139,9 +137,16 @@ document.getElementById('demo-own').addEventListener('click', () => {
   location.reload();
 });
 
-// Erstes Öffnen: kleiner Hinweis an der Vorschau; die Einführung gibt es über den ?-Knopf
-document.getElementById('help-btn').addEventListener('click', () => showTutorial({ goTo: showView, demo }));
-if (!tutorialSeen()) showFirstHint(document.querySelector('#view-schreiben .stage'));
+// ?-Knopf: kleines Menü mit Einführung, Anleitung und Hell/Dunkel; schließt mit Esc oder Tipp daneben
+const helpBtn = document.getElementById('help-btn'), helpMenu = document.getElementById('help-menu');
+const setMenu = open => { helpMenu.hidden = !open; helpBtn.setAttribute('aria-expanded', String(open)); };
+// Ein Klick-Handler für alles: so schließt der Knopf auch die Aufklapp-Menüs der Leiste
+document.addEventListener('click', e => {
+  if (e.target.closest('#help-btn')) setMenu(helpMenu.hidden);
+  else if (!e.target.closest('#help-menu') || e.target.closest('.menu-item')) setMenu(false);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !helpMenu.hidden) { setMenu(false); helpBtn.focus(); } });
+document.getElementById('help-tour').addEventListener('click', () => showTutorial({ goTo: showView, demo }));
 safetyHint();
 
 // Hinweis oben: erst „Zum Home-Bildschirm“ (sonst darf Safari die Daten löschen), dann „Backup“.

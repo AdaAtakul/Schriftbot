@@ -1010,16 +1010,6 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
 /* Werbeplatz unter dem Textfeld (vorbereitet, standardmäßig verborgen); nie in Vorschau, Aufnahme oder Export */
 .ad-slot:not([hidden]) { display: block; min-height: 100px; margin-top: 12px; }
 
-/* Erster Besuch: kleiner Hinweis über der Vorschau statt Tour */
-.first-hint {
-  position: absolute; z-index: 5; right: 16px; bottom: 72px; max-width: min(340px, calc(100% - 32px));
-  display: flex; align-items: center; gap: 6px; padding: 8px 6px 8px 14px; border-radius: 14px;
-  background: var(--panel); color: var(--ink); border: 1px solid var(--border-strong); box-shadow: var(--shadow-2);
-  font-size: 0.882rem; animation: pop-in .45s var(--ease-spring) both;
-}
-.first-hint .icon-btn { min-width: 36px; min-height: 36px; }
-@media (max-width: 700px) { .first-hint { top: 8px; bottom: auto; right: 8px; } }
-@media (prefers-reduced-motion: reduce) { .first-hint { animation: none; } }
 
 /* Vorlagen nach Anlass über dem Textfeld */
 .templates { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
@@ -1064,3 +1054,39 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
   .lb-btn { padding: 0 7px; }
   .lb-btn[data-pop]:not([data-pop="pop-more"]) > svg:last-child { display: none; }
 }
+
+/* Aufgeräumt: ein Satz als Einstieg, Vorlagen unter dem Feld, ruhige Leiste, Hilfe-Menü */
+.editor-lead { margin: 2px 0 10px; font-size: 0.882rem; line-height: 1.45; color: var(--muted); }
+.lead-narrow, .tab-short { display: none; }
+.tpl-label { margin: 12px 0 6px; font-size: 0.765rem; color: var(--muted); }
+.view-schreiben .templates { margin: 0; }
+.lb-style > span:first-child { color: var(--muted); font-weight: 500; }
+.lb-more { color: var(--accent); font-weight: 600; }
+.lb-more .icon { color: var(--accent); }
+.more-h { margin: 4px 0 -6px; font-size: 0.824rem; font-weight: 600; color: var(--ink); }
+.more-actions { gap: 8px; }
+.menu-wrap { position: relative; }
+.menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; min-width: 250px; padding: 6px;
+  border-radius: 14px; background: var(--panel); border: 1px solid var(--border); box-shadow: var(--shadow-2);
+  animation: rise-in .28s var(--ease-spring) both;
+}
+.menu[hidden] { display: none; }
+.menu-item {
+  display: flex; align-items: center; justify-content: flex-start; gap: 10px; width: 100%; min-height: 44px; padding: 0 12px;
+  border: 0; border-radius: 10px; background: transparent; color: var(--ink); font: inherit; font-size: 0.941rem; font-weight: 500; text-decoration: none; white-space: nowrap;
+}
+.menu-item:hover { background: var(--surface-2); }
+.menu-item .icon { width: 18px; height: 18px; color: var(--accent); }
+@media (max-width: 1000px) { .tab-long { display: none; } .tab-short { display: inline; } }
+@media (max-width: 700px) {
+  .lead-wide { display: none; } .lead-narrow { display: inline; }
+  .editor-lead { margin-bottom: 8px; }
+  #text-input { min-height: 72px; height: 11vh; }
+  .tpl-label { margin-top: 8px; }
+  .lookbar .lb-sep, .lb-more-long { display: none; }
+  .lookbar .lb-font { order: 0; } .lookbar [data-pop="pop-paper"] { order: 1; } .lookbar .lb-more { order: 2; }
+  .lookbar .lb-style { order: 3; }
+  .menu { position: fixed; top: 64px; right: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .menu { animation: none; } }

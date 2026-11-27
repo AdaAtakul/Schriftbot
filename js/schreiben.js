@@ -270,9 +270,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     styleRange.value = STYLE_ORDER.indexOf(styleKey);
     $('style-out').textContent = PRESETS[styleKey].label;
     styleRange.setAttribute('aria-valuetext', PRESETS[styleKey].label);
-    $('ink-dot').style.background = inkColor(s);
     for (const b of penEl.children) b.setAttribute('aria-checked', b.dataset.pen === options(s).pen);
-    $('pen-label').parentElement.setAttribute('aria-label', 'Stift: ' + PENS[options(s).pen].label);
     $('style-desc').textContent = PRESETS[styleKey].desc;
     const modified = isModified(s);
     $('style-reset').hidden = !modified;
@@ -308,22 +306,26 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   // Abspielen: die sichtbare Seite schreibt sich mit den echten Strichzeiten hin – beim ersten Anzeigen,
   // nach „Neu würfeln“ und per Knopf. Jede Änderung (Tippen, Regler) zeichnet sofort fertig.
   const stillMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let playNext = !stillMotion(), anim = null;
+  // Am Handy steht die Seite sofort fertig da (sonst ist sie beim ersten Blick fast leer); abspielen per Knopf
+  let playNext = !stillMotion() && !matchMedia('(max-width: 700px)').matches, anim = null;
   const stopAnim = () => { anim?.cancel(); anim = null; };
-  $('play').addEventListener('click', () => { stopAnim(); playNext = true; render(); });
+  $('play').addEventListener('click', () => { closePops(); stopAnim(); playNext = true; render(); });
+
+  // Leeres Feld: ein kurzes Beispiel auf dem Blatt, damit man sieht, was passiert (Export bleibt leer)
+  const shownText = () => input.value.trim() ? input.value : 'Hallo! So sieht dein Text in Handschrift aus.';
 
   function render({ quick = false } = {}) {
     if (!quick) clearTimeout(fullTimer);
     if (!pagesEl.clientWidth) return; // Tab nicht sichtbar
     const s = current(), o = options(s);
-    const result = layout(input.value, profile, o, seed);
+    const result = layout(shownText(), profile, o, seed);
     const color = inkColor(s);
     // Beim Ziehen eines Reglers in einfacher Auflösung zeichnen (4× weniger Pixel am iPad), danach scharf
     const dpr = quick ? 1 : (window.devicePixelRatio || 1);
     const cssW = pageWidth(o);
     const pxPerMm = cssW / o.pageW;
     // Läuft gerade eine Animation zu genau diesem Bild (z. B. nur Größenänderung gemeldet), sie nicht abbrechen
-    const key = [input.value, seed, JSON.stringify(o), color, exportPaper()].join('|');
+    const key = [shownText(), seed, JSON.stringify(o), color, exportPaper()].join('|');
     if (anim && anim.key !== key) stopAnim();
 
     // Vorhandene Canvas wiederverwenden, damit die Vorschau beim Tippen nicht flackert.
@@ -361,7 +363,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
     pageCount = result.pages.length;
     const words = input.value.trim() ? input.value.trim().split(/\s+/).length : 0;
-    const notes = [`${words} ${words === 1 ? 'Wort' : 'Wörter'}`, `${pageCount} ${pageCount === 1 ? 'Seite' : 'Seiten'}`];
+    const notes = words ? [`${words} ${words === 1 ? 'Wort' : 'Wörter'}`, `${pageCount} ${pageCount === 1 ? 'Seite' : 'Seiten'}`] : [];
     const shown = result.missing.filter(ch => ch !== ' ');
     const noGlyphs = progress(profile).done === 0; // dann erklärt der Hinweis über der Vorschau alles
     if (shown.length && !noGlyphs) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
@@ -452,6 +454,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     timer = setTimeout(() => { setSetting('text', input.value); render(); }, 120);
   });
   $('reroll').addEventListener('click', () => {
+    closePops();
     seed = Math.floor(Math.random() * 2 ** 31);
     setSetting('seed', seed);
     stopAnim();

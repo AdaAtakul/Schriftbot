@@ -129,13 +129,19 @@
       </h1>
     <nav class="tabs" role="tablist" aria-label="Bereiche">
       <button role="tab" id="tab-schreiben" data-view="schreiben" aria-controls="view-schreiben" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span>Schreiben</span></button>
-      <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span>Aufnehmen</span></button>
-      <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span>Ausfüllen</span></button>
-      <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span>Meine Schriften</span></button>
+      <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span class="tab-long">Eigene Schrift aufnehmen</span><span class="tab-short">Aufnehmen</span></button>
+      <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span class="tab-long">PDF ausfüllen</span><span class="tab-short">Ausfüllen</span></button>
+      <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span class="tab-long">Meine Schriften</span><span class="tab-short">Schriften</span></button>
     </nav>
     <div class="topbar-end">
-      <button id="theme-btn" class="icon-btn round" aria-label="Dunkles Design" title="Dunkles Design"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></button>
-      <button id="help-btn" class="icon-btn round" aria-label="Kurze Anleitung zeigen" title="Kurze Anleitung"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
+      <div class="menu-wrap">
+        <button id="help-btn" class="icon-btn round" aria-label="Hilfe und Einstellungen" title="Hilfe" aria-haspopup="true" aria-expanded="false" aria-controls="help-menu"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button>
+        <div id="help-menu" class="menu" hidden>
+          <button id="help-tour" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Kurze Einführung</button>
+          <a class="menu-item" href="anleitung"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Anleitung &amp; häufige Fragen</a>
+          <button id="theme-btn" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>Dunkles Design</span></button>
+        </div>
+      </div>
       <button id="export-open" class="primary pill" aria-haspopup="dialog"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg><span>Exportieren</span></button>
     </div>
   </header>
@@ -215,8 +221,10 @@
           <label for="text-input">Dein Text</label>
           <button id="text-delete" class="ghost small" title="Ganzen Text löschen"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Leeren</button>
         </div>
-        <div id="templates" class="templates" role="group" aria-label="Vorlage ausprobieren"></div>
-        <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
+        <p class="editor-lead">Tippe hier – <span class="lead-wide">rechts</span><span class="lead-narrow">unten</span> erscheint dein Text sofort in echter Handschrift.</p>
+        <textarea id="text-input" placeholder="Schreib hier deinen Text …" spellcheck="true" lang="de"></textarea>
+        <p class="tpl-label" id="tpl-label">Oder starte mit einer Vorlage</p>
+        <div id="templates" class="templates" role="group" aria-labelledby="tpl-label"></div>
         <button id="text-restore" hidden><svg class="icon"><use href="#i-reset"/></svg><span>Gelöschten Text wiederherstellen</span></button>
         <p id="schreiben-status" class="status"></p>
         <!-- Werbeplatz: bleibt unsichtbar (hidden), bis ein Werbenetzwerk eingebunden ist. -->
@@ -227,30 +235,28 @@
           <div class="lookbar" role="toolbar" aria-label="Aussehen">
             <label class="lb-font"><span>Schrift</span><select id="profile-switch" aria-label="Schrift wählen"></select></label>
             <span class="lb-sep" aria-hidden="true"></span>
-            <label class="lb-style"><span class="visually-hidden">Stil</span><input type="range" id="style-range" min="0" max="5" step="1" aria-describedby="style-out"><output id="style-out"></output></label>
+            <label class="lb-style"><span>Stil</span><input type="range" id="style-range" min="0" max="5" step="1" aria-describedby="style-out"><output id="style-out"></output></label>
             <button type="button" class="lb-btn" data-pop="pop-paper" aria-expanded="false" aria-controls="pop-paper">Papier<svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></button>
-            <button type="button" class="lb-btn" data-pop="pop-ink" aria-expanded="false" aria-controls="pop-ink">Tinte<span id="ink-dot" class="ink-dot" aria-hidden="true"></span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></button>
-            <button type="button" class="lb-btn" data-pop="pop-pen" aria-expanded="false" aria-controls="pop-pen"><span id="pen-label">Stift</span><svg class="icon" aria-hidden="true"><use href="#i-down"/></svg></button>
-            <button type="button" class="lb-btn" data-pop="pop-more" aria-expanded="false" aria-controls="pop-more" aria-label="Feineinstellungen" title="Feineinstellungen"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></button>
-            <span class="lb-sep" aria-hidden="true"></span>
-            <button type="button" id="reroll" class="lb-btn" aria-label="Neu würfeln" title="Neu würfeln: jede Version sieht etwas anders aus"><svg class="icon" aria-hidden="true"><use href="#i-shuffle"/></svg></button>
-            <button type="button" id="play" class="lb-btn" aria-label="Abspielen: Seite schreibt sich hin" title="Beim Schreiben zusehen"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></button>
+            <button type="button" class="lb-btn lb-more" data-pop="pop-more" aria-expanded="false" aria-controls="pop-more"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg><span>Mehr<span class="lb-more-long"> anpassen</span></span></button>
           </div>
 
           <div id="pop-paper" class="pop" role="dialog" aria-label="Papier" hidden>
             <div id="paper" class="paper-grid" role="radiogroup" aria-label="Papier"></div>
             <div class="pop-row"><span>Papierfarbe</span><div id="paper-color" class="swatches"></div></div>
           </div>
-          <div id="pop-pen" class="pop" role="dialog" aria-label="Stift" hidden>
-            <div id="pen" class="pen-grid" role="radiogroup" aria-label="Stift"></div>
-          </div>
-          <div id="pop-ink" class="pop" role="dialog" aria-label="Tinte" hidden>
+          <div id="pop-more" class="pop pop-wide" role="dialog" aria-label="Mehr anpassen" hidden>
+            <div class="row more-actions">
+              <button type="button" id="play"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Beim Schreiben zusehen</button>
+              <button type="button" id="reroll" title="Jede Version sieht etwas anders aus"><svg class="icon" aria-hidden="true"><use href="#i-shuffle"/></svg>Neu mischen</button>
+            </div>
+            <h3 class="more-h">Tinte</h3>
             <div id="ink" class="swatches" role="group" aria-label="Tintenfarbe"></div>
             <label class="slider hue">Eigener Farbton <output id="ink-hue-out"></output>
               <input type="range" id="ink-hue" min="0" max="359" step="1">
             </label>
-          </div>
-          <div id="pop-more" class="pop pop-wide" role="dialog" aria-label="Feineinstellungen" hidden>
+            <h3 class="more-h">Stift</h3>
+            <div id="pen" class="pen-grid" role="radiogroup" aria-label="Stift"></div>
+            <h3 class="more-h">Feineinstellungen</h3>
             <p id="style-desc" class="hint small"></p>
             <div id="controls-main" class="ctl-list"></div>
             <details class="fine" id="more-settings">
