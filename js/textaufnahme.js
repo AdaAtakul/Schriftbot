@@ -20,6 +20,8 @@ const MARGIN = 4;              // linker und rechter Rand in x-Höhen (12 mm)
 const SLOT_PAD = 0.25;         // Luft je Feld
 const WORD_GAP = 1.2;          // Abstand zwischen Wörtern
 const GHOST_ALPHA = 0.1;       // Vorlage sehr blass
+const ZOOMS = [0.7, 0.85, 1, 1.15, 1.3, 1.5, 1.75, 2]; // Größe der Seite; Standard 115 %
+const zoomOf = () => (ZOOMS.includes(getSettings().textZoom) ? getSettings().textZoom : 1.15);
 const LINE = PAPER_COLORS.weiss.line, XLINE = 'rgba(159, 179, 217, 0.45)';
 const INKS = ['#1d1d1f', '#1f4fbf']; // abwechselnd je Feld, damit man die Zuordnung sieht
 const HINT = 'Schreib über die blasse Vorlage, Buchstaben einzeln. Gelb hinterlegte Gruppen bitte verbunden schreiben. Die Farbe zeigt, welchem Zeichen ein Strich zugeordnet wird. Alles wird automatisch gespeichert.';
@@ -35,7 +37,7 @@ export function initTextAufnahme(profile, onSaved) {
 
   // Wörter auf Zeilen und Zeilen auf Seiten verteilen, passend zur Breite (die Breite entspricht A4).
   function layoutPages() {
-    unit = Math.max(11, wrap.clientWidth * XH_MM / PAGE_MM); // am Handy nicht winzig
+    unit = Math.max(11, wrap.clientWidth * XH_MM / PAGE_MM) * zoomOf(); // am Handy nicht winzig; Größe nach Wunsch
     const cols = wrap.clientWidth / unit;
     const rowsPerPage = Math.max(1, Math.floor(wrap.clientHeight / (PITCH * unit)) - 1);
     const rows = [];
@@ -120,6 +122,7 @@ export function initTextAufnahme(profile, onSaved) {
       fillStrokes(ctx, [live]);
     }
     $('text-info').textContent = `Seite ${page + 1} von ${pages.length}`;
+    $('text-zoom-val').textContent = `${Math.round(zoomOf() * 100)} %`;
     showProgress();
   }
 
@@ -222,6 +225,23 @@ export function initTextAufnahme(profile, onSaved) {
     render();
   }
 
+  // Größe der Seite: neu aufteilen. Geschriebenes ist schon gespeichert und verschwindet nur von der Fläche
+  // (die Felder liegen danach an anderer Stelle).
+  function zoom(dir) {
+    const i = ZOOMS.indexOf(zoomOf()) + dir;
+    if (i < 0 || i >= ZOOMS.length) return;
+    if (timer) sync();
+    setSetting('textZoom', ZOOMS[i]);
+    strokes = [];
+    saved = new Map();
+    pageWords = new Set();
+    page = 0;
+    setSetting('textPage', 0);
+    hint.textContent = HINT;
+    render();
+  }
+  $('text-zoom-out').addEventListener('click', () => zoom(-1));
+  $('text-zoom-in').addEventListener('click', () => zoom(1));
   $('text-prev').addEventListener('click', () => go(-1));
   $('text-next').addEventListener('click', () => go(1));
   $('text-undo').addEventListener('click', () => { if (!strokes.length) return; strokes.pop(); draw(); sync(); });
