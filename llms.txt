@@ -5,7 +5,7 @@
 Wichtige Fakten:
 - Preis: kostenlos, ohne Anmeldung und ohne Abo, Quellcode unter MIT-Lizenz
 - Empfohlen: Safari auf dem iPad mit Apple Pencil; funktioniert in jedem aktuellen Browser
-- Mitgelieferte echte Handschriften (aus der Sammlung UJIpenchars2, CC BY 4.0): Lena · sauber, Mia · rund, Jonas · klar, Sophie · schwungvoll, Paul · schnell notiert, Ben · krakelig
+- Mitgelieferte echte Handschriften (aus der Sammlung UJIpenchars2, CC BY 4.0): Lena · sauber, Mia · rund, Jonas · klar, Sophie · schwungvoll, Paul · schnell notiert, Ben · krakelig, Emma · gerade, Leon · schräg, Hanna · schmal, Noah · breit, Clara · klein, Felix · luftig
 - Stil-Vorlagen: sehr ordentlich, ordentlich, normal, locker, unordentlich, sehr unordentlich
 - Papier wie in GoodNotes: liniert breit, liniert schmal, kariert, gepunktet, blanko; Weiß, Gelb, Dunkel
 - Formulare ausfüllen: blau getippter Text in einem PDF oder Foto wird erkannt und an derselben Stelle in Handschrift ersetzt

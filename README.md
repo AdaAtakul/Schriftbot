@@ -129,7 +129,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 
 ### Mitgelieferte Schriften
 
-Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften zur Auswahl, von ordentlich bis unordentlich. Sie stammen aus der freien Sammlung [UJIpenchars2](https://doi.org/10.24432/C5FG8S) (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; Lizenz [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)): 60 Personen haben dort jedes Zeichen zweimal einzeln auf ein Tablet geschrieben.
+Unter **Schrift** (Leiste über der Vorschau) stehen zwölf echte Handschriften zur Auswahl, von ordentlich bis unordentlich. Sie stammen aus der freien Sammlung [UJIpenchars2](https://doi.org/10.24432/C5FG8S) (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; Lizenz [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)): 60 Personen haben dort jedes Zeichen zweimal einzeln auf ein Tablet geschrieben.
 
 - Für DeineSchrift umgerechnet: Grundlinie und x-Höhe je Person bestimmt, Ä/Ö aus den Punkten des Ü ergänzt, „/ + =“ einfach nachgebildet; ß wird als „ss“ geschrieben. Werkzeug: `tools/uji-schriften.py`.
 - Es sind Einzelbuchstaben: Die Schrift wirkt wie ordentliche Druck-Handschrift, „Buchstaben verbinden“ hat hier keine Wirkung.
@@ -177,7 +177,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v40';` hochzählen (z. B. auf `'v41'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v41';` hochzählen (z. B. auf `'v41'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen

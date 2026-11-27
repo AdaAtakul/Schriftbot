@@ -12,6 +12,12 @@ export const BUILTIN = [
   { id: 'uji-w11', name: 'Sophie · schwungvoll', old: 'Schwungvolle Schrift', file: 'schriften/schrift-d.json' },
   { id: 'uji-w44', name: 'Paul · schnell notiert', old: 'Schnell notiert', file: 'schriften/schrift-e.json' },
   { id: 'uji-w42', name: 'Ben · krakelig', old: 'Krakelig', file: 'schriften/schrift-f.json' },
+  { id: 'uji-w02', name: 'Emma · gerade', file: 'schriften/schrift-g.json' },
+  { id: 'uji-w06', name: 'Leon · schräg', file: 'schriften/schrift-h.json' },
+  { id: 'uji-w46', name: 'Hanna · schmal', file: 'schriften/schrift-i.json' },
+  { id: 'uji-w58', name: 'Noah · breit', file: 'schriften/schrift-j.json' },
+  { id: 'uji-w15', name: 'Clara · klein', file: 'schriften/schrift-k.json' },
+  { id: 'uji-w05', name: 'Felix · luftig', file: 'schriften/schrift-l.json' },
 ];
 
 // Frühere Namen („Schrift A · ordentlich“, „Saubere Schulschrift“) einmalig umbenennen; selbst vergebene Namen bleiben

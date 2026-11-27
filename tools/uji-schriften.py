@@ -1,7 +1,8 @@
 # Mitgelieferte Schriften aus UJIpenchars2 erzeugen (CC BY 4.0, doi:10.24432/C5FG8S).
 # Daten: https://archive.ics.uci.edu/dataset/177 → ujipenchars2.txt
 # Aufruf je Schrift: python3 tools/uji-schriften.py ujipenchars2.txt schriften/schrift-a.json "tst_UPV_W18|Schrift A · ordentlich|ordentlich"
-# Auswahl: B=trn_UJI_W07, C=tst_UPV_W33, D=trn_UJI_W11 (normal), E=trn_UPV_W44 (normal), F=tst_UPV_W42 (locker)
+# Auswahl: B=trn_UJI_W07, C=tst_UPV_W33, D=trn_UJI_W11 (normal), E=trn_UPV_W44 (normal), F=tst_UPV_W42 (locker),
+# G=trn_UJI_W02, H=trn_UJI_W06 (normal), I=trn_UPV_W46, J=trn_UPV_W58 (normal), K=tst_UJI_W15, L=trn_UJI_W05 (locker)
 
 # UJIpenchars2 einlesen und je Schreiber auswerten (Grundlinie, x-Höhe, Streuung)
 import re, json, sys, math, random, datetime, statistics as st
