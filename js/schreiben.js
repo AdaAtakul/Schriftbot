@@ -1,10 +1,10 @@
 // Modul 2: Text → Handschrift mit Live-Vorschau.
 import { layout, lineMetrics, DEFAULTS } from './layout.js';
-import { drawPage, drawPaper } from './render.js';
+import { drawPage, drawPaper, animatePage } from './render.js';
 import { paperShapes } from './paper.js';
 import { getSettings, setSetting, saveProfile, activeProfile } from './storage.js';
 import { equalize, progress } from './profile.js';
-import { PEN_SIZE } from './ink.js';
+import { PEN_SIZE, PENS, penColor } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
@@ -24,10 +24,10 @@ export const INKS = {
 };
 
 // Tintenfarbe: feste Farbe oder eigene über den Farbton-Regler
-export const inkColor = s => (s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.schwarz).color);
+export const inkColor = s => penColor(s.ink === 'eigen' ? hueColor(+s.inkHue || 0) : (INKS[s.ink] || INKS.schwarz).color, s.pen);
 
 const STANDARD = {
-  paper: 'liniert-breit', ink: 'schwarz', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, lineShift: 20, paperColor: 'weiss',
+  paper: 'liniert-breit', ink: 'schwarz', pen: 'kugel', inkHue: 220, xHeight: 3, lineHeight: 8.8, margin: 20, lineShift: 20, paperColor: 'weiss',
 };
 
 const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) + ' mm';
@@ -67,7 +67,7 @@ export function current() {
 export function options(s = current()) {
   const paper = PAPERS[s.paper] ? s.paper : STANDARD.paper;
   return {
-    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, lineShift: (+s.lineShift || 0) / 100, penSize: PEN_SIZE * s.weight / 100,
+    xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, lineShift: (+s.lineShift || 0) / 100, penSize: PEN_SIZE * s.weight / 100, pen: PENS[s.pen] ? s.pen : 'kugel',
     connect: s.connect / 100, chaos: s.chaos / 100, strike: s.strike / 100, wobble: s.wobble / 100, edges: s.edges / 100,
     fix: s.fix / 100, fatigue: s.fatigue / 100,
     paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
@@ -142,13 +142,11 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   const exportPaper = () => getSettings().exportPaper ?? true;
   for (const b of bgEl.children) b.addEventListener('click', () => { setSetting('exportPaper', b.dataset.bg === 'paper'); syncControls(); render(); });
 
-  // Stil-Vorlage
-  const styleSel = $('style');
-  for (const [key, p] of Object.entries(PRESETS)) styleSel.add(new Option(p.label, key));
-  styleSel.addEventListener('change', () => { setSetting('style', styleSel.value); syncControls(); render(); });
-  // Schnellwahl in der Leiste: Ordentlich / Normal / Locker (alle Vorlagen unter „Feineinstellungen“)
-  const styleSeg = $('style-seg');
-  for (const b of styleSeg.children) b.addEventListener('click', () => { setSetting('style', b.dataset.style); syncControls(); render(); });
+  // Stil: ein Regler in der Leiste über alle Vorlagen, von sehr ordentlich bis sehr unordentlich
+  const STYLE_ORDER = Object.keys(PRESETS);
+  const styleRange = $('style-range');
+  styleRange.max = STYLE_ORDER.length - 1;
+  styleRange.addEventListener('input', () => { setSetting('style', STYLE_ORDER[styleRange.value]); syncControls(); renderSoon(); });
 
   // Aufklapp-Menüs der Leiste (Papier, Tinte, Feineinstellungen): eins zur Zeit, schließen mit Esc oder Tipp daneben
   const popBtns = [...document.querySelectorAll('.lookbar [data-pop]')];
@@ -182,6 +180,17 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
 
+  // Stiftart: Form und Breite der Striche (GoodNotes-Export bleibt Kugelschreiber, nur die Breite passt sich an)
+  const penEl = $('pen');
+  for (const [key, p] of Object.entries(PENS)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('role', 'radio');
+    b.dataset.pen = key;
+    b.textContent = p.label;
+    b.addEventListener('click', () => { setSetting('pen', key); syncControls(); render(); });
+    penEl.append(b);
+  }
   const inkEl = $('ink');
   for (const [key, ink] of Object.entries({ ...INKS, eigen: { label: 'Eigene Farbe (Farbton-Regler)', color: '' } })) {
     const b = document.createElement('button');
@@ -257,10 +266,14 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     inkEl.querySelector('[data-ink="eigen"]').style.setProperty('--c', hueColor(+s.inkHue));
     hue.value = s.inkHue;
     $('ink-hue-out').textContent = s.ink === 'eigen' ? `${s.inkHue}°` : 'aus';
-    styleSel.value = PRESETS[s.style] ? s.style : DEFAULT_STYLE;
-    for (const b of styleSeg.children) b.setAttribute('aria-checked', b.dataset.style === styleSel.value);
+    const styleKey = PRESETS[s.style] ? s.style : DEFAULT_STYLE;
+    styleRange.value = STYLE_ORDER.indexOf(styleKey);
+    $('style-out').textContent = PRESETS[styleKey].label;
+    styleRange.setAttribute('aria-valuetext', PRESETS[styleKey].label);
     $('ink-dot').style.background = inkColor(s);
-    $('style-desc').textContent = PRESETS[styleSel.value].desc;
+    for (const b of penEl.children) b.setAttribute('aria-checked', b.dataset.pen === options(s).pen);
+    $('pen-label').parentElement.setAttribute('aria-label', 'Stift: ' + PENS[options(s).pen].label);
+    $('style-desc').textContent = PRESETS[styleKey].desc;
     const modified = isModified(s);
     $('style-reset').hidden = !modified;
     $('style-note').textContent = modified ? 'Angepasst – deine Werte für diese Vorlage bleiben gespeichert.' : '';
@@ -292,6 +305,13 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     return r.bottom > Math.max(0, c.top) && r.top < Math.min(innerHeight, c.bottom) && r.right > c.left && r.left < c.right;
   };
 
+  // Abspielen: die sichtbare Seite schreibt sich mit den echten Strichzeiten hin – beim ersten Anzeigen,
+  // nach „Neu würfeln“ und per Knopf. Jede Änderung (Tippen, Regler) zeichnet sofort fertig.
+  const stillMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let playNext = !stillMotion(), anim = null;
+  const stopAnim = () => { anim?.cancel(); anim = null; };
+  $('play').addEventListener('click', () => { stopAnim(); playNext = true; render(); });
+
   function render({ quick = false } = {}) {
     if (!quick) clearTimeout(fullTimer);
     if (!pagesEl.clientWidth) return; // Tab nicht sichtbar
@@ -302,6 +322,9 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const dpr = quick ? 1 : (window.devicePixelRatio || 1);
     const cssW = pageWidth(o);
     const pxPerMm = cssW / o.pageW;
+    // Läuft gerade eine Animation zu genau diesem Bild (z. B. nur Größenänderung gemeldet), sie nicht abbrechen
+    const key = [input.value, seed, JSON.stringify(o), color, exportPaper()].join('|');
+    if (anim && anim.key !== key) stopAnim();
 
     // Vorhandene Canvas wiederverwenden, damit die Vorschau beim Tippen nicht flackert.
     while (pagesEl.children.length > result.pages.length) pagesEl.lastChild.remove();
@@ -314,6 +337,10 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       if (quick && !isVisible(canvas)) return; // unsichtbare Seiten beim Ziehen auslassen
       // Größe nur bei Bedarf setzen: das Neu-Anlegen des Speichers kostet bei jedem Schritt Zeit
       const w = Math.round(cssW * dpr), h = Math.round(cssW * dpr * o.pageH / o.pageW);
+      if (anim && anim.index === i) {
+        if (canvas.width === w && canvas.height === h) return; // diese Seite schreibt sich gerade hin
+        stopAnim(); playNext = true; // Größe hat sich geändert (z. B. beim Start): von vorn beginnen
+      }
       if (canvas.width !== w) canvas.width = w;
       if (canvas.height !== h) canvas.height = h;
       const ctx = canvas.getContext('2d');
@@ -323,7 +350,13 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr * pxPerMm, 0, 0, dpr * pxPerMm, 0, 0);
       if (withPaper) drawPaper(ctx, o);
-      drawPage(ctx, page, color, o.penSize);
+      if (playNext && !quick && !anim && isVisible(canvas) && progress(profile).done > 0) {
+        playNext = false;
+        anim = { key, index: i, cancel: animatePage(ctx, page, color, o.penSize, o.pen) };
+        setTimeout(() => { if (anim?.key === key) anim = null; }, 6000); // spätestens dann ist sie fertig
+        return;
+      }
+      drawPage(ctx, page, color, o.penSize, o.pen);
     });
 
     pageCount = result.pages.length;
@@ -340,9 +373,9 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   }
 
   // ---------- Zoom und Blättern ----------
-  // 100 % = ganze Seite passt in die Bühne (Handy: volle Breite); Stufen wie in Vorschau-Apps
+  // 100 % = Seitenbreite (Schrift sofort lesbar); „Ganze Seite“ zeigt das ganze Blatt. Stufen wie in Vorschau-Apps
   const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
-  let zoom = 1, pageCount = 1, pageIndex = 0;
+  let zoom = 1, pageCount = 1, pageIndex = 0, fitWhole = false;
   const barWrap = document.querySelector('.view-schreiben .lookbar-wrap');
   function pageWidth(o) {
     // Platz für die schwebende Leiste oben (sie bricht auf schmalen Bildschirmen in zwei Zeilen um)
@@ -352,20 +385,21 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const availW = pagesEl.clientWidth - parseFloat(st.paddingLeft) - parseFloat(st.paddingRight);
     const availH = pagesEl.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom);
     const narrow = matchMedia('(max-width: 700px)').matches;
-    const fit = narrow || availH < 200 ? availW : Math.min(availW, availH * o.pageW / o.pageH);
+    const fit = narrow || availH < 200 || !fitWhole ? availW : Math.min(availW, availH * o.pageW / o.pageH);
     return Math.max(120, Math.round(Math.min(fit, 1000) * zoom));
   }
   const zoomVal = $('zoom-reset');
   function setZoom(z) {
     zoom = z;
-    zoomVal.textContent = Math.round(z * 100) + ' %';
+    zoomVal.textContent = z === 1 ? (fitWhole ? 'Ganze Seite' : 'Seitenbreite') : Math.round(z * 100) + ' %';
+    zoomVal.title = fitWhole ? 'Auf Seitenbreite vergrößern' : 'Ganze Seite zeigen';
     $('zoom-out').disabled = z <= ZOOMS[0];
     $('zoom-in').disabled = z >= ZOOMS[ZOOMS.length - 1];
     render();
   }
   $('zoom-in').addEventListener('click', () => setZoom(ZOOMS.find(z => z > zoom + 1e-6) ?? zoom));
   $('zoom-out').addEventListener('click', () => setZoom([...ZOOMS].reverse().find(z => z < zoom - 1e-6) ?? zoom));
-  zoomVal.addEventListener('click', () => setZoom(1));
+  zoomVal.addEventListener('click', () => { if (zoom === 1) fitWhole = !fitWhole; setZoom(1); });
   function updatePageInfo() {
     const c = pagesEl.getBoundingClientRect(), mid = c.top + c.height / 2;
     let best = 0, dist = Infinity;
@@ -420,6 +454,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
   $('reroll').addEventListener('click', () => {
     seed = Math.floor(Math.random() * 2 ** 31);
     setSetting('seed', seed);
+    stopAnim();
+    playNext = !stillMotion();
     render();
   });
   $('reset-settings').addEventListener('click', async () => {

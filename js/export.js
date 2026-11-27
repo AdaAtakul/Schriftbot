@@ -6,9 +6,9 @@ import { paperShapes } from './paper.js';
 const PNG_DPI = 300;
 
 // Umrisse eines Glyph-Items in Seitenkoordinaten (mm): Drehung und Skalierung schon angewendet.
-export function itemPolygons(it, size = PEN_SIZE) {
+export function itemPolygons(it, size = PEN_SIZE, pen) {
   const c = Math.cos(it.rot || 0), s = Math.sin(it.rot || 0);
-  return it.strokes.map(st => outline(st, size * (it.ink || 1)).map(([px, py]) => [
+  return it.strokes.map(st => outline(st, size * (it.ink || 1), pen).map(([px, py]) => [
     it.x + (px * c - py * s) * it.s,
     it.y + (px * s + py * c) * it.s,
   ]));
@@ -70,7 +70,7 @@ export function buildPdf(result, o, color, withPaper) {
         continue;
       }
       doc.setFillColor(color);
-      for (const poly of itemPolygons(it, o.penSize).map(pts => simplify(pts))) {
+      for (const poly of itemPolygons(it, o.penSize, o.pen).map(pts => simplify(pts))) {
         if (poly.length < 3) continue;
         doc.moveTo(poly[0][0], poly[0][1]);
         for (let k = 1; k < poly.length; k++) doc.lineTo(poly[k][0], poly[k][1]);
@@ -98,7 +98,7 @@ export function buildPng(page, o, color, withPaper) {
   if (page.backgroundImage) ctx.drawImage(page.backgroundImage, 0, 0, canvas.width, canvas.height);
   ctx.setTransform(pxPerMm, 0, 0, pxPerMm, 0, 0);
   if (withPaper && !page.backgroundImage) drawPaper(ctx, { ...o, pageW: w, pageH: h });
-  drawPage(ctx, page, color, o.penSize);
+  drawPage(ctx, page, color, o.penSize, o.pen);
   return new Promise((resolve, reject) => canvas.toBlob(blob => {
     canvas.width = canvas.height = 0; // Speicher auf dem iPad sofort freigeben
     blob ? resolve(blob) : reject(new Error('PNG konnte nicht erzeugt werden.'));

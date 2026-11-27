@@ -177,7 +177,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
     canvas.height = Math.round(cssH * dpr);
     const ctx = canvas.getContext('2d');
     ctx.setTransform(dpr * u, 0, 0, dpr * u, 0, 0);
-    drawPage(ctx, result.pages[0], inkColor(s), writeOptions(s).penSize);
+    drawPage(ctx, result.pages[0], inkColor(s), writeOptions(s).penSize, writeOptions(s).pen);
   }
 
   function draw({ ctx, strokes, unit, w, live }) {

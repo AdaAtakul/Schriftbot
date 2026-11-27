@@ -165,10 +165,10 @@ export function initBlatt(profile) {
     const ctx = v.canvas.getContext('2d');
     ctx.drawImage(clean[i], 0, 0, v.canvas.width, v.canvas.height);
     const k = v.canvas.width / pg.w, s = current();
-    const color = inkColor(s), pen = options(s).penSize;
+    const color = inkColor(s), o = options(s), pen = o.penSize;
     for (const f of fields.filter(f => f.page === i)) {
       ctx.setTransform(k, 0, 0, k, f.x * k, f.y * k);
-      drawPage(ctx, { items: layoutOf(f).items }, color, pen);
+      drawPage(ctx, { items: layoutOf(f).items }, color, pen, o.pen);
     }
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     drawOverlay(i);

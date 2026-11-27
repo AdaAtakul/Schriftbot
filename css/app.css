@@ -898,7 +898,7 @@ button.small { padding: 0 10px; font-size: 0.882rem; font-weight: 500; }
 .pagebar .icon-btn.ghost, .pagebar .ghost { color: var(--ink); font-size: 1.176rem; font-weight: 500; }
 .pagebar button:disabled { background: transparent; }
 .page-info { padding: 0 6px; font-size: 0.882rem; font-variant-numeric: tabular-nums; }
-.pagebar .zoom-val { min-width: 64px; padding: 0 6px; font-size: 0.882rem; font-variant-numeric: tabular-nums; }
+.pagebar .zoom-val { min-width: 96px; padding: 0 8px; font-size: 0.882rem; font-variant-numeric: tabular-nums; }
 .share-again { position: absolute; right: 20px; bottom: 16px; z-index: 6; border-radius: 999px; box-shadow: var(--shadow-2); }
 
 /* Export-Fenster */
@@ -1031,3 +1031,26 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
 .brand .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .hw-mark { width: 180px; height: 32px; color: var(--accent); }
 @media (max-width: 700px) { .brand-logo { height: 26px; width: 146px; } }
+
+/* Stil: ein Regler in der Leiste (6 Stufen) */
+.lb-style { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 10px; font-size: 0.882rem; color: var(--muted); }
+.lb-style input { width: 96px; accent-color: var(--accent); }
+.lb-style output { min-width: 8.6em; color: var(--ink); font-weight: 600; white-space: nowrap; font-size: 0.824rem; }
+@media (max-width: 700px) { .lb-style { flex: 1 1 100%; justify-content: center; } .lb-style input { flex: 1; } .lb-style output { min-width: 8.5em; } }
+
+/* Stiftart */
+.pen-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; min-width: 260px; }
+.pen-grid button { min-height: 44px; border-radius: 10px; }
+.pen-grid button[aria-checked="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+
+.lb-font select { max-width: 180px; }
+
+/* iPad quer und kleinere Fenster: Leiste kompakt halten, damit alle Knöpfe ohne Scrollen sichtbar sind */
+@media (max-width: 1300px) {
+  .lb-font > span { display: none; }
+  .lb-btn { padding: 0 9px; }
+  .lb-style { padding: 0 6px; gap: 6px; }
+  .lb-style input { width: 80px; }
+  .lb-style output { min-width: 7.4em; }
+}
+@media (min-width: 701px) and (max-width: 1300px) { .view-schreiben .editor { width: 300px; } }
