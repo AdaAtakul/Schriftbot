@@ -11,6 +11,7 @@ import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, renameDemo } from './demo.js';
+import { refreshBuiltins } from './schriften.js';
 import { showTutorial } from './tutorial.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
@@ -89,6 +90,7 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
 
 // Erster Start: Demo-Schrift anlegen, falls mitgeliefert (demo/demo-schrift.json)
 await setupDemo();
+await refreshBuiltins(); // z. B. neues ß in schon geladenen mitgelieferten Schriften
 const demo = isDemo();
 
 renameDemo();

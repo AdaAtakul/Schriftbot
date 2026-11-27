@@ -3,7 +3,7 @@
 // für DeineSchrift umgerechnet (Grundlinie, x-Höhe, Umlaute aus den Punkten des ü). Werkzeug: tools/uji-schriften.py
 // Eine Schrift wird erst geladen, wenn man sie wählt; danach liegt sie wie eine eigene im Speicher (demo: true).
 import { parseCollection } from './sammlung.js';
-import { profilesMeta, createProfile, saveGlyphs, renameProfile } from './storage.js';
+import { profilesMeta, createProfile, saveGlyphs, loadGlyphs, renameProfile } from './storage.js';
 
 // group: ordentlich, normal, unordentlich – nach der gemessenen Streuung der Grundlinie (tools/uji-schriften.py)
 export const BUILTIN = [
@@ -46,4 +46,24 @@ export async function useBuiltin(id) {
   const pid = createProfile({ name: spec.name, demo: true, builtin: id });
   await saveGlyphs(pid, entry.handwriting);
   return pid;
+}
+
+// Nachgebesserte Zeichen auch in schon geladene Schriften übernehmen (einmal je Stand, nur diese Zeichen,
+// damit eigene Änderungen wie „Größen angleichen“ bleiben). Offline: beim nächsten Start noch einmal versuchen.
+const FIXES = { stand: '2026-11-28', chars: ['ß'] }; // ß jetzt aus langem Stamm und der eigenen 3
+export async function refreshBuiltins() {
+  try {
+    if (localStorage.getItem('schriften-stand') === FIXES.stand) return;
+    for (const p of profilesMeta().list) {
+      const spec = p.builtin && BUILTIN.find(b => b.id === p.builtin && b.id !== 'marie');
+      if (!spec) continue;
+      const res = await fetch(spec.file);
+      if (!res.ok) return;
+      const [entry] = parseCollection(await res.text());
+      const hw = await loadGlyphs(p.id);
+      for (const ch of FIXES.chars) if (entry?.handwriting?.glyphs[ch]) hw.glyphs[ch] = entry.handwriting.glyphs[ch];
+      await saveGlyphs(p.id, hw);
+    }
+    localStorage.setItem('schriften-stand', FIXES.stand);
+  } catch { /* offline: später */ }
 }
