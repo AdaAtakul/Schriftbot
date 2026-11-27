@@ -229,7 +229,6 @@ js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
 ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen
 .github/workflows/ios.yml  baut die iPad-App als .ipa (GitHub Actions, macOS)
-tools/build-artifact.mjs   baut die claude.ai-Version
 vendor/                 perfect-freehand 1.2.2, jsPDF 2.5.2 (beide MIT), pdf.js 4.10.38 (Apache-2.0, wird erst beim ersten Blatt geladen), Feather-Lizenz
 LICENSE                 MIT
 tests/                  Selbsttests
@@ -251,7 +250,6 @@ node tests/stil.test.mjs
 node tests/storage.test.mjs
 node tests/sammlung.test.mjs
 node tests/einfuegen.test.mjs
-node tests/ki.test.mjs
 ```
 
 Lokal starten (Service Worker braucht `localhost` oder HTTPS):
