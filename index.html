@@ -139,6 +139,7 @@
         <div id="help-menu" class="menu" hidden>
           <button id="help-tour" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Kurze Einführung</button>
           <a class="menu-item" href="anleitung"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Anleitung &amp; häufige Fragen</a>
+          <button id="ki-key-menu" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>KI-Schlüssel (Gemini)</button>
           <a class="menu-item" href="datenschutz"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>Datenschutz</a>
           <a class="menu-item" href="impressum"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>Impressum</a>
           <button id="theme-btn" class="menu-item"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span>Dunkles Design</span></button>
@@ -252,9 +253,39 @@
       <div class="panel editor">
         <div class="editor-head">
           <label for="text-input">Dein Text</label>
-          <button id="text-delete" class="ghost small" title="Ganzen Text löschen"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Leeren</button>
+          <div class="editor-head-btns">
+            <button id="ki-btn" class="ghost small ki-btn" aria-expanded="false" aria-controls="ki-panel" title="Text von Google Gemini schreiben lassen"><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>KI <span class="beta">Beta</span></button>
+            <button id="text-delete" class="ghost small" title="Ganzen Text löschen"><svg class="icon" aria-hidden="true"><use href="#i-trash"/></svg>Leeren</button>
+          </div>
         </div>
         <p class="editor-lead">Tippe hier – <span class="lead-wide">rechts</span><span class="lead-narrow">unten</span> erscheint dein Text sofort in echter Handschrift.</p>
+        <div id="ki-panel" class="ki-panel" hidden>
+          <div id="ki-modes" class="seg ki-modes" role="radiogroup" aria-label="Was soll die KI tun?">
+            <button type="button" role="radio" data-mode="lernzettel">Lernzettel</button>
+            <button type="button" role="radio" data-mode="auftrag">Auftrag</button>
+            <button type="button" role="radio" data-mode="ueberarbeiten">Überarbeiten</button>
+          </div>
+          <textarea id="ki-prompt" rows="2" aria-label="Auftrag an die KI" spellcheck="true" lang="de"></textarea>
+          <div class="ki-row">
+            <span class="hint small">Geht direkt an Google · <button type="button" id="ki-change" class="link-btn">Schlüssel</button></span>
+            <button type="button" id="ki-go" class="primary small">Schreiben lassen</button>
+          </div>
+          <p id="ki-status" class="status small" aria-live="polite"></p>
+        </div>
+        <div class="study-row">
+          <label class="check study-check"><input type="checkbox" id="study-toggle"> Lernzettel-Modus</label>
+          <span class="beta">Beta</span>
+        </div>
+        <div id="study-tools" class="study-tools" role="toolbar" aria-label="Lernzettel-Elemente einfügen" hidden>
+          <button type="button" data-line="# " title="Überschrift: # am Zeilenanfang">Titel</button>
+          <button type="button" data-wrap="_" title="Unterstreichen: _Wort_">Unterstr.</button>
+          <button type="button" data-wrap="==" title="Textmarker: ==Wort==">Marker</button>
+          <button type="button" data-line="[ ] " title="Kästchen: [ ] oder abgehakt [x]">Kästchen</button>
+          <button type="button" data-line="- " title="Aufzählungspunkt: - am Zeilenanfang">Punkt</button>
+          <button type="button" data-insert="-> " title="Pfeil: ->">Pfeil</button>
+          <button type="button" data-line="!! " title="Merkkasten: !! am Zeilenanfang">Merkkasten</button>
+        </div>
+        <p class="beta-note">Beta: KI und Lernzettel-Modus sind neu. Es kann zu Fehlern kommen – Ergebnis bitte prüfen.</p>
         <textarea id="text-input" placeholder="Schreib hier deinen Text …" spellcheck="true" lang="de"></textarea>
         <p class="tpl-label" id="tpl-label">Oder starte mit einer Vorlage</p>
         <div id="templates" class="templates" role="group" aria-labelledby="tpl-label"></div>
@@ -361,6 +392,30 @@
           <div class="dlg-actions">
             <button value="cancel">Abbrechen</button>
             <button type="button" id="export-go" class="primary">Für GoodNotes sichern</button>
+          </div>
+        </form>
+      </dialog>
+      <dialog id="ki-setup" class="export-dlg ki-setup" aria-labelledby="ki-setup-title">
+        <form method="dialog" class="export-form">
+          <div class="dlg-head">
+            <h2 id="ki-setup-title">KI einrichten <span class="beta">Beta</span></h2>
+            <button value="cancel" class="icon-btn round ghost" aria-label="Schließen"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+          </div>
+          <p class="hint">Du brauchst einen kostenlosen Schlüssel von Google Gemini. Das dauert etwa zwei Minuten.</p>
+          <ol class="ki-steps">
+            <li>Öffne <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a> und melde dich mit deinem Google-Konto an.</li>
+            <li>Tippe auf <strong>„Create API key“</strong> (API-Schlüssel erstellen).</li>
+            <li>Kopiere den Schlüssel – er beginnt meist mit „AIza“.</li>
+            <li>Füge ihn hier ein:</li>
+          </ol>
+          <input id="ki-key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AIza…" aria-label="Gemini-Schlüssel">
+          <p class="hint small">Der Schlüssel bleibt nur auf diesem Gerät. Deine Texte gehen direkt an Google, nicht an DeineSchrift. Laut Google ist die Gemini-API ab 18 Jahren. Kostenlos mit Tageslimit.</p>
+          <p class="beta-note">Beta: Es kann zu Fehlern kommen.</p>
+          <p id="ki-setup-status" class="status" aria-live="polite"></p>
+          <div class="dlg-actions">
+            <button type="button" id="ki-delete" class="danger" hidden>Schlüssel löschen</button>
+            <a class="ki-guide-link" href="gemini-schluessel" target="_blank" rel="noopener">Ausführliche Anleitung</a>
+            <button type="button" id="ki-save" class="primary">Speichern &amp; testen</button>
           </div>
         </form>
       </dialog>

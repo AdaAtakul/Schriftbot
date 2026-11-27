@@ -226,6 +226,7 @@ js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Eigene Schrift: Backup, Teilen, Import, Eingabe (Finger/Maus)
 js/vorschau.js          Schriftprobe „Hallo“ für die Galerie (vorschau-daten.js: tools/vorschau.mjs)
+js/gemini.js            KI-Brücke (Beta): eigener Gemini-Schlüssel, Lernzettel/Auftrag/Überarbeiten
 js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
 ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen

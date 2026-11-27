@@ -22,8 +22,8 @@
   <main>
     <nav class="crumbs" aria-label="Pfad"><a href="./">DeineSchrift</a> › Datenschutz &amp; Lizenzen</nav>
     <h1>Datenschutz &amp; Lizenzen</h1>
-    <p class="lead">Kurz gesagt: DeineSchrift speichert deine Handschrift, deine Texte und deine Dateien nur auf deinem Gerät. Es gibt keine Anmeldung, keine Cookies und kein Tracking.</p>
-    <p class="stand">Stand: 27. November 2026</p>
+    <p class="lead">Kurz gesagt: DeineSchrift speichert deine Handschrift, deine Texte und deine Dateien nur auf deinem Gerät. Es gibt keine Anmeldung, keine Cookies und kein Tracking. Nur wenn du selbst die KI-Funktion mit deinem eigenen Gemini-Schlüssel nutzt, geht dein Auftrag direkt an Google.</p>
+    <p class="stand">Stand: 28. November 2026</p>
 
     <h2 id="verantwortlich">Wer ist verantwortlich?</h2>
     <p>Verantwortlich ist der im <a href="impressum">Impressum</a> genannte Betreiber; dort steht auch, wie du ihn erreichst.</p>
@@ -34,7 +34,7 @@
 
     <h2 id="geraet">Was speichert DeineSchrift auf meinem Gerät?</h2>
     <ul>
-      <li><strong>Deine Handschrift, Profile und Einstellungen</strong> im Speicher deines Browsers (IndexedDB und localStorage).</li>
+      <li><strong>Deine Handschriften und Einstellungen</strong>, falls eingerichtet auch dein Gemini-Schlüssel, im Speicher deines Browsers (IndexedDB und localStorage).</li>
       <li><strong>Geöffnete Formulare, PDFs und Fotos</strong> werden direkt im Browser verarbeitet und nur lokal zwischengespeichert, damit sie nach einem Neustart noch da sind.</li>
       <li><strong>Die App-Dateien</strong> legt ein Service Worker im Browser ab, damit DeineSchrift offline startet.</li>
     </ul>
@@ -43,11 +43,15 @@
     <h2 id="cookies">Verwendet DeineSchrift Cookies oder Tracking?</h2>
     <p>Nein. Es gibt keine Cookies, keine Analyse-Werkzeuge und keine eingebundenen Inhalte anderer Anbieter wie Schriften, Videos oder Karten. Alle benötigten Programmteile liegen auf derselben Seite.</p>
 
+    <h2 id="ki">Was passiert bei der KI-Funktion (Beta)?</h2>
+    <p>Die KI-Funktion ist freiwillig und nur aktiv, wenn du einen eigenen Schlüssel für die Gemini-API von Google eingibst. Tippst du auf „Schreiben lassen“, schickt dein Browser deinen Auftrag – beim Überarbeiten auch den Text aus dem Textfeld – zusammen mit deinem Schlüssel direkt an Google (Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA; in der EU Google Ireland Ltd., Gordon House, Barrow Street, Dublin 4, Irland). Der Betreiber von DeineSchrift erhält diese Daten nicht. Du nutzt die Gemini-API mit deinem eigenen Google-Konto; es gelten die <a href="https://ai.google.dev/gemini-api/terms">Nutzungsbedingungen der Gemini-API</a> und die <a href="https://policies.google.com/privacy">Datenschutzerklärung von Google</a>. Google kann Daten in den USA verarbeiten. Gib keine sensiblen oder persönlichen Daten in KI-Aufträge ein.</p>
+    <p>Der Schlüssel wird nur im Speicher deines Browsers abgelegt, nicht in Sicherungsdateien übernommen und lässt sich jederzeit über das ?-Menü löschen. Anleitung: <a href="gemini-schluessel">Kostenlosen Gemini-Schlüssel holen</a>.</p>
+
     <h2 id="demo">Was sind die mitgelieferten Schriften?</h2>
     <p>Beim ersten Öffnen lädt DeineSchrift – falls vorhanden – eine mitgelieferte Beispiel-Handschrift von derselben Seite, damit du die App sofort ausprobieren kannst. Weitere mitgelieferte Schriften lädt die App erst, wenn du sie unter „Schrift“ auswählst, ebenfalls von derselben Seite. Dabei werden keine Daten von dir übertragen.</p>
 
     <h2 id="rechte">Welche Rechte habe ich?</h2>
-    <p>Du hast nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Da DeineSchrift selbst keine personenbezogenen Daten von dir erhält, wende dich für die Server-Protokolle bitte an GitHub.</p>
+    <p>Du hast nach der DSGVO das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch sowie das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Da DeineSchrift selbst keine personenbezogenen Daten von dir erhält, wende dich für die Server-Protokolle bitte an Cloudflare.</p>
 
     <h2 id="marken">Marken</h2>
     <p>GoodNotes ist eine Marke der Goodnotes Limited. Apple, iPad, Apple Pencil und Safari sind Marken der Apple Inc. DeineSchrift ist ein unabhängiges Projekt und steht in keiner Verbindung zu diesen Unternehmen. Das GoodNotes-Dateiformat ist inoffiziell nachgebaut.</p>

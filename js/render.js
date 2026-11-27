@@ -1,5 +1,5 @@
 // Eine Layout-Seite auf ein Canvas zeichnen. ctx muss bereits in mm skaliert sein.
-import { fillStrokes, fillStrokesCached, PEN_SIZE } from './ink.js';
+import { fillStrokes, fillStrokesCached, PEN_SIZE, MARKER } from './ink.js';
 import { paperShapes } from './paper.js';
 
 export const MISSING_COLOR = '#d0021b';
@@ -36,6 +36,10 @@ export function drawPage(ctx, page, color, size = PEN_SIZE, pen) {
       ctx.font = 'bold 1.3px -apple-system, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(it.missing === ' ' ? '␣' : it.missing, w / 2, 0);
+    } else if (it.marker) {
+      ctx.globalAlpha = MARKER.alpha;
+      ctx.fillStyle = MARKER.color;
+      fillStrokesCached(ctx, it.strokes, MARKER.size, MARKER.pen);
     } else {
       ctx.fillStyle = color;
       fillStrokesCached(ctx, it.strokes, size * (it.ink || 1), pen); // ink: Druck des Wortes (Schreibfehler-Regler)
@@ -51,7 +55,7 @@ export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000
   const steps = [];
   let total = 0;
   for (const it of page.items) {
-    if (it.missing || !it.strokes) continue;
+    if (it.missing || it.marker || !it.strokes) continue;
     for (const st of it.strokes) {
       if (!st.length) continue;
       const t0 = st[0][3] || 0, dur = Math.max(30, (st[st.length - 1][3] || 0) - t0);
@@ -59,7 +63,7 @@ export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000
       total += dur + GAP;
     }
   }
-  drawPage(ctx, { items: page.items.filter(it => it.missing) }, color, size, pen); // rote Lücken stehen sofort da
+  drawPage(ctx, { items: page.items.filter(it => it.missing || it.marker) }, color, size, pen); // rote Lücken und Marker stehen sofort da
   const speed = Math.max(1.5, total / maxMs);
   const place = it => { ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.rot || 0); ctx.scale(it.s, it.s); ctx.fillStyle = color; };
   let i = 0, raf = 0, begin = 0;

@@ -2,6 +2,8 @@
 import { getStroke } from '../vendor/perfect-freehand.mjs';
 
 export const PEN_SIZE = 0.13; // Strichbreite in x-Höhen
+// Textmarker im Lernzettel-Modus: breiter, gleichmäßiger Strich, durchsichtig gelb (unter der Schrift)
+export const MARKER = { color: '#ffd54a', rgba: [1, 0.835, 0.29, 0.5], alpha: 0.5, size: 0.75, pen: 'filz' };
 
 const OPTIONS = { thinning: 0.6, smoothing: 0.5, streamline: 0.35, simulatePressure: false, last: true };
 

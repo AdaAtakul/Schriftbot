@@ -1,5 +1,5 @@
 // Modul 3: Export als PDF (Vektor) und PNG, Weitergabe über das Teilen-Menü (z. B. an GoodNotes).
-import { outline, PEN_SIZE } from './ink.js';
+import { outline, PEN_SIZE, MARKER } from './ink.js';
 import { drawPage, drawPaper, MISSING_COLOR } from './render.js';
 import { paperShapes } from './paper.js';
 
@@ -69,14 +69,18 @@ export function buildPdf(result, o, color, withPaper) {
         doc.text(it.missing === ' ' ? '_' : it.missing, it.x + it.w / 2, it.y, { align: 'center' });
         continue;
       }
-      doc.setFillColor(color);
-      for (const poly of itemPolygons(it, o.penSize, o.pen).map(pts => simplify(pts))) {
+      // Textmarker durchsichtig (liegt im Layout schon unter der Schrift)
+      if (it.marker) { doc.saveGraphicsState(); doc.setGState(new doc.GState({ opacity: MARKER.alpha })); }
+      doc.setFillColor(it.marker ? MARKER.color : color);
+      const polys = it.marker ? itemPolygons({ ...it, ink: 1 }, MARKER.size, MARKER.pen) : itemPolygons(it, o.penSize, o.pen);
+      for (const poly of polys.map(pts => simplify(pts))) {
         if (poly.length < 3) continue;
         doc.moveTo(poly[0][0], poly[0][1]);
         for (let k = 1; k < poly.length; k++) doc.lineTo(poly[k][0], poly[k][1]);
         doc.close();
         doc.fill(); // Nonzero wie im Canvas, damit sich überlappende Strichteile nicht ausstanzen
       }
+      if (it.marker) doc.restoreGraphicsState();
     }
   });
   return doc.output('blob');

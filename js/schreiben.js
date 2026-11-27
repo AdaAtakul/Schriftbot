@@ -70,7 +70,7 @@ export function options(s = current()) {
     xHeight: +s.xHeight, lineHeight: +s.lineHeight, margin: +s.margin, lineShift: (+s.lineShift || 0) / 100, penSize: PEN_SIZE * s.weight / 100, pen: PENS[s.pen] ? s.pen : 'kugel',
     connect: s.connect / 100, chaos: s.chaos / 100, strike: s.strike / 100, wobble: s.wobble / 100, edges: s.edges / 100,
     fix: s.fix / 100, fatigue: s.fatigue / 100,
-    paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss',
+    paper, paperColor: PAPER_COLORS[s.paperColor] ? s.paperColor : 'weiss', study: !!s.lernzettel,
     ruled: false, ...paperLines(paper), // Lage der Linien wie in GoodNotes
     pageW: DEFAULTS.pageW, pageH: DEFAULTS.pageH,
   };
@@ -272,6 +272,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     styleRange.setAttribute('aria-valuetext', PRESETS[styleKey].label);
     for (const b of penEl.children) b.setAttribute('aria-checked', b.dataset.pen === options(s).pen);
     $('style-desc').textContent = PRESETS[styleKey].desc;
+    $('study-toggle').checked = !!s.lernzettel;
+    $('study-tools').hidden = !s.lernzettel;
     const modified = isModified(s);
     $('style-reset').hidden = !modified;
     $('style-note').textContent = modified ? 'Angepasst – deine Werte für diese Vorlage bleiben gespeichert.' : '';
@@ -578,5 +580,28 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     if (input.value.trim()) keepPrevious('Vorherigen Text wiederherstellen');
     setText(mode === 'append' && input.value.trim() ? input.value.replace(/\s+$/, '') + '\n\n' + text : text);
   }
-  return { render, sync: () => { syncControls(); render(); }, getSeed: () => seed, getText: () => input.value, insertText };
+  // ---------- Lernzettel-Modus (Beta): # Titel, ==Marker== usw. werden gezeichnet ----------
+  const studyToggle = $('study-toggle'), studyTools = $('study-tools');
+  const LINE_MARK = /^(#|!!|-|\*|\[ \]|\[[xX]\]) /;
+  function setStudy(on) {
+    setSetting('lernzettel', !!on);
+    syncControls();
+    render();
+  }
+  studyToggle.addEventListener('change', () => setStudy(studyToggle.checked));
+  for (const b of studyTools.querySelectorAll('button')) b.addEventListener('click', () => {
+    const v = input.value, a = input.selectionStart, e = input.selectionEnd, { line, wrap } = b.dataset;
+    if (line) {
+      // Zeichen am Zeilenanfang setzen, ersetzen oder (gleiches nochmal) wieder entfernen
+      const ls = v.lastIndexOf('\n', a - 1) + 1, old = v.slice(ls).match(LINE_MARK)?.[0] || '';
+      input.setRangeText(old === line ? '' : line, ls, ls + old.length, 'end');
+    } else if (wrap) {
+      const sel = v.slice(a, e) || 'Wort';
+      input.setRangeText(wrap + sel + wrap, a, e, 'select');
+    } else input.setRangeText(b.dataset.insert, a, e, 'end');
+    input.focus();
+    input.dispatchEvent(new Event('input'));
+  });
+
+  return { render, sync: () => { syncControls(); render(); }, getSeed: () => seed, getText: () => input.value, insertText, setStudy };
 }
