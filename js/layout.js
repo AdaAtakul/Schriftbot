@@ -36,13 +36,17 @@ export function lineMetrics(options) {
 }
 
 // Stärke der Unordnung bei 100 %.
+// Unter 100 % wächst die Wirkung langsamer (Ordentlich bei 30 % bleibt ruhig), darüber gleichmäßig.
 const CHAOS = {
-  rotate: 3 * Math.PI / 180, // Drehung je Zeichen ±3°
-  size: 0.05,                // Größe ±5 %
-  shift: 0.06,               // vertikaler Versatz ±0,06 x-Höhen
-  gap: 0.12,                 // Buchstabenabstand ±0,12 x-Höhen (≈ ±1–2 px auf dem Bildschirm)
-  slant: 0.3 * Math.PI / 180 // Schräglage je Zeile ±0,3° (mehr würde auf liniertem Papier von der Linie laufen)
+  rotate: 6 * Math.PI / 180,     // Drehung je Zeichen ±6° (um die Buchstabenmitte)
+  size: 0.08,                    // Größe ±8 %
+  shift: 0.15,                   // Höhenversatz je Zeichen ±0,15 x-Höhen
+  gap: 0.15,                     // Buchstabenabstand ±0,15 x-Höhen
+  wordShift: 0.1,                // ganzes Wort höher/tiefer ±0,1 x-Höhen
+  wordTilt: 1.5 * Math.PI / 180, // ganzes Wort leicht schräg ±1,5°
+  slant: 0.3 * Math.PI / 180     // Schräglage je Zeile ±0,3° (mehr würde auf liniertem Papier von der Linie laufen)
 };
+export const chaosCurve = c => (c <= 1 ? c ** 1.5 : c);
 
 // Durchstreichen, Zeilen & Druck bei 100 %.
 const MISTAKES = {
@@ -220,7 +224,8 @@ export function layout(text, profile, options = {}, seed = 1) {
   // Getrennte Zufallsquellen: Regler verschieben so nicht die Variantenwahl.
   const random = rng(seed), pairRandom = rng(seed + 1), jitterRandom = rng(seed + 2);
   const lineRandom = rng(seed + 3);
-  const jitter = (amount, r = jitterRandom) => (r() * 2 - 1) * amount * (o.chaos + tired * FATIGUE.chaos);
+  // Glockenförmig (Summe zweier Zufallszahlen): meist kleine, selten große Abweichungen wie bei echter Schrift.
+  const jitter = (amount, r = jitterRandom) => (r() + r() - 1) * amount * chaosCurve(o.chaos + tired * FATIGUE.chaos);
   const strike = o.strike ?? o.mistakes ?? 0, wobble = o.wobble ?? o.mistakes ?? 0, edges = o.edges || 0;
   const slipGap = Math.round(MISTAKES.gap[0] + (MISTAKES.gap[1] - MISTAKES.gap[0]) * strike);
   const edgeRandom = rng(seed + 5), shiftRandom = rng(seed + 7);
@@ -262,13 +267,15 @@ export function layout(text, profile, options = {}, seed = 1) {
     const b = bounds(strokes);
     const pad = PEN_SIZE / 2;
     const sc = (1 + jitter(CHAOS.size, r)) * (1 + FATIGUE.size * tired);
+    const gap = (o.spacing + jitter(CHAOS.gap, r) + FATIGUE.gap * tired) * unit, shift = jitter(CHAOS.shift, r);
+    const rot = jitter(CHAOS.rotate, r) + FATIGUE.lean * tired;
+    // Um die Buchstabenmitte drehen statt um den linken Fußpunkt, sonst hebt die rechte Seite von der Linie ab.
+    const cx = (b.minX + b.maxX) / 2, cy = -0.5, cos = Math.cos(rot), sin = Math.sin(rot);
     return {
-      strokes, sc, minX: b.minX, maxX: b.maxX,
-      dx: (pad - b.minX) * unit * sc,
+      strokes, sc, minX: b.minX, maxX: b.maxX, gap, rot,
+      dx: (pad - b.minX + cx - (cx * cos - cy * sin)) * unit * sc,
       w: (b.maxX - b.minX + 2 * pad) * unit * sc,
-      gap: (o.spacing + jitter(CHAOS.gap, r) + FATIGUE.gap * tired) * unit,
-      dy: jitter(CHAOS.shift, r) * unit,
-      rot: jitter(CHAOS.rotate, r) + FATIGUE.lean * tired,
+      dy: (shift + (cy - (cx * sin + cy * cos)) * sc) * unit,
     };
   }
 
@@ -342,13 +349,16 @@ export function layout(text, profile, options = {}, seed = 1) {
     if (x > lineStart && x + sp + widthOf(glyphs) > lineRight) newLine();
     else x += sp;
     const start = x;
+    // Ganzes Wort etwas höher oder tiefer und leicht schräg
+    const wordDy = jitter(CHAOS.wordShift) * unit, tilt = jitter(CHAOS.wordTilt);
+    let from = x;
     glyphs.forEach((g, i) => {
       if (i) x += g.gap;
-      if (x > lineStart && x + g.w > right) newLine(); // Wort länger als eine Zeile
-      const y = yAt(x);
+      if (x > lineStart && x + g.w > right) { newLine(); from = x; } // Wort länger als eine Zeile
+      const y = yAt(x) + wordDy + (x - from) * Math.tan(tilt);
       if (g.missing) page.items.push({ missing: g.missing, x, y, w: g.w, s: unit, rot: lineAngle });
       else {
-        const item = { strokes: g.strokes, x: x + g.dx, y: y + g.dy, s: unit * g.sc, rot: g.rot + lineAngle };
+        const item = { strokes: g.strokes, x: x + g.dx, y: y + g.dy, s: unit * g.sc, rot: g.rot + tilt + lineAngle };
         if (wobble) item.ink = inkAt(x, flow);
         page.items.push(item);
         // Korrektur: Buchstabe nachgezogen – leicht versetzt ein zweites Mal geschrieben

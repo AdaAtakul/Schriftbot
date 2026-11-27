@@ -1,7 +1,7 @@
 // Selbsttest für das Layout: node tests/layout.test.mjs
 import assert from 'node:assert/strict';
 import { emptyProfile, variantsOf } from '../js/profile.js';
-import { layout, bounds, lineMetrics, DEFAULTS, misspell, rng } from '../js/layout.js';
+import { layout, bounds, lineMetrics, DEFAULTS, misspell, rng, chaosCurve } from '../js/layout.js';
 
 const p = emptyProfile();
 const line = (x0, x1) => [[[x0, 0, 0.5, 0], [x1, -1, 0.5, 10]]];
@@ -60,8 +60,17 @@ assert.ok(calm.every(it => it.rot === 0 && it.s === DEFAULTS.xHeight));
 const wild = layout(long, p, { chaos: 1 }).pages[0].items;
 assert.ok(wild.some(it => it.rot !== 0));
 const deg = 180 / Math.PI;
-assert.ok(wild.every(it => Math.abs(it.rot) * deg <= 3.3), 'Drehung ≤ 3° + Schräglage');
-assert.ok(wild.every(it => Math.abs(it.s / DEFAULTS.xHeight - 1) <= 0.0501), 'Größe ±5 %');
+assert.ok(wild.every(it => Math.abs(it.rot) * deg <= 7.8 + 1e-9), 'Drehung ≤ 6° + Wort 1,5° + Schräglage');
+assert.ok(wild.some(it => Math.abs(it.rot) * deg > 2), 'Drehung sichtbar');
+// Ordentlich (30 %) bleibt ruhig: Wirkung unter 100 % wächst langsamer
+assert.ok(chaosCurve(0.3) < 0.2 && chaosCurve(1) === 1 && chaosCurve(1.4) === 1.4);
+const tidy = layout(long, p, { chaos: 0.3 }).pages[0].items;
+assert.ok(tidy.every(it => Math.abs(it.rot) * deg <= 7.8 * 0.17), 'Ordentlich: höchstens ±1,3°');
+// Gedrehte Buchstaben bleiben bei der Linie: Mitte (cx, −0,5) weicht < 0,5 x-Höhen ab
+const mid = (it, cx) => it.y + it.s * (cx * Math.sin(it.rot) - 0.5 * Math.cos(it.rot));
+const off = wild.map((it, i) => Math.abs(mid(it, 0.5) - mid(calm[i], 0.5)) / DEFAULTS.xHeight);
+assert.ok(Math.max(...off) > 0.08 && Math.max(...off) < 0.5, `Höhenversatz ${Math.max(...off)}`);
+assert.ok(wild.every(it => Math.abs(it.s / DEFAULTS.xHeight - 1) <= 0.0801), 'Größe ±8 %');
 // Unordnung verschiebt die Variantenwahl nicht
 assert.deepEqual(layout(long, p, { chaos: 1 }).pages[0].items.map(i => i.strokes), layout(long, p).pages[0].items.map(i => i.strokes));
 // Liniertes Papier: jede Grundlinie liegt exakt auf einer Papierlinie
