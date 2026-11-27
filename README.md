@@ -177,7 +177,7 @@ Deine Handschriften liegen nur im Speicher von Safari auf diesem iPad. Wird die 
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v43';` hochzählen (z. B. auf `'v44'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v45';` hochzählen (z. B. auf `'v46'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -226,7 +226,6 @@ js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
 js/profil.js            Eigene Schrift: Backup, Teilen, Import, Eingabe (Finger/Maus)
 js/vorschau.js          Schriftprobe „Hallo“ für die Galerie (vorschau-daten.js: tools/vorschau.mjs)
-js/gemini.js            KI-Brücke (Beta): eigener Gemini-Schlüssel, Lernzettel/Auftrag/Überarbeiten
 js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
 ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen

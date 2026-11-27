@@ -12,7 +12,6 @@ import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, renameDemo } from './demo.js';
 import { showTutorial } from './tutorial.js';
-import { initGemini } from './gemini.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -119,7 +118,6 @@ const aufnahme = initAufnahme(own, () => schreiben.sync()); // Schriftgröße im
 initTextAufnahme(own, aufnahme.refresh);
 schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
 initProfil(own);
-initGemini({ insertText: t => schreiben.insertText(t), getText: () => schreiben.getText(), setStudy: on => schreiben.setStudy(on) });
 // Früher gab es eine KI mit API-Schlüssel: einen gespeicherten Schlüssel vom Gerät löschen.
 try { localStorage.removeItem('ki'); } catch {}
 const blatt = initBlatt(profile);

@@ -4,7 +4,7 @@
 // github.com/Taylor-Nilsen/goodnotes-codec, docs/FORMAT.md und Document.new), dessen Dateien GoodNotes importiert.
 // shortcut: inoffizielles Format (Schema 24), ein GoodNotes-Update kann den Import brechen → dann PDF nehmen.
 import { simplify } from './export.js';
-import { penWidth, MARKER } from './ink.js';
+import { penWidth } from './ink.js';
 import { PAPER_COLORS } from './paper.js';
 
 const SCHEMA = 24, DJB2_EMPTY = 5381;
@@ -234,7 +234,7 @@ export function buildGoodnotes(result, o, color, paperPdf, title) {
         const sid = uuid(), st0 = stamp();
         records.push(
           [s(1, sid), s(2, st0), v(8, device), v(9, ++seq), v(14, DJB2_EMPTY), v(16, SCHEMA)],
-          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), (it.marker ? MARKER.size * penWidth(MARKER.pen) : o.penSize * penWidth(o.pen) * (it.ink || 1)) * it.s * UNITS_PER_MM)), s(4, rgba(it.marker ? MARKER.rgba : ink)), s(6, ''),
+          [s(7, [s(1, sid), s(2, strokeBlob(strokePath(it, st), o.penSize * penWidth(o.pen) * (it.ink || 1) * it.s * UNITS_PER_MM)), s(4, rgba(ink)), s(6, ''),
             s(7, [s(1, stamp())]), s(9, ''), s(15, st0), s(20, ''), v(21, SCHEMA)])],
         );
       }

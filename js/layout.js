@@ -19,7 +19,6 @@ export const DEFAULTS = {
   // strike 0..1: Durchstreichen – wie oft ein Wort erst falsch geschrieben und durchgestrichen wird
   // wobble 0..1: Zeilen & Druck – schwankende Zeilen, Druck je Wort, nachlassend zum Zeilenende
   // (alt: mistakes 0..1 setzt beide zugleich; ohne Angabe 0)
-  study: false,     // Lernzettel-Modus: # Titel, ==Marker==, _unterstrichen_, - Punkt, [ ] Kästchen, -> Pfeil, !! Merkkasten
   ruled: false,     // true: Grundlinien rasten auf Papierlinien ein
   lineSpacing: 8.8, // Abstand der Papierlinien in mm
   lineTop: 20,      // Lage der ersten Papierlinie in mm von oben
@@ -220,35 +219,11 @@ function kerning(L, R) {
   return free === Infinity ? 0 : Math.min(free * KERN, MAX_KERN); // keine gemeinsame Höhe (z. B. ' und s) → normaler Abstand
 }
 
-// Lernzettel: Markierungen am Zeilenanfang und in Wörtern
-const STUDY_LINE = /^\s*(#|!!|-|\*|\[ \]|\[[xX]\])\s+/;
-const STUDY_BIG = 1.4; // Überschrift so viel größer
-// Wörter mit ==Marker== und _Unterstrich_ (auch über mehrere Wörter): Zeichen entfernen, Bereiche merken
-export function studyTokens(para) {
-  let hi = false, ul = false;
-  return para.split(' ').map(raw => {
-    let w = raw, m;
-    while ((m = w.match(/^(==|_)/)) && w.length > m[1].length) {
-      if (m[1] === '==') hi = true; else ul = true;
-      w = w.slice(m[1].length);
-    }
-    const t = { hi, ul };
-    while ((m = w.match(/(==|_)(?=[.,;:!?)"“”'’]*$)/)) && (m[1] === '==' ? hi : ul)) {
-      if (m[1] === '==') hi = false; else ul = false;
-      w = w.slice(0, m.index) + w.slice(m.index + m[1].length);
-    }
-    t.w = w;
-    return t;
-  });
-}
-
 export function layout(text, profile, options = {}, seed = 1) {
   const o = { ...DEFAULTS, ...options };
   // Getrennte Zufallsquellen: Regler verschieben so nicht die Variantenwahl.
   const random = rng(seed), pairRandom = rng(seed + 1), jitterRandom = rng(seed + 2);
-  const lineRandom = rng(seed + 3), decoRandom = rng(seed + 11);
-  const study = !!o.study;
-  let big = 1, hang = 0, seg = null, segs = [], lastStart = 0; // Lernzettel: Schriftgröße, hängender Einzug, Zeilenstücke
+  const lineRandom = rng(seed + 3);
   // Glockenförmig (Summe zweier Zufallszahlen): meist kleine, selten große Abweichungen wie bei echter Schrift.
   const jitter = (amount, r = jitterRandom) => (r() + r() - 1) * amount * chaosCurve(o.chaos + tired * FATIGUE.chaos);
   const strike = o.strike ?? o.mistakes ?? 0, wobble = o.wobble ?? o.mistakes ?? 0, edges = o.edges || 0;
@@ -294,8 +269,8 @@ export function layout(text, profile, options = {}, seed = 1) {
     const strokes = pick(key, r);
     const b = bounds(strokes);
     const pad = PEN_SIZE / 2;
-    const sc = (1 + jitter(CHAOS.size, r)) * (1 + FATIGUE.size * tired) * big;
-    const gap = (o.spacing + jitter(CHAOS.gap, r) + FATIGUE.gap * tired) * unit * big, shift = jitter(CHAOS.shift, r);
+    const sc = (1 + jitter(CHAOS.size, r)) * (1 + FATIGUE.size * tired);
+    const gap = (o.spacing + jitter(CHAOS.gap, r) + FATIGUE.gap * tired) * unit, shift = jitter(CHAOS.shift, r);
     const rot = jitter(CHAOS.rotate, r) + FATIGUE.lean * tired;
     // Um die Buchstabenmitte drehen statt um den linken Fußpunkt, sonst hebt die rechte Seite von der Linie ab.
     const cx = (b.minX + b.maxX) / 2, cy = -0.5, cos = Math.cos(rot), sin = Math.sin(rot);
@@ -308,7 +283,6 @@ export function layout(text, profile, options = {}, seed = 1) {
   }
 
   function word(text, r) {
-    if (study && (text === '->' || text === '→')) return [deco(arrowStrokes(), 2.1)];
     const chars = [...text], glyphs = [];
     for (let i = 0; i < chars.length;) {
       if ((r || pairRandom)() < o.connect) {
@@ -335,53 +309,16 @@ export function layout(text, profile, options = {}, seed = 1) {
   }
 
   function spaceWidth(r) {
-    if (!has(' ')) return SPACE_W * unit * big;
+    if (!has(' ')) return SPACE_W * unit;
     const b = bounds(pick(' ', r));
-    return (b.maxX - b.minX) * unit * big;
-  }
-
-  // ---------- Lernzettel: gezeichnete Elemente in x-Höhen (Grundlinie y = 0), leicht zittrig wie von Hand ----------
-  const studyPressure = study ? typicalPressure(profile.glyphs) : 0.5;
-  function hand(corners) {
-    const out = [];
-    let t = 0;
-    for (let k = 0; k < corners.length - 1; k++) {
-      const [ax, ay] = corners[k], [bx, by] = corners[k + 1];
-      const n = Math.max(2, Math.ceil(Math.hypot(bx - ax, by - ay) / 0.2));
-      const amp = 0.012 + decoRandom() * 0.02, ph = decoRandom() * 6.3;
-      for (let i = k ? 1 : 0; i <= n; i++) {
-        const u = i / n;
-        out.push([ax + (bx - ax) * u, ay + (by - ay) * u + amp * Math.sin(ph + u * 6), studyPressure, t += 8]);
-      }
-    }
-    return out;
-  }
-  const wig = (v = 0.05) => (decoRandom() * 2 - 1) * v;
-  const arrowStrokes = () => [hand([[0.05, -0.45 + wig()], [1.75, -0.47 + wig()]]),
-    hand([[1.3 + wig(), -0.85 + wig()], [1.8, -0.47], [1.3 + wig(), -0.1 + wig()]])];
-  const boxStrokes = checked => [hand([[0, -0.95 + wig()], [0.95 + wig(), -0.97], [0.97, 0.02 + wig()], [0.02 + wig(), 0], [0.04, -0.9]]),
-    ...(checked ? [hand([[0.15, -0.5], [0.42, -0.15 + wig()], [1.15 + wig(), -1.25 + wig(0.1)]])] : [])];
-  const dotStrokes = () => [hand(Array.from({ length: 9 }, (_, i) => [0.3 + 0.13 * Math.cos(i * 0.8), -0.45 + 0.13 * Math.sin(i * 0.8)]))];
-  // Platzhalter-„Glyphe“ für Pfeil, Punkt, Kästchen: gezeichnete Striche mit fester Breite (x-Höhen)
-  const deco = (strokes, w) => ({ deco: strokes, w: w * unit * big, gap: 0 });
-  // Marker/Unterstrich/Rahmen über einem Stück [x0, x1] einer Zeile; Marker liegen unter der Schrift
-  function span(sp, kind) {
-    const u = unit * sp.big, pad = 0.2, len = (sp.x1 - sp.x0) / u + 2 * pad;
-    const item = { x: sp.x0 - pad * u, y: sp.y, s: u, rot: sp.angle };
-    if (kind === 'hi') sp.page.items.unshift({ ...item, marker: true, strokes: [hand([[0, -0.42 + wig(0.04)], [len, -0.44 + wig(0.04)]])] });
-    else if (kind === 'ul') sp.page.items.push({ ...item, deco: true, strokes: [hand([[0.1, 0.32 + wig()], [len - 0.1, 0.3 + wig()]])] });
-    else if (kind === 'head') sp.page.items.push({ ...item, deco: true, strokes: [hand([[0, 0.38 + wig()], [len + 0.2, 0.34 + wig()]])] });
-    else if (kind === 'box') {
-      const l = -0.35, r = len + 0.35, t = -2.05, b = 0.75;
-      sp.page.items.push({ ...item, deco: true, strokes: [hand([[l + 0.3, t + wig()], [r, t + wig()], [r + wig(), b], [l, b + wig()], [l + wig(), t + 0.05], [l + 0.6, t - 0.02]])] });
-    }
+    return (b.maxX - b.minX) * unit;
   }
 
   const lm = lineMetrics(o);
   const startLine = () => {
     // Ränder: Einzug wandert langsam (halb alter, halb neuer Wert), rechts bricht die Zeile mal früher um
     indent = (indent + edgeRandom()) / 2;
-    lineStart = left + indent * EDGES.left * edges * unit + hang;
+    lineStart = left + indent * EDGES.left * edges * unit;
     lineRight = right - edgeRandom() * EDGES.right * edges * unit;
     // Zeilen versetzen: die ganze Zeile rückt um einen eigenen Betrag nach links oder rechts (Breite bleibt)
     const shift = (shiftRandom() * 2 - 1) * LINE_SHIFT * (o.lineShift || 0);
@@ -423,7 +360,6 @@ export function layout(text, profile, options = {}, seed = 1) {
       if (x > lineStart && x + g.w > right) { newLine(); from = x; } // Wort länger als eine Zeile
       const y = yAt(x) + wordDy + (x - from) * Math.tan(tilt);
       if (g.missing) page.items.push({ missing: g.missing, x, y, w: g.w, s: unit, rot: lineAngle });
-      else if (g.deco) page.items.push({ strokes: g.deco, x, y, s: unit * big, rot: lineAngle + tilt, deco: true });
       else {
         const item = { strokes: g.strokes, x: x + g.dx, y: y + g.dy, s: unit * g.sc, rot: g.rot + tilt + lineAngle };
         if (wobble) item.ink = inkAt(x, flow);
@@ -436,11 +372,6 @@ export function layout(text, profile, options = {}, seed = 1) {
       }
       x += g.w;
     });
-    if (study) {
-      if (!seg || seg.page !== page || seg.base !== baseline) segs.push(seg = { page, base: baseline, x0: start, y: yAt(start), angle: lineAngle, big });
-      seg.x1 = x;
-      lastStart = start;
-    }
     return start;
   }
 
@@ -480,54 +411,17 @@ export function layout(text, profile, options = {}, seed = 1) {
   }
 
   newPage();
-  text.split('\n').forEach((raw, pi) => {
-    big = 1;
-    hang = 0;
+  text.split('\n').forEach((para, pi) => {
     if (pi > 0) newLine();
-    let para = raw, kind = null, toks = null;
-    if (study) {
-      const m = para.match(STUDY_LINE);
-      if (m) { kind = m[1].toLowerCase(); para = para.slice(m[0].length); }
-      toks = studyTokens(para.replace(/\s*(->|→)\s*/g, ' -> ').trim());
-      segs = [];
-      seg = null;
-      if (kind === '#') big = STUDY_BIG;
-      // Punkt oder Kästchen vorn; Folgezeilen rücken darunter ein (hängender Einzug)
-      const mark = kind === '-' || kind === '*' ? deco(dotStrokes(), 0.75) : kind === '[ ]' || kind === '[x]' ? deco(boxStrokes(kind === '[x]'), 1.05) : null;
-      if (mark) {
-        place([mark], 0, 1, null);
-        x += 0.55 * unit;
-        hang = x - lineStart;
-      }
-    }
-    const words = toks ? toks.map(t => t.w) : para.split(' ');
-    const open = { hi: null, ul: null }; // laufende Marker-/Unterstrich-Bereiche
-    const flush = k => { if (open[k]) span(open[k], k); open[k] = null; };
+    const words = para.split(' ');
     words.forEach((w, wi) => {
-      const placed = setWord(w, wi);
-      if (!toks) return;
-      for (const k of ['hi', 'ul']) {
-        if (!toks[wi][k] || !placed) { flush(k); continue; }
-        const cur = open[k];
-        if (cur && cur.page === page && cur.base === baseline) cur.x1 = x;
-        else { flush(k); open[k] = { page, base: baseline, x0: lastStart, x1: x, y: yAt(lastStart), angle: lineAngle, big }; }
-      }
-    });
-    if (toks) {
-      flush('hi');
-      flush('ul');
-      if (kind === '#') segs.forEach(sg => span(sg, 'head'));
-      if (kind === '!!') segs.forEach(sg => span(sg, 'box'));
-    }
-    // Ein Wort setzen (mit Verschreibern und Korrekturen); true, wenn es normal auf der Zeile steht
-    function setWord(w, wi) {
       const sp = wi > 0 && x > lineStart ? spaceWidth() : 0;
-      if (!w) { x += sp; return false; }
+      if (!w) { x += sp; return; }
       tired = fatigue * done / totalChars;
       done += [...w].length;
       // Eigene Zufallsquelle für Korrekturen, damit sie die übrigen Entscheidungen nicht verschieben
       const rc = fix ? rng((Math.imul(seed ^ 0x5bd1e995, 0x27d4eb2d) + wordIndex * 0x165667b1) >>> 0) : null;
-      if (rc && forget(w, sp, words, wi, rc)) { wordIndex++; sinceSlip++; return false; }
+      if (rc && forget(w, sp, words, wi, rc)) { wordIndex++; sinceSlip++; return; }
       let flow = 1, slip = null, r;
       if (strike || wobble) {
         r = rng((Math.imul(seed, 0x9e3779b1) + wordIndex * 0x85ebca6b) >>> 0);
@@ -537,7 +431,7 @@ export function layout(text, profile, options = {}, seed = 1) {
       }
       wordIndex++;
       sinceSlip++;
-      if (!slip) { place(word(w), sp, flow, rc); return true; }
+      if (!slip) { place(word(w), sp, flow, rc); return; }
       // Erst falsch, durchstreichen, dann richtig daneben
       sinceSlip = 0;
       const start = place(slip, sp, flow, rc), len = (x - start) / unit;
@@ -546,8 +440,7 @@ export function layout(text, profile, options = {}, seed = 1) {
         x: start, y: yAt(start), s: unit, rot: lineAngle, strike: true, ...(wobble ? { ink: inkAt(start, flow) } : {}),
       });
       place(word(w), spaceWidth(r), flow, rc);
-      return true;
-    }
+    });
   });
 
   return { pages, missing: [...missing], spaceMissing: !has(' ') };

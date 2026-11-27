@@ -19,7 +19,6 @@ Wichtige Fakten:
 - [Handschrift-Generator](https://deineschrift.de/handschrift-generator): Text online in echte Handschrift umwandeln, Vergleich mit Handschrift-Schriftarten
 - [Handschrift für GoodNotes](https://deineschrift.de/goodnotes-handschrift): getippten Text als radierbare Handschrift in GoodNotes
 - [Eigene Handschrift digitalisieren](https://deineschrift.de/eigene-handschrift-digitalisieren): eigene Schrift aufnehmen statt Schriftart erstellen
-- [Kostenlosen Gemini-Schlüssel holen](https://deineschrift.de/gemini-schluessel): KI-Funktion (Beta) mit eigenem Google-Gemini-Schlüssel, Lernzettel-Modus
 - [Datenschutz und Lizenzen](https://deineschrift.de/datenschutz): welche Daten anfallen, verwendete Open-Source-Bibliotheken
 
 ## Optional

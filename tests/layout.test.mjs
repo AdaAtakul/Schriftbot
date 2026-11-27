@@ -1,7 +1,7 @@
 // Selbsttest für das Layout: node tests/layout.test.mjs
 import assert from 'node:assert/strict';
 import { emptyProfile, variantsOf } from '../js/profile.js';
-import { layout, bounds, lineMetrics, DEFAULTS, misspell, rng, chaosCurve, studyTokens } from '../js/layout.js';
+import { layout, bounds, lineMetrics, DEFAULTS, misspell, rng, chaosCurve } from '../js/layout.js';
 
 const p = emptyProfile();
 const line = (x0, x1) => [[[x0, 0, 0.5, 0], [x1, -1, 0.5, 10]]];
@@ -237,27 +237,3 @@ console.log('OK – Layout');
   assert.equal(r.pages[0].items.length, 2);
   assert.equal(r.pages[0].items[0].strokes, variantsOf(q, 'a')[0]);
 }
-
-// Lernzettel-Modus: Zeichen werden zu gezeichneten Elementen, ohne ihn bleibt der Text wörtlich
-{
-  assert.deepEqual(studyTokens('ab ==ba ab==, _ab_ a_b'), [
-    { w: 'ab', hi: false, ul: false }, { w: 'ba', hi: true, ul: false }, { w: 'ab,', hi: true, ul: false },
-    { w: 'ab', hi: false, ul: true }, { w: 'a_b', hi: false, ul: false },
-  ]);
-  const o = { chaos: 0 };
-  const plain = layout('# ab', p, o).pages[0].items;
-  assert.ok(plain.some(it => it.missing === '#'), 'ohne Lernzettel-Modus bleibt # ein Zeichen');
-  const head = layout('# ab\nab', p, { ...o, study: true }).pages[0].items;
-  const glyphs = head.filter(it => it.strokes && !it.deco && !it.marker);
-  assert.ok(!head.some(it => it.missing), 'Markierungen werden nicht als Zeichen gesetzt');
-  assert.ok(Math.abs(glyphs[0].s / glyphs[2].s - 1.4) < 0.01, 'Überschrift 1,4-mal so groß');
-  assert.equal(head.filter(it => it.deco).length, 1, 'Überschrift unterstrichen');
-  const hi = layout('ab ==ba ab== ab', p, { ...o, study: true }).pages[0].items;
-  assert.equal(hi.filter(it => it.marker).length, 1, 'ein Marker über beide Wörter');
-  assert.ok(hi[0].marker, 'Marker liegt unter der Schrift');
-  const list = layout('- ab\n[x] ab\n[ ] ab -> ba\n!! ab', p, { ...o, study: true }).pages[0].items;
-  assert.equal(list.filter(it => it.deco).length, 5, 'Punkt, zwei Kästchen, Pfeil, Rahmen');
-  const firstBullet = list.find(it => it.deco), firstWord = list.find(it => !it.deco);
-  assert.ok(firstWord.x > firstBullet.x + 0.5 * DEFAULTS.xHeight, 'Text rückt hinter den Punkt');
-}
-console.log('OK – Lernzettel-Modus');
