@@ -47,9 +47,14 @@ export function drawPage(ctx, page, color, size = PEN_SIZE, pen) {
 // Sinus-Kurve: Tempo 0 am Anfang und Ende, am höchsten in der Mitte
 export const easeInOut = t => (1 - Math.cos(Math.PI * t)) / 2;
 
+// Kleiner Pop beim Einblenden: von 95 % Größe hoch, knapp über 100 % hinaus, dann ruhig auf 100 % (Back-out)
+export const popScale = u => { const c = 1.70158, v = u - 1; return 0.95 + 0.05 * (1 + (c + 1) * v ** 3 + c * v ** 2); };
+const FADE = 0.3, POP = 0.45; // Anteil der Animationsdauer für Einblenden und Pop
+
 // Seite sich selbst hinschreiben lassen: Striche in Schreibreihenfolge mit ihrer echten Aufnahmezeit,
-// beschleunigt auf höchstens maxMs, mit Ease-in-out. ctx wie bei drawPage (Papier schon gezeichnet). Gibt eine Abbruch-Funktion zurück.
-export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000) {
+// gerafft auf höchstens maxMs, mit Ease-in-out; die Schrift (nicht das Papier) blendet dabei ein und ploppt leicht auf.
+// ctx wie bei drawPage (Papier schon gezeichnet). Gibt eine Abbruch-Funktion zurück.
+export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 1000) {
   const GAP = 70; // Stift absetzen zwischen zwei Strichen (ms)
   const steps = [];
   let total = 0;
@@ -64,24 +69,46 @@ export function animatePage(ctx, page, color, size = PEN_SIZE, pen, maxMs = 4000
   }
   drawPage(ctx, { items: page.items.filter(it => it.missing) }, color, size, pen); // rote Lücken stehen sofort da
   const duration = total / Math.max(1.5, total / maxMs);
+  // Papier (und rote Lücken) einmal merken: jedes Bild zeichnet die Schrift neu darüber, mit Deckkraft und Größe
+  const base = ctx.getTransform(), bg = document.createElement('canvas');
+  bg.width = ctx.canvas.width;
+  bg.height = ctx.canvas.height;
+  bg.getContext('2d').drawImage(ctx.canvas, 0, 0);
+  // Pop um die Mitte der Schrift, damit sie an ihrem Platz bleibt
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const { it } of steps) { x0 = Math.min(x0, it.x); x1 = Math.max(x1, it.x); y0 = Math.min(y0, it.y); y1 = Math.max(y1, it.y); }
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   const place = it => { ctx.save(); ctx.translate(it.x, it.y); ctx.rotate(it.rot || 0); ctx.scale(it.s, it.s); ctx.fillStyle = color; };
-  let i = 0, raf = 0, begin = 0;
+  let raf = 0, begin = 0;
   const frame = now => {
     begin ||= now;
+    const t = Math.min(1, (now - begin) / duration);
     // Ease-in-out: langsam anfangen, in der Mitte am schnellsten, sanft auslaufen (Tempo wie eine Glocke)
-    const elapsed = total * easeInOut(Math.min(1, (now - begin) / duration));
-    while (i < steps.length && steps[i].start + steps[i].dur <= elapsed) {
-      const { it, st } = steps[i++];
-      place(it); fillStrokesCached(ctx, [st], size * (it.ink || 1), pen); ctx.restore();
+    const elapsed = total * easeInOut(t), k = popScale(Math.min(1, t / POP));
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.drawImage(bg, 0, 0);
+    ctx.setTransform(base);
+    ctx.translate(cx, cy);
+    ctx.scale(k, k);
+    ctx.translate(-cx, -cy);
+    ctx.globalAlpha = Math.min(1, t / FADE);
+    for (const { it, st, t0, start, dur } of steps) {
+      if (start >= elapsed) break;
+      place(it);
+      if (start + dur <= elapsed) fillStrokesCached(ctx, [st], size * (it.ink || 1), pen);
+      else {
+        // Strich in Arbeit: nur die Punkte bis jetzt
+        const part = st.filter(p => (p[3] || 0) <= t0 + elapsed - start);
+        if (part.length > 1) fillStrokes(ctx, [part], size * (it.ink || 1), pen);
+      }
+      ctx.restore();
     }
-    // Strich in Arbeit: nur die Punkte bis jetzt (wird mit jedem Bild länger und deckt sich selbst)
-    if (i < steps.length && steps[i].start < elapsed) {
-      const { it, st, t0, start } = steps[i], upto = t0 + elapsed - start;
-      const part = st.filter(p => (p[3] || 0) <= upto);
-      if (part.length > 1) { place(it); fillStrokes(ctx, [part], size * (it.ink || 1), pen); ctx.restore(); }
-    }
-    if (i < steps.length) raf = requestAnimationFrame(frame);
+    ctx.globalAlpha = 1;
+    ctx.setTransform(base);
+    if (t < 1) raf = requestAnimationFrame(frame);
+    else bg.width = bg.height = 0; // Speicher auf dem iPad sofort freigeben
   };
   raf = requestAnimationFrame(frame);
-  return () => cancelAnimationFrame(raf);
+  return () => { cancelAnimationFrame(raf); bg.width = bg.height = 0; };
 }
