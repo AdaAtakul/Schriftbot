@@ -286,8 +286,9 @@ export function initBlatt(profile) {
   }
 
   // ---------- Ziehen: verschieben, Größe ändern, neu aufziehen ----------
-  let drag = null;
+  let drag = null, tap = null;
   stage.addEventListener('pointerdown', e => {
+    tap = null;
     const overlay = e.target.closest('.sheet-overlay');
     if (!overlay || !sheet) return;
     const i = +overlay.dataset.page, pg = sheet.pages[i];
@@ -305,8 +306,10 @@ export function initBlatt(profile) {
       drag = { kind: e.target.dataset.handle ? 'resize' : 'move', f, x0: x, y0: y, fx: f.x, fy: f.y, fw: f.w, fh: f.h, at, pg, moved: false };
       if (selected !== f.id) select(f.id);
     } else {
+      // Freies Blatt: Wischen scrollt; ein kurzer Tipp legt dort ein Feld an (erst wählt er ein offenes Feld ab)
       if (selected) select(null);
-      return; // Finger auf freiem Blatt scrollt
+      else tap = { i, x, y, cx: e.clientX, cy: e.clientY, t: Date.now() };
+      return;
     }
     e.preventDefault();
     overlay.setPointerCapture(e.pointerId);
@@ -330,7 +333,21 @@ export function initBlatt(profile) {
     if (drag.kind === 'move') renderPage(f.page);
     else drawOverlay(f.page);
   });
-  const endDrag = () => {
+  const endDrag = e => {
+    if (!drag && tap && e?.type === 'pointerup') {
+      const t = tap, pg = sheet.pages[t.i];
+      tap = null;
+      if (Math.hypot(e.clientX - t.cx, e.clientY - t.cy) > 8 || Date.now() - t.t > 500) return; // gewischt, nicht getippt
+      const x = Math.max(0, t.x - 2), y = Math.max(0, t.y - 9);
+      const f = { id: uid(), page: t.i, x, y, w: Math.min(120, pg.w - x), h: Math.min(14, pg.h - y), text: '', auto: true, seed: newSeed() };
+      fields.push(f);
+      select(f.id);
+      statusEl.textContent = 'Neues Feld: Text links eintragen. Ziehen verschiebt es.';
+      changed(f);
+      syncEditor();
+      textEl.focus();
+      return;
+    }
     if (!drag) return;
     const { f, kind } = drag;
     drag = null;
