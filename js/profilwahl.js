@@ -7,12 +7,17 @@ import { PRESETS, DEFAULT_STYLE } from './stil.js';
 import { ask, info as showInfo, askText } from './dialog.js';
 import { BUILTIN, useBuiltin, renameOldBuiltins } from './schriften.js';
 
-export function initProfilwahl() {
+export function initProfilwahl(onSwitch = null) {
   const $ = id => document.getElementById(id);
   const list = $('profile-list'), switcher = $('profile-switch');
   const fromSel = $('profile-from'), styleSel = $('profile-style'), nameInput = $('profile-name');
 
-  const switchTo = id => { setActiveProfile(id); location.reload(); };
+  // Wechseln ohne Neuladen (schnell); nur ohne Rückruf wird die Seite neu geladen
+  const switchTo = async id => {
+    if (!onSwitch) { setActiveProfile(id); location.reload(); return; }
+    await onSwitch(id);
+    render();
+  };
   const styleLabel = id => PRESETS[profileSettings(id).style]?.label || PRESETS[DEFAULT_STYLE].label;
 
   renameOldBuiltins();
@@ -99,7 +104,7 @@ export function initProfilwahl() {
     if (switcher.value.startsWith('__builtin:')) {
       const id = switcher.value.slice(10);
       switcher.disabled = true;
-      try { await useBuiltin(id); location.reload(); } catch (err) {
+      try { await switchTo(await useBuiltin(id)); switcher.disabled = false; } catch (err) {
         switcher.disabled = false;
         switcher.value = activeProfile().id;
         showInfo(err.message);

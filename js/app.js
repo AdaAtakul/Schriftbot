@@ -10,6 +10,7 @@ import { info } from './dialog.js';
 import { initKiTab } from './kiui.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
+import { BUILTIN } from './schriften.js';
 import { showTutorial, tutorialSeen } from './tutorial.js';
 
 // Läuft die App als Artifact auf claude.ai? Dort gibt es Claude (KI-Tab), aber keinen Service Worker.
@@ -120,7 +121,25 @@ initProfil(profile);
 // Früher gab es eine KI mit API-Schlüssel: einen gespeicherten Schlüssel vom Gerät löschen.
 try { localStorage.removeItem('ki'); } catch {}
 const blatt = initBlatt(profile);
-initProfilwahl();
+// Schrift/Profil sofort wechseln: neue Striche in dasselbe Profil-Objekt laden und alle Bereiche neu zeichnen
+async function switchProfile(id) {
+  setActiveProfile(id);
+  const next = await loadProfile();
+  if (alignAll(next)) saveProfile(next);
+  for (const k of Object.keys(profile)) delete profile[k];
+  Object.assign(profile, next);
+  const d = isDemo();
+  document.getElementById('view-aufnahme').classList.toggle('is-demo', d);
+  document.getElementById('demo-note').hidden = !d;
+  schreiben.sync();
+  aufnahme.refresh();
+  blatt.render();
+}
+initProfilwahl(switchProfile);
+// Mitgelieferte Schriften im Leerlauf vorladen (landen im Offline-Speicher), damit das Wählen sofort geht
+(window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => {
+  for (const b of BUILTIN) fetch(b.file).catch(() => {});
+});
 initKiTab(profile, { schreiben, blatt, goTo: showView });
 
 // Demo-Profil: statt der Aufnahme ein Hinweis mit Weg zur eigenen Schrift
