@@ -531,7 +531,6 @@ details.settings[open] { padding-bottom: 16px; }
 .mode-switch { margin-bottom: 6px; }
 
 .text-info { min-width: 130px; text-align: center; font-weight: 600; color: var(--accent); }
-#text-commit { margin-left: auto; }
 .text-page-wrap { flex: 1; min-height: 0; overflow: hidden; }
 /* Feste Höhe: sonst ändert ein längerer Hinweis die Seitenaufteilung */
 #text-hint { height: 2.9em; overflow-y: auto; }
@@ -1135,3 +1134,12 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
 /* Galerie: mitgelieferte Schriften nach Ordnung gruppiert */
 .font-groups { display: grid; gap: 6px; }
 .font-group-h { margin: 6px 0 0; font-size: 0.706rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }
+
+/* Text-Aufnahme: Fortschritt über der Seite, Seite wie GoodNotes-Papier */
+.text-progress { margin: 10px 0 2px; }
+.text-progress-row { display: flex; justify-content: space-between; font-size: 0.824rem; color: var(--muted); margin-bottom: 4px; }
+.text-progress-bar { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; box-shadow: inset 0 0 0 1px var(--border); }
+#text-progress-fill { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--accent); transition: width .35s var(--ease-out); }
+#text-page { border-radius: 4px; }
+#text-undo { margin-left: auto; }
+@media (max-width: 700px) { #text-recorder .recorder-head { flex-wrap: wrap; row-gap: 6px; } #text-recorder .recorder-head .text-info { min-width: 0; } }

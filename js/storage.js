@@ -133,7 +133,7 @@ export function saveProfile(profile) {
 // ---------- Einstellungen ----------
 // Aussehen (Stil, Tinte, Papier, Stift …) und Geräte-Werte (Text …) gelten für alle Schriften und liegen unter 'settings'.
 // Was zur Aufnahme einer Handschrift gehört, liegt bei der aufgenommenen Handschrift.
-const HANDWRITING = new Set(['boxScale', 'aufnahmeChar', 'textPage']);
+const HANDWRITING = new Set(['boxScale', 'aufnahmeChar', 'textPage', 'textWords']); // textWords: fertig geschriebene Wörter der Text-Aufnahme
 const read = key => { try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; } };
 const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 const targetKey = key => (HANDWRITING.has(key) ? settingsKey(recProfile()?.id || 'p1') : 'settings');

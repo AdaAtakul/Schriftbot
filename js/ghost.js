@@ -59,13 +59,13 @@ const partsOf = text => [...text].map(ch => cache.get(ch) || cache.set(ch, prepa
 export const ghostWidth = text => partsOf(text).reduce((n, p) => n + p.adv * p.k, 0);
 
 // ctx ist in x-Höhen skaliert, Ursprung (0, 0) liegt am linken Rand auf der Grundlinie.
-export function drawGhost(ctx, text, boxW) {
+export function drawGhost(ctx, text, boxW, alpha = ALPHA) {
   if (!text.trim()) return;
   const parts = partsOf(text);
   const total = ghostWidth(text);
   let x = (boxW - total) / 2;
   ctx.save();
-  ctx.globalAlpha = ALPHA;
+  ctx.globalAlpha = alpha;
   ctx.imageSmoothingQuality = 'high';
   for (const p of parts) {
     const { c, base, k } = p;

@@ -226,7 +226,10 @@
           <button id="text-next" class="icon-btn" aria-label="Nächste Seite"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
           <button id="text-undo"><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Rückgängig</button>
           <button id="text-clear"><svg class="icon"><use href="#i-trash"/></svg>Leeren</button>
-          <button id="text-commit" class="primary"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Übernehmen</button>
+        </div>
+        <div class="text-progress">
+          <div class="text-progress-row"><span>Fortschritt</span><span id="text-progress-label"></span></div>
+          <div class="text-progress-bar" role="progressbar" aria-labelledby="text-progress-label" aria-valuemin="0"><span id="text-progress-fill"></span></div>
         </div>
         <p id="text-hint" class="hint"></p>
         <div id="text-page-wrap" class="text-page-wrap"><canvas id="text-page"></canvas></div>
