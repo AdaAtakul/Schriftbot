@@ -634,11 +634,6 @@ button.danger-solid { background: var(--danger-fill); color: var(--on-accent); }
 .banner.safety > span { flex: 1; min-width: 200px; }
 
 /* ---------- Demo-Schrift ---------- */
-.view-aufnahme.is-demo > :not(#demo-note) { display: none !important; }
-.view-aufnahme.is-demo:not([hidden]) { display: flex; align-items: center; justify-content: center; }
-.demo-note { max-width: 520px; margin: auto; padding: 32px; text-align: center; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); }
-.demo-note h2 { margin: 12px 0 8px; }
-.demo-note p { color: var(--muted); }
 
 /* ---------- Einführung ---------- */
 .tour-bg { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; background: var(--scrim); }
@@ -686,7 +681,7 @@ a.btn-link { background: var(--accent-fill); box-shadow: none; }
 
 /* Seitenleisten im Stil gruppierter Listen: Grau als Grund, weiße Karten darauf */
 .panel { background: var(--bg); border-right: 0.5px solid var(--border-strong); }
-details.settings, .subcard, .card, .group, .demo-note { border: 0; box-shadow: none; background: var(--surface); }
+details.settings, .subcard, .card, .group { border: 0; box-shadow: none; background: var(--surface); }
 .group { background: var(--bg); }
 :root[data-theme="dark"] .group { background: var(--field); }
 details.fine { border: 0.5px solid var(--border-strong); }
@@ -791,14 +786,14 @@ details.fine { border: 0.5px solid var(--border-strong); }
 .tour-dots span { transition: width .35s var(--ease-spring), background .25s; }
 .sheet { animation: sheet-up .42s var(--ease-spring) both; }
 .toast { animation: rise-in .35s var(--ease-spring) both; }
-.write-empty-card, .demo-note { animation: pop-in .5s var(--ease-spring) both; }
+.write-empty-card { animation: pop-in .5s var(--ease-spring) both; }
 .fill-steps li { animation: rise-in .5s var(--ease-spring) both; }
 .fill-steps li:nth-child(2) { animation-delay: .08s; }
 .fill-steps li:nth-child(3) { animation-delay: .16s; }
 .banner:not([hidden]) { animation: rise-in .35s var(--ease-spring) both; }
 /* Die Feder wippt kurz zur Begrüßung und hält dann still (keine Dauerbewegung) */
 .brand-icon { animation: nib-bob 1.6s ease-in-out 1s 2; transform-origin: 30% 70%; }
-.write-empty-card .empty-icon, .demo-note .empty-icon { animation: nib-bob 2.4s ease-in-out 3; }
+.write-empty-card .empty-icon { animation: nib-bob 2.4s ease-in-out 3; }
 .fd-typed { animation: typed-cycle 6s var(--ease-out) infinite; }
 .fd-ink { animation: ink-cycle 6s var(--ease-out) infinite; }
 .fd-typed2, .fd-ink2 { animation-delay: .6s; }
@@ -1090,3 +1085,50 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
   .menu { position: fixed; top: 64px; right: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .menu { animation: none; } }
+
+/* Schrift-Auswahl: Galerie mit Schriftproben statt Profilliste */
+.lb-font { gap: 6px; padding: 0 12px; color: var(--muted); font-weight: 500; }
+.lb-font strong { color: var(--ink); font-weight: 600; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+.pop-font { width: 520px; max-height: calc(100vh - 200px); overflow-y: auto; }
+.font-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.font-card {
+  display: grid; justify-items: start; align-content: start; gap: 2px; min-height: 76px; padding: 8px 9px; min-width: 0;
+  border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--ink); text-align: left;
+}
+.font-card:hover { border-color: var(--accent); background: var(--surface); }
+.font-card[aria-current="true"] { border: 2px solid var(--accent); padding: 7px 8px; background: var(--accent-soft); }
+.font-sample { width: 100%; height: 28px; }
+.font-sample path { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.font-card-name { max-width: 100%; font-size: 0.765rem; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.font-card-meta { font-size: 0.706rem; color: var(--muted); }
+.font-card.add { justify-items: center; align-content: center; border-style: dashed; color: var(--accent); text-align: center; }
+.font-card.add .icon { width: 20px; height: 20px; }
+.font-card.loading { opacity: 0.5; }
+
+/* Eigene Schrift: welche Handschrift aufgenommen wird, Sichern & teilen */
+.rec-head { display: grid; gap: 8px; padding-bottom: 12px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+.rec-row { display: flex; align-items: center; justify-content: space-between; }
+.rec-label { font-size: 0.824rem; font-weight: 600; color: var(--muted); }
+.rec-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-chip { min-height: 36px; padding: 0 12px; gap: 6px; border-radius: 999px; font-size: 0.882rem; font-weight: 600; background: var(--surface); border: 1px solid var(--border-strong); }
+.rec-chip span { font-weight: 500; color: var(--muted); font-size: 0.765rem; }
+.rec-chip[aria-pressed="true"] { border: 2px solid var(--accent); background: var(--accent-soft); color: var(--ink); }
+.rec-chip.add { border-style: dashed; color: var(--accent); background: transparent; }
+.rec-chip.add .icon { width: 16px; height: 16px; }
+.rec-safe .status { margin: 0 0 6px; font-size: 0.824rem; }
+.rec-safe-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.rec-safe-btns button { min-height: 36px; padding: 0 10px; font-size: 0.824rem; }
+.rec-safe-btns .icon { width: 16px; height: 16px; }
+.rec-input { margin-top: 18px; font-size: 0.882rem; }
+.rec-input summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; color: var(--muted); cursor: pointer; }
+.charlist .app-footer { gap: 0 16px; margin-top: 12px; font-size: 0.824rem; }
+.menu-item.danger { color: var(--danger); }
+.menu-item.danger .icon { color: var(--danger); }
+@media (max-width: 700px) {
+  .font-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Galerie als Blatt von unten, über der Tab-Leiste */
+  .pop-font {
+    position: fixed; top: auto; left: 0 !important; right: 0; bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    width: auto; max-height: 70vh; border-radius: 20px 20px 0 0;
+  }
+}

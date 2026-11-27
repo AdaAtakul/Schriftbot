@@ -48,7 +48,7 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 
 - **Beispielschrift** (empfohlen): Damit Besucher DeineSchrift sofort ausprobieren können, legst du eine Beispiel-Schrift bei.
   1. In DeineSchrift ein Profil mit der Beispielschrift aufnehmen (alle Zeichen, auch „ “ und Satzzeichen) und die Stil-Vorlage wählen, die Besucher zuerst sehen sollen.
-  2. **Profil → Profil teilen** und die Datei sichern.
+  2. **Eigene Schrift → Teilen** und die Datei sichern.
   3. Sie im Repo als **`demo/demo-schrift.json`** hochladen und `VERSION` in `sw.js` hochzählen.
 
   Neue Besucher bekommen dann beim ersten Öffnen die Schrift „Marie · natürlich“ und starten im Tab „Schreiben“ mit leerem Textfeld; das Blatt zeigt einen kurzen Beispielsatz. Im Tab „Aufnahme“ steht stattdessen „Eigene Schrift aufnehmen“. Fehlt die Datei, startet Schriftbot wie bisher in der Aufnahme.
@@ -56,7 +56,7 @@ Du brauchst nur ein kostenloses GitHub-Konto. Alles geht im Browser, auch auf de
 - **Datenschutz**: `datenschutz.html` nennt als Kontakt GitHub Issues. Je nach Lage kann eine Anschrift nötig sein – im Zweifel rechtlich prüfen lassen.
 - **Suchmaschinen**: Die Adresse in der [Google Search Console](https://search.google.com/search-console) und bei [Bing Webmaster Tools](https://www.bing.com/webmasters) anmelden und dort `sitemap.xml` einreichen. `robots.txt` liegt im Hauptordner und wirkt, weil die Seite auf der eigenen Domain im Wurzelverzeichnis läuft.
 - **Hosting (Cloudflare Pages)**: Siehe Abschnitt 1c. Die Domain `deineschrift.de` bleibt bei GoDaddy registriert (Cloudflare nimmt keine .de-Domains zur Übertragung an), nur die DNS-Verwaltung liegt bei Cloudflare.
-- **Umzug**: Unter der neuen Adresse ist der Browser-Speicher leer. Vorher **Alle Profile sichern**, danach **Importieren**. Zieht die Seite erneut um, die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `CNAME` und `ios/` ersetzen.
+- **Umzug**: Unter der neuen Adresse ist der Browser-Speicher leer. Vorher **Alles sichern**, danach **Importieren**. Zieht die Seite erneut um, die Adresse in `index.html`, `anleitung.html`, `datenschutz.html`, `sitemap.xml`, `robots.txt`, `llms.txt`, `CNAME` und `ios/` ersetzen.
 
 ## 1c. Auf Cloudflare veröffentlichen (statt GitHub Pages)
 
@@ -75,7 +75,7 @@ Cloudflare entfernt `.html` aus Adressen: `anleitung.html` wird zu `/anleitung`.
 1. Die Adresse in **Safari** öffnen (nicht in Chrome – nur Safari kann Apps zum Home-Bildschirm hinzufügen).
 2. **Teilen-Symbol** (Quadrat mit Pfeil) → **Zum Home-Bildschirm** → **Hinzufügen**.
 3. Die App ab jetzt immer über das neue Symbol starten. So läuft sie im Vollbild, offline, und Safari löscht ihre Daten deutlich seltener.
-4. Im Tab **Profil** sollte unter „Status“ „✅ Offline-Modus bereit“ stehen.
+4. Unter **Eigene Schrift → Eingabe & Speicher** sollte „✅ Offline-Modus bereit“ stehen.
 
 ## 2b. Als iPad-App mit Claude (optional)
 
@@ -96,12 +96,12 @@ Gut zu wissen:
 
 - Die App lädt die Handschrift-App von deineschrift.de: beim ersten Start braucht sie Internet, danach geht sie offline; Updates kommen automatisch mit.
 - Bei Claude mit **E-Mail-Code** anmelden. Die Google-Anmeldung blockiert Google in Apps.
-- Die App hat ihren eigenen Speicher (getrennt von Safari): Profile einmal per **Alle Profile sichern** / **Importieren** übertragen.
+- Die App hat ihren eigenen Speicher (getrennt von Safari): Handschriften einmal per **Alles sichern** / **Importieren** übertragen.
 - Die App liest nur die Zwischenablage, wenn du in Claude etwas kopierst – nicht den Chat selbst.
 
 ## 3. So benutzt du die App
 
-### Handschrift aufnehmen (Bereich „Aufnehmen“)
+### Handschrift aufnehmen (Bereich „Eigene Schrift“)
 
 - Links wählst du das Zeichen, rechts schreibst du es mit dem Pencil in die drei Kästchen (= drei Varianten, damit die Schrift später lebendig wirkt).
 - **Grundlinie** (dunkle Linie): Hier steht die Schrift. **x-Höhe** (blau gestrichelt): So hoch sind Kleinbuchstaben wie a, n, o. **Oberlänge / Unterlänge**: für b, d, h, k bzw. g, j, p, y.
@@ -133,14 +133,14 @@ Unter **Schrift** (Leiste über der Vorschau) stehen zwölf echte Handschriften 
 
 - Für DeineSchrift umgerechnet: Grundlinie und x-Höhe je Person bestimmt, Ä/Ö aus den Punkten des Ü ergänzt, „/ + =“ einfach nachgebildet; ß wird als „ss“ geschrieben. Werkzeug: `tools/uji-schriften.py`.
 - Es sind Einzelbuchstaben: Die Schrift wirkt wie ordentliche Druck-Handschrift, „Buchstaben verbinden“ hat hier keine Wirkung.
-- Eine Schrift wird erst beim Auswählen geladen (Internet nötig) und ist danach ein normales Profil.
+- Eine Schrift wird erst beim Auswählen geladen (Internet nötig) und liegt danach offline bereit.
 
 ### Text umwandeln (Bereich „Schreiben“ – hier startet die App)
 
 - Links Text eingeben oder einfügen (darunter Wörter, Seiten und fehlende Zeichen), rechts erscheint die A4-Vorschau.
-- **Leiste über der Seite**: Schrift (Profil), Stil **Ordentlich / Normal / Locker**, **Papier** und **Tinte** als Aufklapp-Menüs, **Feineinstellungen** (Regler-Symbol) und **Neu würfeln**. Esc oder ein Tipp daneben schließt ein Menü.
+- **Leiste über der Seite**: Schrift (Galerie mit Schriftprobe; Stil, Papier und Tinte gelten für alle Schriften), Stil **Ordentlich / Normal / Locker**, **Papier** und **Tinte** als Aufklapp-Menüs, **Feineinstellungen** (Regler-Symbol) und **Neu würfeln**. Esc oder ein Tipp daneben schließt ein Menü.
 - **Unter der Seite**: blättern („Seite 1 von 3“) und zoomen; 100 % zeigt die ganze Seite, ein Tipp auf die Prozentzahl setzt zurück.
-- **Standard** für neue Profile: Stil Ordentlich, schwarze Tinte, liniertes weißes Papier.
+- **Standard** beim ersten Öffnen: Stil Ordentlich, schwarze Tinte, liniertes weißes Papier.
 - Beim allerersten Öffnen steht eine Seite Beispieltext im Feld, damit die Vorschau sofort etwas zeigt. Gibt es noch keine Schrift, erklärt ein Hinweis über der Vorschau den nächsten Schritt.
 - **Exportieren** (oben rechts) öffnet ein Fenster: Format **GoodNotes, PDF oder Bild** und Hintergrund **Mit Papier** oder **Nur Schrift** (PNG mit durchsichtigem Hintergrund, PDF ohne Linien; die Vorschau zeigt dann ein Schachbrettmuster).
 - **Hell/Dunkel**: Mond- bzw. Sonnen-Knopf oben rechts; Standard ist hell, die Wahl merkt sich das Gerät.
@@ -165,19 +165,19 @@ Unter **Schrift** (Leiste über der Vorschau) stehen zwölf echte Handschriften 
 
 ## 4. Backup – wichtig!
 
-Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, sind sie weg.
+Deine Handschriften liegen nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, sind sie weg.
 
-- **Profil → Alle Profile sichern** packt alle Profile mit ihren Schriften und Stil-Einstellungen in eine `.json`-Datei. Im Teilen-Menü „In Dateien sichern“ wählen, am besten in iCloud Drive.
-- **Profil teilen** schickt das aktive Profil (Schrift und Stil) als Datei, z. B. per AirDrop oder Nachricht. Benutzt das Profil die Schrift eines anderen, kommt diese Schrift mit.
-- **Importieren** liest eine solche Datei ein. Die Profile kommen als **neue Profile** dazu, vorhandene bleiben unangetastet (gleiche Namen werden durchnummeriert). Auf einem neuen Gerät ersetzt der Import das leere Start-Profil. Alte Backups mit nur einer Schrift ersetzen wie früher die Schrift des aktiven Profils.
+- **Eigene Schrift → Alles sichern** packt alle eigenen Handschriften und das Aussehen (Stil, Tinte, Papier) in eine `.json`-Datei. Im Teilen-Menü „In Dateien sichern“ wählen, am besten in iCloud Drive. Mitgelieferte Schriften sind nicht dabei, sie lassen sich jederzeit neu laden.
+- **Teilen** schickt die gerade aufgenommene Handschrift als Datei, z. B. per AirDrop oder Nachricht.
+- **Importieren** liest eine solche Datei ein. Die Handschriften kommen **neu dazu**, vorhandene bleiben unangetastet (gleiche Namen werden durchnummeriert). Auf einem neuen Gerät ersetzt der Import die leere Start-Handschrift und übernimmt auch das Aussehen. Ältere Sicherungen funktionieren weiter; Profile, die nur die Schrift eines anderen benutzten, werden dabei übersprungen.
 - In der Datei stehen nur Schriften und Stil-Einstellungen – keine Texte und keine Geräte-Einstellungen.
-- Ein **roter Punkt am Profil-Tab** und ein Hinweis oben erinnern dich, wenn das letzte Backup älter als 7 Tage ist.
+- Ein **roter Punkt am Tab „Eigene Schrift“** und ein Hinweis oben erinnern dich, wenn das letzte Backup älter als 7 Tage ist.
 - Auf iPad/iPhone erscheint außerdem der Hinweis **„Zum Home-Bildschirm hinzufügen“**: In Safari darf eine normale Website ihre Daten nach 7 Tagen ohne Nutzung verlieren, als Home-Bildschirm-App nicht. Die Home-Bildschirm-App hat einen eigenen Speicher – vorher sichern, dort importieren.
 
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v42';` hochzählen (z. B. auf `'v43'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v43';` hochzählen (z. B. auf `'v44'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ## 6. Probleme lösen
@@ -185,11 +185,11 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 | Problem | Lösung |
 |---|---|
 | Pencil schreibt nicht | Mit dem Pencil direkt ins Kästchen schreiben. |
-| Finger zeichnet nicht mehr | Nach dem ersten Pencil-Strich zählt nur noch der Pencil. Profil → Eingabe & Speicher → „Finger und Maus zum Schreiben erlauben“. |
+| Finger zeichnet nicht mehr | Nach dem ersten Pencil-Strich zählt nur noch der Pencil. Eigene Schrift → Eingabe & Speicher → „Finger und Maus zum Schreiben erlauben“. |
 | Alte Version wird angezeigt | App ganz schließen (von unten wischen) und neu öffnen, ggf. zweimal. |
 | Teilen-Menü zeigt GoodNotes nicht | Im Teilen-Menü ganz nach rechts wischen → „Mehr“ → GoodNotes aktivieren. |
 | Zeichen fehlen rot im PDF | Die markierten Zeichen im Tab „Aufnahme“ nachtragen. |
-| Profil ist weg | Profil → Importieren und das letzte Backup wählen. |
+| Handschrift ist weg | Eigene Schrift → Importieren und das letzte Backup wählen. |
 
 ## 7. Für Entwickler
 
@@ -216,15 +216,16 @@ js/layout.js            Satz: Paare, Varianten, Unordnung, Umbruch, Seiten, Lini
 js/render.js            Zeichnen auf Canvas (Vorschau, PNG)
 js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
-js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
-js/sammlung.js          Datei mit mehreren Profilen: Backup aller Profile, Profil teilen
+js/profilwahl.js        Schrift-Galerie; eigene Handschriften anlegen, wechseln, umbenennen, löschen
+js/sammlung.js          Datei mit mehreren Handschriften: Backup, Teilen
 js/dialog.js            Eigene Dialoge (Bestätigen, Hinweis, Eingabe, Auswahl)
 js/einfuegen.js         Eingefügten Text bereinigen und einsetzen
 js/export.js            PDF (Vektor), PNG, Teilen
 js/goodnotes.js         .goodnotes-Notizbuch (ZIP + Protobuf, Kugelschreiber-Striche)
 js/ink.js               Strichumrisse mit Druck (perfect-freehand)
 js/profile.js           Zeichensatz, Profil-Format, Import-Prüfung
-js/profil.js            Tab Profil: Backup, Eingabe (Finger/Maus)
+js/profil.js            Eigene Schrift: Backup, Teilen, Import, Eingabe (Finger/Maus)
+js/vorschau.js          Schriftprobe „Hallo“ für die Galerie (vorschau-daten.js: tools/vorschau.mjs)
 js/storage.js           IndexedDB und Einstellungen
 sw.js                   Service Worker (Offline-Cache)
 ios/                    iPad-App (SwiftUI + WKWebView): Handschrift-App, echtes claude.ai, Übernehmen, Teilen

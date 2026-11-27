@@ -1,9 +1,9 @@
 // Mitgelieferte Handschriften echter Menschen: einzelne Buchstaben aus der Sammlung UJIpenchars2
 // (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; CC BY 4.0, doi:10.24432/C5FG8S),
 // für DeineSchrift umgerechnet (Grundlinie, x-Höhe, Umlaute aus den Punkten des ü). Werkzeug: tools/uji-schriften.py
-// Eine Schrift wird erst geladen, wenn man sie wählt; danach ist sie ein normales Profil.
+// Eine Schrift wird erst geladen, wenn man sie wählt; danach liegt sie wie eine eigene im Speicher (demo: true).
 import { parseCollection } from './sammlung.js';
-import { profilesMeta, createProfile, setActiveProfile, saveGlyphs, seedSettings, renameProfile } from './storage.js';
+import { profilesMeta, createProfile, saveGlyphs, renameProfile } from './storage.js';
 
 export const BUILTIN = [
   { id: 'uji-w18', name: 'Lena · sauber', old: 'Saubere Schulschrift', file: 'schriften/schrift-a.json' },
@@ -28,19 +28,17 @@ export function renameOldBuiltins() {
   }
 }
 
-// Schon angelegt? Dann nur wechseln, sonst laden und als Profil anlegen. Gibt die Profil-Id zurück.
+// Schon geladen? Dann nur die Id, sonst einmal laden und merken. Gibt die Id der Handschrift zurück (Wählen macht der Aufrufer).
 export async function useBuiltin(id) {
   const spec = BUILTIN.find(b => b.id === id);
   if (!spec) throw new Error('Unbekannte Schrift');
   const have = profilesMeta().list.find(p => p.builtin === id);
-  if (have) { setActiveProfile(have.id); return have.id; }
+  if (have) return have.id;
   const res = await fetch(spec.file);
   if (!res.ok) throw new Error('Die Schrift konnte nicht geladen werden (Internet nötig beim ersten Mal).');
   const [entry] = parseCollection(await res.text());
   if (!entry?.handwriting) throw new Error('Die Schriftdatei ist beschädigt.');
-  const pid = createProfile({ name: spec.name, from: null, demo: true, builtin: id });
+  const pid = createProfile({ name: spec.name, demo: true, builtin: id });
   await saveGlyphs(pid, entry.handwriting);
-  seedSettings(pid, { ...entry.settings, styles: {} });
-  setActiveProfile(pid);
   return pid;
 }

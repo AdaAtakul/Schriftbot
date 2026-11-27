@@ -1,4 +1,4 @@
-// Selbsttest für Profile und Einstellungen: node tests/storage.test.mjs
+// Selbsttest für Handschriften und Einstellungen: node tests/storage.test.mjs
 import assert from 'node:assert/strict';
 
 const mem = new Map();
@@ -15,55 +15,75 @@ const db = { transaction() {
   return t;
 } };
 globalThis.indexedDB = { open() { const req = {}; queueMicrotask(() => { req.result = db; req.onsuccess?.(); }); return req; } };
-idb.set('profile', { format: 'handschrift-profil', version: 1, customPairs: [], glyphs: { a: [[], [], []] } });
+const glyphs = ch => ({ format: 'handschrift-profil', version: 1, customPairs: [], glyphs: { [ch]: [[[[0, 0, 0.5, 0]]]] } });
+idb.set('profile', glyphs('a'));
 
-// Bestehende Daten von vor den Profilen
-mem.set('settings', JSON.stringify({ text: 'Hallo', chaos: 30, boxScale: 0.8, lastBackup: 5, ink: 'rot' }));
+// Alte Daten (v1): p1 mit eigenem Aussehen, „Schnell“ benutzt die Schrift von p1, „Lena“ ist mitgeliefert und gerade gewählt
+mem.set('settings', JSON.stringify({ text: 'Hallo', ink: 'rot', boxScale: 0.8, lastBackup: 5 }));
+mem.set('settings:px', JSON.stringify({ style: 'unordentlich' }));
+mem.set('settings:pl', JSON.stringify({ ink: 'blau', paper: 'kariert', lastBackup: 9 }));
+mem.set('profiles', JSON.stringify({ active: 'pl', list: [
+  { id: 'p1', name: 'Meine Schrift', from: null },
+  { id: 'px', name: 'Schnell', from: 'p1' },
+  { id: 'pl', name: 'Lena · sauber', from: null, demo: true, builtin: 'uji-w18' },
+] }));
 const S = await import('../js/storage.js');
 
-// Ohne Profil-Liste: ein Profil „Meine Schrift“ mit den alten Einstellungen
-assert.equal(S.activeProfile().name, 'Meine Schrift');
-assert.equal(S.getSettings().chaos, 30);
-
-// Zweites Profil mit der Schrift von p1: eigene Stil-Werte, gemeinsamer Text, Schrift-Werte vom Besitzer
-const p2 = S.createProfile({ name: 'Schnell', from: 'p1' });
-S.seedSettings(p2, { style: 'unordentlich' });
-S.setActiveProfile(p2);
-assert.equal(S.glyphOwner().id, 'p1');
+// Umzug: verknüpfte Profile entfallen, Aussehen der gewählten Schrift gilt für alle, eigene Handschrift wird aufgenommen
+let m = S.profilesMeta();
+assert.equal(m.v, 2);
+assert.deepEqual(m.list.map(p => p.name), ['Meine Schrift', 'Lena · sauber']);
+assert.equal(S.activeProfile().id, 'pl');
+assert.equal(S.recProfile().id, 'p1', 'mitgelieferte Schrift wird nie aufgenommen');
+assert.equal(mem.has('settings:px'), false, 'Einstellungen des verknüpften Profils entfernt');
 let s = S.getSettings();
-assert.equal(s.text, 'Hallo', 'Text gilt für alle Profile');
-assert.equal(s.boxScale, 0.8, 'Kästchengröße gehört zur Schrift');
-assert.equal(s.style, 'unordentlich');
-assert.equal(s.chaos, undefined, 'Stil-Werte von p1 gelten nicht');
-assert.equal(s.ink, undefined);
-S.setSetting('ink', 'schwarz');
-S.setSetting('text', 'Neu');
-S.setSetting('lastBackup', 9);
+assert.equal(s.ink, 'blau', 'Aussehen der zuletzt gewählten Schrift');
+assert.equal(s.paper, 'kariert');
+assert.equal(s.text, 'Hallo', 'Text bleibt');
+assert.equal(s.boxScale, 0.8, 'Kästchengröße der aufgenommenen Handschrift');
+assert.equal(s.lastBackup, 9, 'jüngstes Sicherungsdatum');
+
+// Aussehen gilt für alle Schriften, Aufnahme-Werte gehören zur aufgenommenen Handschrift
+const oma = S.createProfile({ name: 'Oma' });
+assert.equal(S.recProfile().id, 'p1', 'neue Handschrift ändert die Aufnahme nicht von selbst');
+S.setRecProfile(oma);
 S.setActiveProfile('p1');
 s = S.getSettings();
-assert.equal(s.ink, 'rot', 'Tinte je Profil');
-assert.equal(s.text, 'Neu', 'Text gemeinsam');
-assert.equal(s.lastBackup, 9, 'Backup-Datum gehört zur Schrift');
+assert.equal(s.ink, 'blau', 'Wechsel der Schrift lässt das Aussehen gleich');
+assert.equal(s.boxScale, undefined, 'Oma hat noch keine eigene Kästchengröße');
+S.setSetting('boxScale', 1.2);
+S.setSetting('ink', 'schwarz');
+S.setRecProfile('p1');
+assert.equal(S.getSettings().boxScale, 0.8);
+assert.equal(S.getSettings().ink, 'schwarz');
+S.setRecProfile('pl');
+assert.equal(S.recProfile().id, 'p1', 'mitgelieferte Schrift lässt sich nicht als Aufnahme wählen');
 
-// Profil mit eigener Schrift ist sein eigener Besitzer, hat eigene Schrift-Werte
-const p3 = S.createProfile({ name: 'Oma', from: null });
-S.setActiveProfile(p3);
-assert.equal(S.glyphOwner().id, p3);
-assert.equal(S.getSettings().boxScale, undefined);
+// Geladene Objekte speichern in ihre eigene Handschrift, auch wenn eine andere gewählt ist
+const a = await S.loadInto({}, 'p1'), b = await S.loadInto({ alt: 1 }, oma);
+assert.ok(a.glyphs.a && !b.alt && !b.glyphs.a, 'neu befüllt');
+b.glyphs.o = glyphs('o').glyphs.o;
+await S.saveProfile(b);
+assert.ok(idb.get('profile:' + oma).glyphs.o, 'in Omas Handschrift gespeichert');
+const shared = S.shareInto({}, a);
+assert.equal(shared.glyphs, a.glyphs, 'gemeinsame Buchstaben');
+await S.saveProfile(shared);
+assert.ok(idb.get('profile').glyphs.a);
 
-// Umbenennen; p1 kann nicht gelöscht werden, solange „Schnell“ seine Schrift benutzt; das letzte nie
-S.renameProfile(p2, 'Schnell mitgeschrieben');
-assert.ok(S.profilesMeta().list.some(p => p.name === 'Schnell mitgeschrieben'));
-assert.match(await S.deleteProfile('p1'), /noch von „Schnell mitgeschrieben“ benutzt/);
-S.setActiveProfile(p2);
-assert.equal(await S.deleteProfile(p2), null, 'verknüpftes Profil löschen (ohne eigene Schrift)');
-assert.equal(S.activeProfile().id, 'p1', 'nach dem Löschen des aktiven Profils ist das erste aktiv');
-assert.equal(mem.has('settings:' + p2), false, 'Einstellungen mit gelöscht');
-// Erstes Profil löschen: seine Stil-Werte gehen, die Geräte-Werte (Text) bleiben
-S.setActiveProfile(p3);
-assert.equal(await S.deleteProfile('p1'), null);
-assert.equal(S.getSettings().text, 'Neu', 'Text überlebt');
-assert.equal(JSON.parse(mem.get('settings')).ink, undefined, 'Stil von p1 weg');
-assert.equal(idb.has('profile'), false, 'Schrift von p1 gelöscht');
-assert.ok((await S.loadGlyphs(p3)).glyphs, 'leeres Profil für neue Schrift');
-console.log(`OK – Profile: ${S.profilesMeta().list.map(p => p.name).join(', ')}`);
+// Löschen: nie die letzte eigene; gelöschte aktive/aufgenommene Handschrift wird ersetzt
+S.setActiveProfile(oma);
+S.setRecProfile(oma);
+assert.equal(await S.deleteProfile(oma), null);
+assert.equal(S.activeProfile().id, 'p1');
+assert.equal(S.recProfile().id, 'p1');
+assert.match(await S.deleteProfile('p1'), /letzte eigene Handschrift/);
+assert.equal(await S.deleteProfile('pl'), null, 'mitgelieferte Schrift darf weg');
+assert.equal(S.getSettings().ink, 'schwarz', 'Aussehen bleibt');
+S.renameProfile('p1', 'Anna');
+m = S.profilesMeta();
+assert.deepEqual(m.list, [{ id: 'p1', name: 'Anna' }]);
+
+// Neues Gerät ohne Daten: eine leere eigene Handschrift
+mem.clear();
+assert.deepEqual(S.profilesMeta(), { v: 2, active: 'p1', rec: 'p1', list: [{ id: 'p1', name: 'Meine Schrift' }] });
+console.log('OK – Handschriften, Umzug, Aussehen und Aufnahme-Werte');

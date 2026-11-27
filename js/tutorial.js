@@ -63,7 +63,7 @@ const STEPS = demo => [
   {
     view: 'aufnahme',
     title: '2. Eigene Schrift aufnehmen',
-    text: 'Unter „Aufnehmen“ schreibst du zuerst jeden Kleinbuchstaben einmal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
+    text: 'Unter „Eigene Schrift“ schreibst du zuerst jeden Kleinbuchstaben einmal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
       'Nach etwa drei Minuten schreibt DeineSchrift in deiner Schrift; Großbuchstaben, Ziffern und Varianten nimmst du nach und nach dazu.',
   },
   {
@@ -72,10 +72,10 @@ const STEPS = demo => [
     text: 'Hier füllst du PDFs und Arbeitsblätter in Handschrift aus: PDF oder Foto öffnen, auf die Stelle tippen, Text eintippen.',
   },
   {
-    view: 'profil',
+    view: 'aufnahme',
     title: 'Wichtig: Schrift sichern',
     text: 'Deine Handschrift liegt nur in diesem Browser. Füge DeineSchrift zum Home-Bildschirm hinzu (Safari: Teilen → „Zum Home-Bildschirm“) ' +
-      'und sichere ab und zu unter „Meine Schriften“ mit „Alle Schriften sichern“.',
+      'und sichere ab und zu unter „Eigene Schrift“ mit „Alles sichern“.',
     link: true,
   },
 ];

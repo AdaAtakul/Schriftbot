@@ -8,7 +8,7 @@ import { STYLE_KEYS } from './stil.js';
 export const FORMAT = 'handschrift-sammlung';
 
 // Nur diese Einstellungen wandern mit (keine Texte, Geräte-Werte oder Schlüssel). boxScale gehört zur Schrift.
-const PROFILE_KEYS = ['style', 'styles', 'ink', 'inkHue', 'paper', 'paperColor', 'xHeight', 'lineHeight', 'margin'];
+const PROFILE_KEYS = ['style', 'styles', 'ink', 'inkHue', 'pen', 'paper', 'paperColor', 'xHeight', 'lineHeight', 'margin'];
 const HANDWRITING_KEYS = ['boxScale'];
 const isText = v => typeof v === 'string' && v.length <= 40;
 const isNum = v => typeof v === 'number' && Number.isFinite(v);

@@ -24,16 +24,17 @@ export async function setupDemo() {
   try {
     if (localStorage.getItem(DONE_KEY)) return false;
     const m = profilesMeta();
-    if (m.list.length !== 1 || m.list[0].from) return false;
+    if (m.list.length !== 1) return false;
     if (progress(await loadGlyphs(m.list[0].id)).done > 0) { localStorage.setItem(DONE_KEY, 'eigene'); return false; }
     const res = await fetch(DEMO_URL, { cache: 'no-cache' });
     if (!res.ok) return false;
     const [entry] = parseCollection(await res.text());
     if (!entry?.handwriting) return false;
-    const id = createProfile({ name: DEMO_NAME, from: null, demo: true });
+    const id = createProfile({ name: DEMO_NAME, demo: true });
     await saveGlyphs(id, entry.handwriting);
-    // Standard für den ersten Eindruck: ordentlich, schwarze Tinte, liniertes weißes Papier
-    seedSettings(id, { ...entry.settings, style: DEFAULT_STYLE, styles: {}, ink: 'schwarz' });
+    // Erster Eindruck (Aussehen gilt für alle Schriften): ordentlich, schwarze Tinte, liniertes weißes Papier
+    const { boxScale, ...look } = entry.settings || {};
+    seedSettings('p1', { ...look, style: DEFAULT_STYLE, styles: {}, ink: 'schwarz' });
     setActiveProfile(id);
     localStorage.setItem(DONE_KEY, '1');
     return true;
@@ -42,5 +43,3 @@ export async function setupDemo() {
   }
 }
 
-// Erstes eigenes Profil (nicht die Demo, keine geliehene Schrift)
-export const ownProfile = (m = profilesMeta()) => m.list.find(p => !p.demo && !p.from) || null;

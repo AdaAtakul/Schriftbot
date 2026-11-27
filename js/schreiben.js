@@ -367,7 +367,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const shown = result.missing.filter(ch => ch !== ' ');
     const noGlyphs = progress(profile).done === 0; // dann erklärt der Hinweis über der Vorschau alles
     if (shown.length && !noGlyphs) notes.push(`Noch nicht aufgenommen: ${shown.join(' ')}`);
-    if (isDemo()) notes.push('Eigene Schrift: unter „Aufnehmen“');
+    if (isDemo()) notes.push('Deine eigene Schrift: unter „Eigene Schrift“');
     statusEl.textContent = notes.join(' · ');
     $('write-empty').hidden = progress(profile).done > 0;
     statusEl.classList.toggle('warn', shown.length > 0 && !noGlyphs);
@@ -525,7 +525,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     const s = current(), o = options(s);
     const result = layout(input.value, profile, o, seed);
     const miss = result.missing.filter(ch => ch !== ' ');
-    if (miss.length && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${miss.join(' ')}\n\nSie erscheinen im Export als rote Kästchen. Nimm sie am besten erst unter „Aufnehmen“ auf.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren', cancel: 'Abbrechen' })) return;
+    if (miss.length && !await ask(`Diese Zeichen hast du noch nicht aufgenommen: ${miss.join(' ')}\n\nSie erscheinen im Export als rote Kästchen. Nimm sie am besten erst unter „Eigene Schrift“ auf.`, { title: 'Zeichen fehlen', ok: 'Trotzdem exportieren', cancel: 'Abbrechen' })) return;
 
     const color = inkColor(s);
     const date = new Date().toISOString().slice(0, 10);

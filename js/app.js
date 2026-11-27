@@ -1,4 +1,6 @@
-import { loadProfile, saveProfile, getSettings, createProfile, setActiveProfile } from './storage.js';
+import {
+  loadInto, shareInto, saveProfile, getSettings, createProfile, activeProfile, recProfile, setActiveProfile, setRecProfile,
+} from './storage.js';
 import { alignAll, progress } from './profile.js';
 import { initAufnahme } from './aufnahme.js';
 import { initTextAufnahme } from './textaufnahme.js';
@@ -8,13 +10,15 @@ import { initBlatt } from './blattui.js';
 import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
-import { setupDemo, isDemo, ownProfile, renameDemo } from './demo.js';
+import { setupDemo, isDemo, renameDemo } from './demo.js';
 import { showTutorial } from './tutorial.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
 
-let profile;
+// Zwei Schrift-Objekte: profile = Schrift zum Schreiben (Schreiben, Ausfüllen), own = eigene Handschrift in der Aufnahme.
+// Sind beide dieselbe Handschrift, teilen sie sich die Buchstaben (Aufgenommenes erscheint sofort beim Schreiben).
+const profile = {}, own = {};
 
 // Gleitende Markierung hinter dem gewählten Tab (iPad); auf dem Handy per CSS ausgeblendet
 const tabBar = document.querySelector('.tabs');
@@ -33,7 +37,7 @@ new ResizeObserver(moveIndicator).observe(tabBar);
 let currentView = null;
 function showView(name) {
   // Beim Tabwechsel frisch geschriebene Zeichen ausrichten, damit „Schreiben“ sie schon gerade sieht.
-  if (profile && alignAll(profile)) saveProfile(profile);
+  for (const p of new Set([profile, own])) if (p.glyphs && alignAll(p)) saveProfile(p);
   for (const tab of tabs) {
     const active = tab.dataset.view === name;
     tab.setAttribute('aria-selected', active);
@@ -86,7 +90,6 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
 // Erster Start: Demo-Schrift anlegen, falls mitgeliefert (demo/demo-schrift.json)
 await setupDemo();
 const demo = isDemo();
-if (demo) document.getElementById('view-aufnahme').classList.add('is-demo');
 
 renameDemo();
 
@@ -95,47 +98,46 @@ let start = 'schreiben';
 try { start = sessionStorage.getItem('startView') || start; sessionStorage.removeItem('startView'); } catch {}
 showView(document.getElementById('view-' + start) ? start : 'schreiben');
 
-try {
-  profile = await loadProfile();
+// Schrift zum Schreiben laden: dieselbe wie in der Aufnahme → gemeinsame Buchstaben
+async function loadFont(id) {
+  if (id === recProfile()?.id) shareInto(profile, own); else await loadInto(profile, id);
   if (alignAll(profile)) saveProfile(profile); // ältere Aufnahmen nachträglich ausrichten
+}
+try {
+  if (!recProfile()) createProfile({ name: 'Meine Schrift' }); // z. B. nach dem Umzug nur mitgelieferte Schriften
+  await loadInto(own, recProfile().id);
+  if (alignAll(own)) saveProfile(own);
+  await loadFont(activeProfile().id);
 } catch (err) {
   info('Die Schrift konnte nicht geladen werden: ' + err.message +
-    '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, unter „Meine Schriften“ eine Sicherung importieren.');
+    '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, unter „Eigene Schrift“ eine Sicherung importieren.');
   throw err;
 }
 let schreiben;
-const aufnahme = initAufnahme(profile, () => schreiben.sync()); // Schriftgröße im Schreiben-Tab nachziehen
-initTextAufnahme(profile, aufnahme.refresh);
+const aufnahme = initAufnahme(own, () => schreiben.sync()); // Schriftgröße im Schreiben-Tab nachziehen
+initTextAufnahme(own, aufnahme.refresh);
 schreiben = initSchreiben(profile, aufnahme.refresh); // rendert neu, sobald der Tab sichtbar wird
-initProfil(profile);
+initProfil(own);
 // Früher gab es eine KI mit API-Schlüssel: einen gespeicherten Schlüssel vom Gerät löschen.
 try { localStorage.removeItem('ki'); } catch {}
 const blatt = initBlatt(profile);
-// Schrift/Profil sofort wechseln: neue Striche in dasselbe Profil-Objekt laden und alle Bereiche neu zeichnen
-async function switchProfile(id) {
+// Schrift zum Schreiben wechseln (sofort, ohne Neuladen); das Aussehen bleibt
+async function chooseFont(id) {
   setActiveProfile(id);
-  const next = await loadProfile();
-  if (alignAll(next)) saveProfile(next);
-  for (const k of Object.keys(profile)) delete profile[k];
-  Object.assign(profile, next);
-  const d = isDemo();
-  document.getElementById('view-aufnahme').classList.toggle('is-demo', d);
-  document.getElementById('demo-note').hidden = !d;
+  await loadFont(id);
   schreiben.sync();
-  aufnahme.refresh();
   blatt.render();
+  wahl.render();
 }
-initProfilwahl(switchProfile);
-// Mitgelieferte Schriften werden erst beim Wählen geladen (je ~0,2 MB), nicht mehr alle vorab im Hintergrund.
-
-// Demo-Profil: statt der Aufnahme ein Hinweis mit Weg zur eigenen Schrift
-document.getElementById('demo-note').hidden = !demo;
-document.getElementById('demo-own').addEventListener('click', () => {
-  const own = ownProfile() || { id: createProfile({ name: 'Meine Schrift' }) };
-  setActiveProfile(own.id);
+// Andere eigene Handschrift aufnehmen: neu laden und direkt in „Eigene Schrift“ starten (Aufnahme-Stand gehört zur Handschrift)
+function chooseRec(id, { force = false } = {}) {
+  if (id === recProfile()?.id && !force) return showView('aufnahme');
+  setRecProfile(id);
   try { sessionStorage.setItem('startView', 'aufnahme'); } catch {}
   location.reload();
-});
+}
+const wahl = initProfilwahl({ chooseFont, chooseRec });
+// Mitgelieferte Schriften werden erst beim Wählen geladen (je ~0,2 MB), nicht vorab im Hintergrund.
 
 // ?-Knopf: kleines Menü mit Einführung, Anleitung und Hell/Dunkel; schließt mit Esc oder Tipp daneben
 const helpBtn = document.getElementById('help-btn'), helpMenu = document.getElementById('help-menu');
@@ -153,8 +155,8 @@ safetyHint();
 function safetyHint() {
   const $ = id => document.getElementById(id);
   const banner = $('safety-banner');
-  const done = progress(profile).done;
-  if (demo || !done || window.schriftbotNative) return;
+  const done = progress(own).done;
+  if (!done || window.schriftbotNative) return;
   const later = key => { try { return +localStorage.getItem(key) > Date.now(); } catch { return false; } };
   const snooze = (key, days) => { try { localStorage.setItem(key, Date.now() + days * 86400000); } catch {} };
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -166,9 +168,9 @@ function safetyHint() {
     $('safety-text').textContent = 'Füge DeineSchrift zum Home-Bildschirm hinzu – sonst darf Safari deine Schrift nach 7 Tagen ohne Nutzung löschen.';
     $('safety-action').textContent = 'So geht’s';
     $('safety-action').onclick = () => info(
-      '1. Sichere zuerst deine Schrift: Meine Schriften → „Alle Schriften sichern“, z. B. in „Dateien“.\n' +
+      '1. Sichere zuerst deine Schrift: Eigene Schrift → „Alles sichern“, z. B. in „Dateien“.\n' +
       '2. Tippe in Safari auf „Teilen“ (Quadrat mit Pfeil) und dann auf „Zum Home-Bildschirm“.\n' +
-      '3. Öffne DeineSchrift ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Meine Schriften → Importieren).\n\n' +
+      '3. Öffne DeineSchrift ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Eigene Schrift → Importieren).\n\n' +
       'Die App auf dem Home-Bildschirm hat einen eigenen Speicher, deshalb der Umweg über die Sicherung.',
       { title: 'Zum Home-Bildschirm hinzufügen' });
   } else if (done >= 10 && (days == null || days > 7) && !later('hinweis-backup')) {
