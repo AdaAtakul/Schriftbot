@@ -120,21 +120,6 @@ export async function shareFiles(files) {
     native.postMessage({ action: 'share', files: await Promise.all(files.map(async f => ({ name: f.name, data: await toBase64(f) }))) });
     return true;
   }
-  // In der claude.ai-Version: Teilen und Downloads sind dort gesperrt, nur claude.ai's eigene Speichern-Funktion geht.
-  if (typeof window.claude?.use === 'function') {
-    const dl = await window.claude.use('downloads').catch(() => null);
-    if (dl) {
-      for (const file of files) {
-        // .goodnotes ist dort nicht erlaubt: als .zip speichern (vor dem Import in GoodNotes „.zip“ entfernen)
-        const filename = file.name.endsWith('.goodnotes') ? file.name + '.zip' : file.name;
-        try { await dl.save({ filename, data: file }); } catch (e) {
-          if (e?.code === 'declined') return true;
-          throw new Error(e?.code === 'host_unavailable' ? 'Diese App kann hier keine Dateien speichern. Öffne claude.ai im Browser.' : (e?.message || 'Speichern nicht möglich.'));
-        }
-      }
-      return true;
-    }
-  }
   if (navigator.canShare?.({ files })) {
     try {
       await navigator.share({ files });

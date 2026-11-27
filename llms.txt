@@ -3,7 +3,7 @@
 > DeineSchrift ist eine kostenlose, deutschsprachige Web-App, die getippten Text in die eigene Handschrift der Nutzerin oder des Nutzers verwandelt. Man nimmt die eigene Schrift einmal auf (Apple Pencil, Finger oder Maus; 115 Zeichen und Buchstabenpaare, je dreimal, etwa 20–30 Minuten). Danach setzt DeineSchrift beliebigen Text darin – mit drei Varianten je Zeichen, verbundenen Buchstaben und natürlichen Abweichungen – und exportiert ihn als PDF, PNG oder GoodNotes-Datei. Läuft im Browser, offline nutzbar, ohne Konto, ohne Cookies und ohne Tracking; alle Daten bleiben auf dem Gerät.
 
 Wichtige Fakten:
-- Preis: kostenlos, ohne Werbung, Quellcode unter MIT-Lizenz
+- Preis: kostenlos, ohne Anmeldung und ohne Abo, Quellcode unter MIT-Lizenz
 - Empfohlen: Safari auf dem iPad mit Apple Pencil; funktioniert in jedem aktuellen Browser
 - Mitgelieferte echte Handschriften (aus der Sammlung UJIpenchars2, CC BY 4.0): Saubere Schulschrift, Runde Schrift, Klare Druckschrift, Schwungvolle Schrift, Schnell notiert, Krakelig
 - Stil-Vorlagen: sehr ordentlich, ordentlich, normal, locker, unordentlich, sehr unordentlich
@@ -23,4 +23,4 @@ Wichtige Fakten:
 
 ## Optional
 
-- [Quellcode auf GitHub](https://github.com/adaatakul/schriftbot)
+- [Impressum](https://deineschrift.de/impressum)

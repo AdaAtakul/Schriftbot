@@ -9,7 +9,7 @@
   <meta name="description" content="Getippten Text in echte Handschrift umwandeln: kostenloser Handschrift-Generator mit deiner eigenen oder mitgelieferten Handschriften. Export als PDF, PNG oder GoodNotes – ohne Anmeldung, alles bleibt auf deinem Gerät.">
   <link rel="canonical" href="https://deineschrift.de/">
   <meta name="robots" content="index, follow, max-image-preview:large">
-  <meta name="author" content="adaatakul">
+  <meta name="author" content="DeineSchrift">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="de_DE">
   <meta property="og:site_name" content="DeineSchrift">
@@ -66,18 +66,17 @@
           "Papier wie in GoodNotes: liniert, kariert, gepunktet, blanko",
           "Export als PDF, PNG und GoodNotes-Datei",
           "Formulare und Arbeitsblätter (PDF oder Foto) in Handschrift ausfüllen",
-          "Mehrere Profile, Backup und Teilen",
+          "Mehrere eigene Schriften, Backup und Teilen",
           "Offline nutzbar, keine Anmeldung, keine Datenübertragung"
         ],
         "screenshot": "https://deineschrift.de/icons/og.png",
         "author": { "@id": "https://deineschrift.de/#autor" }
       },
       {
-        "@type": "Person",
+        "@type": "Organization",
         "@id": "https://deineschrift.de/#autor",
-        "name": "adaatakul",
-        "url": "https://github.com/adaatakul",
-        "sameAs": ["https://github.com/adaatakul", "https://github.com/adaatakul/schriftbot"]
+        "name": "DeineSchrift",
+        "url": "https://deineschrift.de/"
       }
     ]
   }
@@ -130,7 +129,6 @@
       <button role="tab" id="tab-schreiben" data-view="schreiben" aria-controls="view-schreiben" aria-selected="true"><svg class="icon" aria-hidden="true"><use href="#i-edit"/></svg><span>Schreiben</span></button>
       <button role="tab" id="tab-blatt" data-view="blatt" aria-controls="view-blatt" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-sheet"/></svg><span>Ausfüllen</span></button>
       <button role="tab" id="tab-aufnahme" data-view="aufnahme" aria-controls="view-aufnahme" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-nib"/></svg><span>Aufnehmen</span></button>
-      <button role="tab" id="tab-ki" data-view="ki" aria-controls="view-ki" aria-selected="false" hidden><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><span>KI</span></button>
       <button role="tab" id="tab-profil" data-view="profil" aria-controls="view-profil" aria-selected="false"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span>Profil</span></button>
     </nav>
     <div class="topbar-end">
@@ -217,6 +215,8 @@
         <textarea id="text-input" placeholder="Hier Text eingeben oder einfügen …" spellcheck="true" lang="de"></textarea>
         <button id="text-restore" hidden><svg class="icon"><use href="#i-reset"/></svg><span>Gelöschten Text wiederherstellen</span></button>
         <p id="schreiben-status" class="status"></p>
+        <!-- Werbeplatz: bleibt unsichtbar (hidden), bis ein Werbenetzwerk eingebunden ist. -->
+        <aside class="ad-slot" aria-label="Anzeige" hidden></aside>
       </div>
       <div class="stage">
         <div class="lookbar-wrap">
@@ -380,37 +380,6 @@
       </div>
     </section>
 
-    <section id="view-ki" class="view view-ki" role="tabpanel" aria-labelledby="tab-ki" hidden>
-      <div class="ki-shell">
-        <div class="ki-top">
-          <div class="seg" id="ki-tier" role="group" aria-label="Modell"></div>
-          <button id="ki-new" class="ghost-btn"><svg class="icon"><use href="#i-plus"/></svg>Neuer Chat</button>
-        </div>
-        <div id="ki-unavailable" class="ki-unavailable" hidden>
-          <h2>KI gibt es in der claude.ai-Version</h2>
-          <p>Damit Claude über dein Abo antwortet – ohne API-Schlüssel –, muss die App auf claude.ai laufen. Öffne dort deine Handschrift-App und spiele einmal dein Backup ein (Profil → Alle Profile sichern, dort Importieren).</p>
-          <a id="ki-open-claude" class="btn-link" target="_blank" rel="noopener"><svg class="icon"><use href="#i-spark"/></svg>App auf claude.ai öffnen</a>
-        </div>
-        <div id="ki-log" class="ki-log" aria-live="polite"></div>
-        <div id="ki-empty" class="ki-empty">
-          <div class="ki-hello"><svg class="icon"><use href="#i-spark"/></svg></div>
-          <h2>Was soll ich für dich schreiben?</h2>
-          <p class="hint">Häng Fotos, PDFs oder Textdateien an. Jede Antwort kannst du mit einem Tipp in deine Handschrift übernehmen.</p>
-          <div id="ki-suggestions" class="ki-suggestions"></div>
-        </div>
-        <form id="ki-form" class="ki-composer" autocomplete="off">
-          <div id="ki-attachments" class="ki-attachments" hidden></div>
-          <textarea id="ki-input" rows="1" placeholder="Schreib Claude eine Nachricht …" aria-label="Nachricht an Claude" lang="de"></textarea>
-          <div class="ki-bar">
-            <button type="button" id="ki-attach" class="ki-icon-btn" aria-label="Datei anhängen" title="Foto, PDF oder Textdatei anhängen"><svg class="icon"><use href="#i-clip"/></svg></button>
-            <input type="file" id="ki-file" multiple class="visually-hidden" aria-label="Dateien anhängen" tabindex="-1">
-            <label class="ki-ctx-toggle"><input type="checkbox" id="ki-context"> Meinen Text aus „Schreiben“ mitschicken</label>
-            <button type="button" id="ki-stop" class="ki-stop" hidden aria-label="Antwort stoppen"><span></span></button>
-            <button type="submit" id="ki-send" class="ki-send" aria-label="Senden" disabled><svg class="icon"><use href="#i-up"/></svg></button>
-          </div>
-        </form>
-      </div>
-    </section>
 
     <section id="view-profil" class="view view-profil" role="tabpanel" aria-labelledby="tab-profil" hidden>
       <h2>Profil &amp; Backup</h2>
@@ -452,7 +421,7 @@
         <a href="goodnotes-handschrift">Handschrift für GoodNotes</a>
         <a href="eigene-handschrift-digitalisieren">Eigene Handschrift digitalisieren</a>
         <a href="datenschutz">Datenschutz &amp; Lizenzen</a>
-        <a href="https://github.com/adaatakul/schriftbot" rel="noopener">Quellcode auf GitHub</a>
+        <a href="impressum">Impressum</a>
       </footer>
     </section>
   </main>

@@ -15,11 +15,9 @@ const FILES = [
   'js/sammlung.js',
   'js/einfuegen.js',
   'js/dialog.js',
-  'js/ki.js',
   'js/demo.js',
   'js/schriften.js',
   'js/tutorial.js',
-  'js/kiui.js',
   'js/aufnahme.js',
   'js/export.js',
   'js/goodnotes.js',
@@ -60,7 +58,7 @@ self.addEventListener('activate', e => {
 
 // Erst bei Bedarf geladen und dann für offline gemerkt: pdf.js (3 MB, nur fürs Blatt) und die Seiten
 // Anleitung/Datenschutz. Die Demo-Schrift kommt immer frisch, wenn online (sie wird nur beim ersten Start gebraucht).
-const LAZY = /\/(vendor\/pdfjs\/|anleitung(\.html)?$|datenschutz(\.html)?$|css\/seite\.css$|icons\/|schriften\/)/;
+const LAZY = /\/(vendor\/pdfjs\/|anleitung(\.html)?$|datenschutz(\.html)?$|impressum(\.html)?$|css\/seite\.css$|icons\/|schriften\/)/;
 const FRESH = /\/demo\//;
 
 // Cache zuerst, damit die App offline sofort startet.

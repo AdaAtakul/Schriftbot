@@ -163,89 +163,6 @@ Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften z
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
 - Der Abstand zwischen Buchstaben richtet sich nach ihrer Form: Ein o rückt unter das Dach eines T, schräge Schrift wird nicht zu breit.
 
-### KI-Tab (Claude über dein Abo, ohne API-Schlüssel)
-
-Der Tab **KI** ist ein Chat mit Claude. Er erscheint nur in der **claude.ai-Version** der App: https://claude.ai/artifact/TuYxD4Q6AKc8VLQQU1K5eY – dieselbe App, nur auf claude.ai, wo sie Claude über dein normales Abo fragen darf. In der öffentlichen GitHub-Version ist der Tab ausgeblendet. (claude.ai lässt sich nicht in andere Seiten einbetten, deshalb geht es nur so.)
-
-- Nachricht schreiben, mit der **Büroklammer** Dateien anhängen: **Fotos**, **PDFs** (Text wird gelesen, gescannte Seiten gehen als Foto mit) und **Textdateien**. Bilder lassen sich auch einfügen oder hineinziehen. Word-Dateien vorher als PDF exportieren.
-- **Schnell / Normal / Gründlich** wählt, wie lange Claude nachdenkt.
-- **Meinen Text aus „Schreiben“ mitschicken**, z. B. zum Korrigieren.
-- Unter jeder Antwort: **In Handschrift übernehmen** → Vorschau → **Text ersetzen**, **Anhängen** oder **In Feld N (Blatt)**, wenn im Blatt-Tab ein Feld gewählt ist. Die App springt danach in den passenden Tab; **Vorherigen Text wiederherstellen** macht es rückgängig. Außerdem **Kopieren** und **Neu schreiben**.
-- Claude bekommt die Liste deiner aufgenommenen Zeichen und schreibt ohne Formatierung, damit nichts rot markiert wird.
-- Beim ersten Mal fragt claude.ai, ob die App Claude benutzen darf. Anfragen zählen zu deinem normalen Claude-Nutzungslimit.
-
-Gut zu wissen über die claude.ai-Version:
-
-- Sie braucht Internet und eine Anmeldung bei claude.ai (Safari oder Claude-App). Offline und vom Home-Bildschirm läuft weiter die GitHub-Version.
-- Sie hat **ihren eigenen Speicher**: Profile einmal mit **Profil → Alle Profile sichern** (GitHub-Version) und **Importieren** (claude.ai-Version) übertragen.
-- Exporte speichert sie über claude.ai. Die GoodNotes-Datei heißt dort **…goodnotes.zip**: in der Dateien-App „.zip“ aus dem Namen löschen, dann in GoodNotes öffnen.
-- Sie ist privat: nur du kannst sie öffnen, bis du sie auf claude.ai über „Teilen“ freigibst.
-
-### Formular ausfüllen (Bereich „Ausfüllen“)
-
-Du hast ein Formular oder Blatt als PDF, in das du deine Einträge blau hineingetippt hast? Die App setzt sie in deiner Handschrift an genau dieselbe Stelle.
-
-1. **PDF oder Foto öffnen** antippen und das Arbeitsblatt wählen (aus Dateien, iCloud Drive …).
-2. Die App findet jede **blaue Antwort**, entfernt sie vom Blatt und schreibt denselben Text an dieselbe Stelle in deiner Handschrift. Das Feld reicht nach unten bis kurz vor die nächste Aufgabe, so ist Platz für die größere Handschrift.
-3. Felder anpassen:
-   - **Antippen** wählt ein Feld. Links kannst du den Text ändern.
-   - **Ziehen** verschiebt das Feld, der **Punkt unten rechts** ändert die Größe.
-   - **Automatisch einpassen** (Standard): Die Schrift wird nur so weit verkleinert, wie nötig ist, damit alles ins Feld passt. Ausgeschaltet stellst du die Größe selbst ein.
-   - **＋ Textfeld**, dann ein Rechteck aufziehen: neues Feld, z. B. auf einem leeren Arbeitsblatt.
-   - **Feld löschen**: Bei einem erkannten Feld erscheint dann wieder der blaue Text.
-4. Exportieren über die Leiste unten: **GoodNotes** (Blatt als Hintergrund, die Schrift radierbar darüber), **PDF** oder **PNG**.
-
-- Tinte, Strichdicke, Unordnung und Schreibfehler kommen aus dem Tab „Schreiben“.
-- Bei einem **Foto** oder einem eingescannten PDF gibt es keinen lesbaren Text. Dann werden die blauen Stellen trotzdem gefunden, und du trägst den Text selbst ein.
-- Als Antwort zählt nur deutlich blaue Schrift. Schwarzer Aufgabentext bleibt unangetastet, auch wenn er direkt über der Antwort steht.
-- Das zuletzt geöffnete Blatt bleibt mit allen Feldern gespeichert, auch nach dem Schließen der App.
-
-### Nach GoodNotes exportieren
-
-**Als GoodNotes-Notizbuch (radierbar):**
-
-1. **Exportieren** → **GoodNotes** → **Für GoodNotes sichern** antippen.
-2. Im Teilen-Menü **GoodNotes** wählen. Fehlt GoodNotes dort, „In Dateien sichern“ wählen und die Datei in der Dateien-App antippen → „Öffnen in GoodNotes“ (oder in GoodNotes über **Importieren**).
-3. GoodNotes legt ein neues Notizbuch an. Jeder Strich ist ein echter Kugelschreiber-Strich: mit dem **Radierer** einzelne Buchstaben löschen, mit dem **Lasso** verschieben, umfärben oder löschen. Buchstaben aus mehreren Strichen (t, ä, i …) brauchen einen Radierer-Tipp pro Strich.
-
-- Mit „Mit Papier“ im Export-Fenster bekommt jede Seite das gewählte Papier als Hintergrund.
-- Das .goodnotes-Format ist nicht offiziell dokumentiert, die App baut es nach dem offenen Projekt [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) (MIT) nach. Ein GoodNotes-Update kann den Import brechen – dann vorübergehend das PDF nehmen.
-- GoodNotes-Striche haben eine feste Breite, der Druck des Pencils geht dabei verloren.
-
-**Als PDF (Seitenhintergrund, nicht radierbar):**
-
-1. **Exportieren** → **PDF** → **Als PDF sichern** antippen.
-2. Im Teilen-Menü **GoodNotes** wählen (ggf. unter „Mehr“). GoodNotes legt ein neues Dokument an oder fügt die Seiten an.
-3. Erscheint stattdessen der Knopf **Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
-
-- Das PDF ist A4, mehrseitig und in Vektorqualität – die Schrift bleibt bei jedem Zoom scharf.
-- **Mit Papier** (Export-Fenster): Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommt das gewählte Papier standardmäßig mit ins PDF.
-- **PNG** erzeugt ein Bild pro Seite (300 dpi). Mit „Nur Schrift“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
-
-### Papier wie in GoodNotes
-
-Die Vorlagen sind nach den Messungen des offenen Projekts [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) nachgebaut. GoodNotes legt sie in festen Abständen ab der linken oberen Ecke an (1 pt = 0,353 mm):
-
-| Vorlage | Abstand | Erste Linie (Oberkante) |
-|---|---|---|
-| Liniert breit | 25 pt = 8,82 mm | 49,5 pt = 17,5 mm |
-| Liniert schmal | 17,5 pt = 6,17 mm | 50 pt = 17,6 mm |
-| Kariert | 16 pt = 5,64 mm | 15,5 pt |
-| Gepunktet | 16 pt = 5,64 mm, Punkte mit 0,5 pt Radius | 16 pt |
-
-Linien sind 0,5 pt dick und grau (#d0d2d3), auf dunklem Papier (#333333) #58595b. Gelbes Papier ist #f8f7e9.
-
-Cornell-, Checklisten- und Planer-Papiere sind nicht dabei, weil für sie keine Maße vorliegen.
-
-### Profile (Tab „Profil“ und „Schrift“ in der Leiste)
-
-Du kannst mehrere Profile mit eigenem Namen anlegen. Jedes Profil hat eigenen Stil, eigene Tinte und eigenes Papier. Die Schrift ist entweder
-
-- **eine eigene** – z. B. eine zweite Handschrift oder die einer anderen Person; nach dem Anlegen im Tab „Aufnahme“ neu aufnehmen, oder
-- **die eines anderen Profils** – z. B. deine Schrift als „Schnell mitgeschrieben“ mit der Vorlage „Unordentlich“. Aufnahmen und Korrekturen landen dann bei dem Profil, dem die Schrift gehört.
-
-Gewechselt wird über **Schrift** in der Leiste über der Vorschau oder im Tab „Profil“ (die App lädt dabei kurz neu). Text, Arbeitsblatt und Exportwahl gelten für alle Profile.
-
 ## 4. Backup – wichtig!
 
 Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App gelöscht oder Safari-Daten entfernt, sind sie weg.
@@ -260,12 +177,8 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v32';` hochzählen (z. B. auf `'v32'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v39';` hochzählen (z. B. auf `'v40'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
-
-### claude.ai-Version aktualisieren
-
-`node tools/build-artifact.mjs` baut sie nach `dist-artifact/` (ohne Service Worker; Steuerzeichen in den Bibliotheken werden maskiert, weil claude.ai sie nicht annimmt). Den Ordner dann mit Claude Code als Artifact veröffentlichen (Fähigkeiten `sample` mit Bildern und `downloads`) – an dieselbe Adresse, damit der Link gleich bleibt.
 
 ## 6. Probleme lösen
 
@@ -305,8 +218,6 @@ js/paper.js             GoodNotes-Papiervorlagen (Maße, Farben)
 js/stil.js              Stil-Vorlagen, Anpassungen je Vorlage, Farbton
 js/profilwahl.js        Profile anlegen, wechseln, umbenennen, löschen
 js/sammlung.js          Datei mit mehreren Profilen: Backup aller Profile, Profil teilen
-js/ki.js                KI-Tab: Regeln, Gespräch, Anhänge (ohne DOM)
-js/kiui.js              KI-Tab: Chat-Oberfläche, Dateien, Übernehmen in die Handschrift
 js/dialog.js            Eigene Dialoge (Bestätigen, Hinweis, Eingabe, Auswahl)
 js/einfuegen.js         Eingefügten Text bereinigen und einsetzen
 js/export.js            PDF (Vektor), PNG, Teilen

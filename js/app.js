@@ -7,14 +7,10 @@ import { initSchreiben } from './schreiben.js';
 import { initBlatt } from './blattui.js';
 import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
-import { initKiTab } from './kiui.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
 import { BUILTIN } from './schriften.js';
 import { showTutorial, tutorialSeen } from './tutorial.js';
-
-// Läuft die App als Artifact auf claude.ai? Dort gibt es Claude (KI-Tab), aber keinen Service Worker.
-const inClaude = typeof window.claude?.use === 'function';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -89,9 +85,6 @@ document.querySelector('.tabs').addEventListener('keydown', e => {
   showView(next.dataset.view);
 });
 
-// KI gibt es nur in der claude.ai-Version (dort antwortet Claude über das eigene Abo). Sonst kein toter Tab.
-if (inClaude) document.querySelector('.tabs [data-view="ki"]').hidden = false;
-
 // Erster Start: Demo-Schrift anlegen, falls mitgeliefert (demo/demo-schrift.json)
 await setupDemo();
 const demo = isDemo();
@@ -140,7 +133,6 @@ initProfilwahl(switchProfile);
 (window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => {
   for (const b of BUILTIN) fetch(b.file).catch(() => {});
 });
-initKiTab(profile, { schreiben, blatt, goTo: showView });
 
 // Demo-Profil: statt der Aufnahme ein Hinweis mit Weg zur eigenen Schrift
 document.getElementById('demo-note').hidden = !demo;
@@ -161,7 +153,7 @@ function safetyHint() {
   const $ = id => document.getElementById(id);
   const banner = $('safety-banner');
   const done = progress(profile).done;
-  if (demo || !done || inClaude || window.schriftbotNative) return;
+  if (demo || !done || window.schriftbotNative) return;
   const later = key => { try { return +localStorage.getItem(key) > Date.now(); } catch { return false; } };
   const snooze = (key, days) => { try { localStorage.setItem(key, Date.now() + days * 86400000); } catch {} };
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
@@ -195,9 +187,7 @@ window.schriftbotInsert = (text, mode = 'replace') => {
 
 // PWA: Service Worker für Offline-Betrieb.
 const offlineStatus = document.getElementById('status-offline');
-if (inClaude) {
-  offlineStatus.textContent = 'Läuft auf claude.ai: KI-Tab aktiv, braucht Internet. Daten liegen getrennt von der Web-Version.';
-} else if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator) {
   // Neue Version installiert → Hinweis statt automatischem Neuladen (könnte mitten im Schreiben stören).
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', () => {

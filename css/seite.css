@@ -51,3 +51,6 @@ details.frage { border-bottom: 1px solid var(--border); }
 footer { max-width: 820px; margin: 0 auto; padding: 24px 16px 40px; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 15px; }
 footer a { color: var(--muted); display: inline-flex; align-items: center; min-height: 44px; }
 code { font-size: 0.9em; padding: 1px 5px; border-radius: 6px; background: var(--surface); border: 1px solid var(--border); }
+
+/* Werbeplatz (vorbereitet, standardmäßig verborgen) */
+.ad-slot:not([hidden]) { display: block; max-width: 728px; min-height: 100px; margin: 32px auto; }

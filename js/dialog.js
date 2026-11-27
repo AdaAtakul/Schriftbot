@@ -1,5 +1,4 @@
-// Eigene Dialoge statt alert/confirm/prompt: Diese sind in der claude.ai-Version gesperrt (confirm gibt dort
-// sofort „Nein“ zurück) und sehen auf dem iPad ohnehin fremd aus. Blatt von unten, per Tastatur und Tipp bedienbar.
+// Eigene Dialoge statt alert/confirm/prompt: Die eingebauten sehen auf dem iPad fremd aus. Blatt von unten, per Tastatur und Tipp bedienbar.
 
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
 

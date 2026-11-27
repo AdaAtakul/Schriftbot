@@ -7,7 +7,6 @@ wrangler.jsonc
 ios
 tests
 tools
-dist-artifact
 node_modules
 README.md
 schriftbot-site.zip
