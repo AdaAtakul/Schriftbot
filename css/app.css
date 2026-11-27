@@ -1054,3 +1054,13 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
   .lb-style output { min-width: 7.4em; }
 }
 @media (min-width: 701px) and (max-width: 1300px) { .view-schreiben .editor { width: 300px; } }
+
+/* Handy: Vorschau früher sichtbar – kleineres Textfeld, Vorlagen in einer wischbaren Zeile, Leiste in zwei Zeilen */
+@media (max-width: 700px) {
+  #text-input { min-height: 110px; height: 20vh; }
+  .templates { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -16px; padding-right: 16px; }
+  .templates::-webkit-scrollbar { display: none; }
+  .templates .tpl-chip { flex-shrink: 0; }
+  .lb-btn { padding: 0 7px; }
+  .lb-btn[data-pop]:not([data-pop="pop-more"]) > svg:last-child { display: none; }
+}

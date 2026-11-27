@@ -101,7 +101,7 @@ export function initBlatt(profile) {
       statusEl.textContent = found.length
         ? `${found.length} blaue ${found.length === 1 ? 'Antwort' : 'Antworten'} gefunden und in Handschrift gesetzt${note}.` +
           (empty ? ` ${empty} ohne lesbaren Text (z. B. Foto): Feld antippen und Text eintragen.` : '')
-        : `Keine blauen Antworten gefunden${note}. Mit „Textfeld“ ein Feld aufziehen.`;
+        : `Tippe auf die Stelle im Blatt, an die deine Antwort soll${note}.`;
     } catch (err) {
       statusEl.textContent = 'Datei konnte nicht gelesen werden: ' + err.message;
     } finally {
