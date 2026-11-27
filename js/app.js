@@ -9,7 +9,6 @@ import { initProfilwahl } from './profilwahl.js';
 import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
-import { BUILTIN } from './schriften.js';
 import { showTutorial, tutorialSeen, showFirstHint } from './tutorial.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
@@ -129,10 +128,7 @@ async function switchProfile(id) {
   blatt.render();
 }
 initProfilwahl(switchProfile);
-// Mitgelieferte Schriften im Leerlauf vorladen (landen im Offline-Speicher), damit das Wählen sofort geht
-(window.requestIdleCallback || (f => setTimeout(f, 2500)))(() => {
-  for (const b of BUILTIN) fetch(b.file).catch(() => {});
-});
+// Mitgelieferte Schriften werden erst beim Wählen geladen (je ~0,2 MB), nicht mehr alle vorab im Hintergrund.
 
 // Demo-Profil: statt der Aufnahme ein Hinweis mit Weg zur eigenen Schrift
 document.getElementById('demo-note').hidden = !demo;

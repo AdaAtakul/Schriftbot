@@ -6,19 +6,19 @@ import { parseCollection } from './sammlung.js';
 import { profilesMeta, createProfile, setActiveProfile, saveGlyphs, seedSettings, renameProfile } from './storage.js';
 
 export const BUILTIN = [
-  { id: 'uji-w18', name: 'Saubere Schulschrift', file: 'schriften/schrift-a.json' },
-  { id: 'uji-w07', name: 'Runde Schrift', file: 'schriften/schrift-b.json' },
-  { id: 'uji-w33', name: 'Klare Druckschrift', file: 'schriften/schrift-c.json' },
-  { id: 'uji-w11', name: 'Schwungvolle Schrift', file: 'schriften/schrift-d.json' },
-  { id: 'uji-w44', name: 'Schnell notiert', file: 'schriften/schrift-e.json' },
-  { id: 'uji-w42', name: 'Krakelig', file: 'schriften/schrift-f.json' },
+  { id: 'uji-w18', name: 'Lena · sauber', old: 'Saubere Schulschrift', file: 'schriften/schrift-a.json' },
+  { id: 'uji-w07', name: 'Mia · rund', old: 'Runde Schrift', file: 'schriften/schrift-b.json' },
+  { id: 'uji-w33', name: 'Jonas · klar', old: 'Klare Druckschrift', file: 'schriften/schrift-c.json' },
+  { id: 'uji-w11', name: 'Sophie · schwungvoll', old: 'Schwungvolle Schrift', file: 'schriften/schrift-d.json' },
+  { id: 'uji-w44', name: 'Paul · schnell notiert', old: 'Schnell notiert', file: 'schriften/schrift-e.json' },
+  { id: 'uji-w42', name: 'Ben · krakelig', old: 'Krakelig', file: 'schriften/schrift-f.json' },
 ];
 
-// Frühere, technische Namen („Schrift A · ordentlich“) einmalig umbenennen; eigene Namen bleiben
+// Frühere Namen („Schrift A · ordentlich“, „Saubere Schulschrift“) einmalig umbenennen; selbst vergebene Namen bleiben
 export function renameOldBuiltins() {
   for (const p of profilesMeta().list) {
     const spec = p.builtin && BUILTIN.find(b => b.id === p.builtin);
-    if (spec && /^Schrift [A-F] · /.test(p.name)) renameProfile(p.id, spec.name);
+    if (spec && (/^Schrift [A-F] · /.test(p.name) || p.name === spec.old)) renameProfile(p.id, spec.name);
   }
 }
 
