@@ -52,7 +52,7 @@ const keysOf = r => r.pages[0].items.map(it => Object.keys(p.glyphs).find(k => p
 assert.deepEqual(keysOf(layout('asch', p, { connect: 1 })), ['a', 'sch']);
 assert.deepEqual(keysOf(layout('ach', p, { connect: 1 })), ['a', 'ch']);
 assert.deepEqual(keysOf(layout('asch', p, { connect: 0 })), ['a', 's', 'c', 'h']);
-assert.deepEqual(keysOf(layout('Sch', p, { connect: 1 })), [undefined, 'ch'], 'Großes S ist kein Paar'); // S fehlt → markiert
+assert.deepEqual(keysOf(layout('Sch', p, { connect: 1 })), ['s', 'ch'], 'Großes S ist kein Paar'); // S fehlt → kleines s (Schnellstart), aber kein „sch“
 
 // Unordnung: 0 % = exakt, 100 % = in den vorgegebenen Grenzen
 const calm = layout(long, p, { chaos: 0 }).pages[0].items;
@@ -226,4 +226,14 @@ console.log('OK – Layout');
   const r = layout('ß', q);
   assert.deepEqual(r.missing, []);
   assert.equal(r.pages[0].items.length, 2);
+}
+
+// Schnellstart: fehlende Großbuchstaben werden durch die Kleinbuchstaben ersetzt statt rot markiert
+{
+  const q = emptyProfile();
+  variantsOf(q, 'a')[0].push([[0.2, -0.5, 0.5, 0], [0.8, -0.9, 0.5, 10]]);
+  const r = layout('Aa', q, { chaos: 0 });
+  assert.deepEqual(r.missing, [], 'A fehlt nicht, sondern wird zu a');
+  assert.equal(r.pages[0].items.length, 2);
+  assert.equal(r.pages[0].items[0].strokes, variantsOf(q, 'a')[0]);
 }

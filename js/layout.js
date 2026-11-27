@@ -259,6 +259,9 @@ export function layout(text, profile, options = {}, seed = 1) {
     for (const cand of [ch, ...(ALIASES[ch] || [])]) {
       if ([...cand].every(has)) return [...cand];
     }
+    // Schnellstart: solange ein Großbuchstabe fehlt, den Kleinbuchstaben nehmen statt einer roten Lücke
+    const low = ch.toLowerCase();
+    if (low !== ch && [...low].every(has)) return [...low];
     return null;
   }
 

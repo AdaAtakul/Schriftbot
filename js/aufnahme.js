@@ -31,6 +31,19 @@ export function initAufnahme(profile, onScaled = () => {}) {
   const allChars = () => groupsFor(profile).flatMap(g => g.chars);
   if (!allChars().includes(current)) current = allChars()[0];
 
+  // Schnellstart: erst jeder Kleinbuchstabe einmal (etwa drei Minuten), dann ist die Schrift nutzbar
+  const LOWER = [...'abcdefghijklmnopqrstuvwxyz'];
+  const quickDone = () => LOWER.filter(c => recordedCount(profile, c) > 0).length;
+  function showProgress() {
+    const q = quickDone(), p = progress(profile), quick = q < LOWER.length;
+    $('progress-text').textContent = quick ? `Schnellstart: ${q} von ${LOWER.length} Kleinbuchstaben` : `${p.done} von ${p.total} Zeichen`;
+    $('progress-bar').max = quick ? LOWER.length : p.total;
+    $('progress-bar').value = quick ? q : p.done;
+    $('quick-note').textContent = quick
+      ? 'Schreib jeden Kleinbuchstaben einmal – mehr braucht es für den Anfang nicht. Dann „Nächstes fehlendes“.'
+      : 'Deine Schrift ist nutzbar. Großbuchstaben, Ziffern und weitere Varianten machen sie vollständiger und lebendiger.';
+  }
+
   // ---------- Zeichenliste links ----------
   function renderList() {
     groupsEl.innerHTML = '';
@@ -52,10 +65,7 @@ export function initAufnahme(profile, onScaled = () => {}) {
       }
       groupsEl.append(h, grid);
     }
-    const p = progress(profile);
-    $('progress-text').textContent = `${p.done} von ${p.total} Zeichen`;
-    $('progress-bar').max = p.total;
-    $('progress-bar').value = p.done;
+    showProgress();
   }
 
   function updateChip(ch) {
@@ -64,9 +74,10 @@ export function initAufnahme(profile, onScaled = () => {}) {
       b.dataset.status = recordedCount(profile, ch);
       b.setAttribute('aria-label', `${label(ch)}: ${recordedCount(profile, ch)} von ${VARIANTS} Varianten`);
     }
-    const p = progress(profile);
-    $('progress-text').textContent = `${p.done} von ${p.total} Zeichen`;
-    $('progress-bar').value = p.done;
+    const before = $('progress-text').textContent;
+    showProgress();
+    if (before.startsWith('Schnellstart') && quickDone() === LOWER.length)
+      hintEl.textContent = 'Geschafft! Deine Schrift ist nutzbar – sieh sie dir unter „Schreiben“ an. Großbuchstaben nimmt sie so lange aus den Kleinbuchstaben.';
   }
 
   function select(ch) {
@@ -213,7 +224,13 @@ export function initAufnahme(profile, onScaled = () => {}) {
   $('prev-char').addEventListener('click', () => step(-1));
   $('next-char').addEventListener('click', () => step(1));
   $('next-missing').addEventListener('click', () => {
-    // Erst Pflichtzeichen ab der aktuellen Stelle, dann die optionalen Extras.
+    // Schnellstart: zuerst die Kleinbuchstaben, die noch ganz fehlen
+    if (quickDone() < LOWER.length) {
+      const i = Math.max(LOWER.indexOf(current), -1);
+      const ch = [...LOWER.slice(i + 1), ...LOWER.slice(0, i + 1)].find(c => recordedCount(profile, c) === 0);
+      if (ch) return select(ch);
+    }
+    // Danach Pflichtzeichen ab der aktuellen Stelle, dann die optionalen Extras.
     const required = groupsFor(profile).filter(g => !g.optional).flatMap(g => g.chars);
     const start = Math.max(required.indexOf(current), 0);
     const order = [...required.slice(start + 1), ...required.slice(0, start + 1),
