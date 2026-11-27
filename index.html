@@ -5,8 +5,8 @@
   <script>/* Nur eine Adresse: www leitet auf die Hauptadresse um (sonst getrennte Speicher für Schrift und Einstellungen) */
     if (location.hostname === 'www.deineschrift.de') location.replace('https://deineschrift.de' + location.pathname + location.search + location.hash);</script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>DeineSchrift – getippten Text in deine eigene Handschrift verwandeln</title>
-  <meta name="description" content="DeineSchrift verwandelt getippten Text in deine eigene Handschrift: einmal mit Apple Pencil oder Finger aufnehmen, dann als PDF, PNG oder GoodNotes-Datei exportieren. Kostenlos, ohne Anmeldung, alles bleibt auf deinem Gerät.">
+  <title>Text in Handschrift umwandeln – kostenloser Handschrift-Generator | DeineSchrift</title>
+  <meta name="description" content="Getippten Text in echte Handschrift umwandeln: kostenloser Handschrift-Generator mit deiner eigenen oder mitgelieferten Handschriften. Export als PDF, PNG oder GoodNotes – ohne Anmeldung, alles bleibt auf deinem Gerät.">
   <link rel="canonical" href="https://deineschrift.de/">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="author" content="adaatakul">
@@ -38,6 +38,14 @@
   {
     "@context": "https://schema.org",
     "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://deineschrift.de/#website",
+        "url": "https://deineschrift.de/",
+        "name": "DeineSchrift",
+        "alternateName": ["Handschrift-Generator DeineSchrift", "Text in Handschrift umwandeln"],
+        "inLanguage": "de"
+      },
       {
         "@type": "WebApplication",
         "@id": "https://deineschrift.de/#app",
@@ -143,7 +151,7 @@
     <button id="update-reload" class="primary">Neu laden</button>
   </div>
 
-  <noscript><p class="noscript">DeineSchrift verwandelt getippten Text in deine eigene Handschrift. Die App braucht JavaScript. <a href="anleitung">Zur Anleitung</a></p></noscript>
+  <noscript><div class="noscript"><h2>Text in Handschrift umwandeln</h2><p>DeineSchrift ist ein kostenloser Handschrift-Generator: Getippter Text wird zu echter Handschrift – in deiner eigenen oder einer mitgelieferten Schrift – und lässt sich als PDF, PNG oder GoodNotes-Datei speichern. Die App braucht JavaScript.</p><p><a href="anleitung">Anleitung</a> · <a href="handschrift-generator">Handschrift-Generator</a> · <a href="goodnotes-handschrift">Handschrift für GoodNotes</a> · <a href="eigene-handschrift-digitalisieren">Eigene Handschrift digitalisieren</a></p></div></noscript>
 
   <main>
     <section id="view-aufnahme" class="view view-aufnahme" role="tabpanel" aria-labelledby="tab-aufnahme" hidden>
@@ -238,21 +246,23 @@
             </label>
           </div>
           <div id="pop-more" class="pop pop-wide" role="dialog" aria-label="Feineinstellungen" hidden>
-            <label class="field">Alle Stil-Vorlagen
+            <label class="field">Stil-Vorlage
               <select id="style"></select>
             </label>
             <p id="style-desc" class="hint small"></p>
-            <details class="fine" id="style-fine">
-              <summary>Regler der Vorlage</summary>
-              <div id="style-controls" class="group"></div>
+            <div id="controls-main" class="ctl-list"></div>
+            <details class="fine" id="more-settings">
+              <summary>Weitere Einstellungen …</summary>
+              <div id="controls-more" class="ctl-list"></div>
+              <div class="row">
+                <button id="equalize"><svg class="icon"><use href="#i-ruler"/></svg>Buchstabengrößen angleichen</button>
+                <button id="equalize-undo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Angleichen rückgängig</button>
+              </div>
             </details>
             <p id="style-note" class="hint small"></p>
-            <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
-            <div id="controls"></div>
             <div class="row">
-              <button id="reset-settings"><svg class="icon"><use href="#i-reset"/></svg>Standard</button>
-              <button id="equalize"><svg class="icon"><use href="#i-ruler"/></svg>Größen angleichen</button>
-              <button id="equalize-undo" hidden><svg class="icon" aria-hidden="true"><use href="#i-undo"/></svg>Angleichen rückgängig</button>
+              <button id="style-reset" hidden><svg class="icon"><use href="#i-reset"/></svg>Vorlage zurücksetzen</button>
+              <button id="reset-settings"><svg class="icon"><use href="#i-reset"/></svg>Alles auf Standard</button>
             </div>
           </div>
         </div>
@@ -438,6 +448,9 @@
       </div>
       <footer class="app-footer">
         <a href="anleitung">Anleitung &amp; häufige Fragen</a>
+        <a href="handschrift-generator">Handschrift-Generator</a>
+        <a href="goodnotes-handschrift">Handschrift für GoodNotes</a>
+        <a href="eigene-handschrift-digitalisieren">Eigene Handschrift digitalisieren</a>
         <a href="datenschutz">Datenschutz &amp; Lizenzen</a>
         <a href="https://github.com/adaatakul/schriftbot" rel="noopener">Quellcode auf GitHub</a>
       </footer>

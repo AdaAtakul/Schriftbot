@@ -5,7 +5,7 @@ import {
 } from './storage.js';
 import { PRESETS, DEFAULT_STYLE } from './stil.js';
 import { ask, info as showInfo, askText } from './dialog.js';
-import { BUILTIN, useBuiltin } from './schriften.js';
+import { BUILTIN, useBuiltin, renameOldBuiltins } from './schriften.js';
 
 export function initProfilwahl() {
   const $ = id => document.getElementById(id);
@@ -15,6 +15,7 @@ export function initProfilwahl() {
   const switchTo = id => { setActiveProfile(id); location.reload(); };
   const styleLabel = id => PRESETS[profileSettings(id).style]?.label || PRESETS[DEFAULT_STYLE].label;
 
+  renameOldBuiltins();
   function render() {
     const m = profilesMeta(), active = activeProfile(m);
     const nameOf = id => m.list.find(p => p.id === id)?.name || '?';

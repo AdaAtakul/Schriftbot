@@ -127,7 +127,7 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Die Abstände zwischen deinen Wörtern werden automatisch als Leerzeichen übernommen.
 - Text dreimal schreiben = drei Varianten für jedes Zeichen. Einzelne Zeichen kannst du jederzeit unter **Einzeln** nachbessern.
 
-### Mitgelieferte Schriften A–F
+### Mitgelieferte Schriften
 
 Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften zur Auswahl, von ordentlich bis unordentlich. Sie stammen aus der freien Sammlung [UJIpenchars2](https://doi.org/10.24432/C5FG8S) (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; Lizenz [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)): 60 Personen haben dort jedes Zeichen zweimal einzeln auf ein Tablet geschrieben.
 

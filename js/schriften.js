@@ -3,16 +3,24 @@
 // für DeineSchrift umgerechnet (Grundlinie, x-Höhe, Umlaute aus den Punkten des ü). Werkzeug: tools/uji-schriften.py
 // Eine Schrift wird erst geladen, wenn man sie wählt; danach ist sie ein normales Profil.
 import { parseCollection } from './sammlung.js';
-import { profilesMeta, createProfile, setActiveProfile, saveGlyphs, seedSettings } from './storage.js';
+import { profilesMeta, createProfile, setActiveProfile, saveGlyphs, seedSettings, renameProfile } from './storage.js';
 
 export const BUILTIN = [
-  { id: 'uji-w18', name: 'Schrift A · ordentlich', file: 'schriften/schrift-a.json' },
-  { id: 'uji-w07', name: 'Schrift B · ordentlich, rund', file: 'schriften/schrift-b.json' },
-  { id: 'uji-w33', name: 'Schrift C · Druckschrift', file: 'schriften/schrift-c.json' },
-  { id: 'uji-w11', name: 'Schrift D · schwungvoll', file: 'schriften/schrift-d.json' },
-  { id: 'uji-w44', name: 'Schrift E · schnell', file: 'schriften/schrift-e.json' },
-  { id: 'uji-w42', name: 'Schrift F · unordentlich', file: 'schriften/schrift-f.json' },
+  { id: 'uji-w18', name: 'Saubere Schulschrift', file: 'schriften/schrift-a.json' },
+  { id: 'uji-w07', name: 'Runde Schrift', file: 'schriften/schrift-b.json' },
+  { id: 'uji-w33', name: 'Klare Druckschrift', file: 'schriften/schrift-c.json' },
+  { id: 'uji-w11', name: 'Schwungvolle Schrift', file: 'schriften/schrift-d.json' },
+  { id: 'uji-w44', name: 'Schnell notiert', file: 'schriften/schrift-e.json' },
+  { id: 'uji-w42', name: 'Krakelig', file: 'schriften/schrift-f.json' },
 ];
+
+// Frühere, technische Namen („Schrift A · ordentlich“) einmalig umbenennen; eigene Namen bleiben
+export function renameOldBuiltins() {
+  for (const p of profilesMeta().list) {
+    const spec = p.builtin && BUILTIN.find(b => b.id === p.builtin);
+    if (spec && /^Schrift [A-F] · /.test(p.name)) renameProfile(p.id, spec.name);
+  }
+}
 
 // Schon angelegt? Dann nur wechseln, sonst laden und als Profil anlegen. Gibt die Profil-Id zurück.
 export async function useBuiltin(id) {

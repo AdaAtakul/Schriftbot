@@ -34,23 +34,25 @@ const mm = v => Number(v).toLocaleString('de-DE', { maximumFractionDigits: 1 }) 
 const pct = v => v + ' %';
 // Stil-Regler: gelten für die gewählte Vorlage (Anpassungen werden je Vorlage gemerkt)
 const off = v => (v ? pct(v) : 'aus');
+// Regler in Alltagssprache. main: sofort sichtbar, sonst unter „Weitere Einstellungen“.
+// toggle: An/Aus-Schalter (an = dieser Wert, aus = 0). style: gehört zur Stil-Vorlage (je Vorlage gemerkt).
 const STYLE_SLIDERS = [
-  { key: 'connect', label: 'Buchstaben verbinden', desc: 'Wie oft Buchstaben ineinander übergehen', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'chaos', label: 'Unregelmäßigkeit', desc: 'Schwankungen in Größe, Neigung und Abstand', min: 0, max: 150, step: 5, fmt: pct },
-  { key: 'strike', label: 'Durchgestrichene Wörter', desc: 'Ab und zu ein Wort falsch begonnen, durchgestrichen und neu geschrieben', min: 0, max: 100, step: 5, fmt: off },
-  { key: 'fix', label: 'Kleine Korrekturen', desc: 'Vergessene Buchstaben mit ^ eingefügt, Buchstaben nachgezogen', min: 0, max: 100, step: 5, fmt: off },
-  { key: 'fatigue', label: 'Nachlassen zum Ende', desc: 'Lange Texte werden zum Ende hin größer und krakeliger', min: 0, max: 100, step: 5, fmt: off },
+  { key: 'chaos', main: true, label: 'Unordnung', desc: 'Wie stark Größe, Neigung und Abstand der Buchstaben schwanken', min: 0, max: 150, step: 5, fmt: pct },
+  { key: 'weight', main: true, label: 'Stiftdicke', desc: '100 % = so dick wie aufgenommen', min: 40, max: 250, step: 5, fmt: pct },
+  { key: 'fix', main: true, toggle: 40, label: 'Kleine Korrekturen', desc: 'Mal ein Buchstabe nachgezogen oder ein vergessenes Wort mit ^ eingefügt' },
+  { key: 'connect', label: 'Buchstaben verbinden', desc: 'Nutzt deine aufgenommenen Buchstabenpaare (z. B. „ch“)', min: 0, max: 100, step: 5, fmt: pct },
   { key: 'wobble', label: 'Wellige Zeilen', desc: 'Zeilen laufen leicht auf und ab, der Druck schwankt', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'edges', label: 'Unruhige Zeilenränder', desc: 'Zeilen beginnen und enden nicht ganz bündig', min: 0, max: 100, step: 5, fmt: pct },
-  { key: 'weight', label: 'Strichdicke', desc: '100 % = so dick wie aufgenommen', min: 40, max: 250, step: 5, fmt: pct },
+  { key: 'edges', label: 'Ungleiche Zeilenenden', desc: 'Zeilen beginnen und enden nicht ganz bündig', min: 0, max: 100, step: 5, fmt: pct },
+  { key: 'strike', toggle: 30, label: 'Verschreiben und durchstreichen', desc: 'Ab und zu ein Wort falsch begonnen, durchgestrichen und neu geschrieben' },
+  { key: 'fatigue', toggle: 40, label: 'Zum Ende hin krakeliger', desc: 'Lange Texte werden gegen Ende größer und unordentlicher' },
 ];
 const SLIDERS = [
-  { key: 'xHeight', label: 'Schriftgröße (x-Höhe)', min: 1.5, max: 6, step: 0.1, fmt: mm },
+  { key: 'xHeight', main: true, label: 'Schriftgröße', min: 1.5, max: 6, step: 0.1, fmt: mm },
   { key: 'lineHeight', label: 'Zeilenabstand', min: 4, max: 20, step: 0.1, fmt: (v, s) => {
     const lm = lineMetrics(options(s));
     return lm.lines ? `${mm(lm.step)} (${lm.lines} ${lm.lines === 1 ? 'Linie' : 'Linien'})` : mm(v);
   } },
-  { key: 'margin', label: 'Rand', desc: 'Abstand des ganzen Textes zur Blattkante', min: 5, max: 40, step: 1, fmt: mm },
+  { key: 'margin', label: 'Seitenrand', desc: 'Abstand des ganzen Textes zur Blattkante', min: 5, max: 40, step: 1, fmt: mm },
   { key: 'lineShift', label: 'Zeilen versetzen', desc: 'Jede Zeile rückt für sich etwas nach links oder rechts', min: 0, max: 100, step: 5, fmt: off },
 ];
 
@@ -202,28 +204,43 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     paperColorEl.append(b);
   }
 
-  const makeSlider = (spec, parent, style) => {
+  const makeSlider = (spec, style) => {
+    const parent = $(spec.main ? 'controls-main' : 'controls-more');
     const label = document.createElement('label');
+    const set = v => {
+      if (style) setSetting('styles', withStyleValue(current(), spec.key, v));
+      else setSetting(spec.key, v);
+      syncControls();
+    };
+    if (spec.toggle) {
+      // An/Aus-Schalter: aus = 0, an = Wert der Vorlage (falls sie einen hat) oder spec.toggle
+      label.className = 'switch-row';
+      label.innerHTML = `<span><span class="switch-label">${spec.label}</span><small class="slider-desc">${spec.desc}</small></span><input type="checkbox" role="switch" class="switch">`;
+      const box = label.querySelector('input');
+      box.addEventListener('change', () => { set(box.checked ? (PRESETS[current().style]?.[spec.key] || spec.toggle) : 0); render(); });
+      parent.append(label);
+      return { spec, label, box };
+    }
     label.className = 'slider';
     label.innerHTML = `${spec.label} <output></output>${spec.desc ? `<small class="slider-desc">${spec.desc}</small>` : ''}<input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}">`;
     const range = label.querySelector('input');
     range.addEventListener('input', () => {
-      if (style) setSetting('styles', withStyleValue(current(), spec.key, Number(range.value)));
-      else setSetting(spec.key, Number(range.value));
-      syncControls();
+      set(Number(range.value));
       renderSoon(); // flüssig: höchstens einmal pro Bild, erst die sichtbare Seite
     });
     parent.append(label);
     return { spec, label, range, out: label.querySelector('output') };
   };
   const sliders = [
-    ...STYLE_SLIDERS.map(spec => makeSlider(spec, $('style-controls'), true)),
-    ...SLIDERS.map(spec => makeSlider(spec, $('controls'), false)),
+    ...SLIDERS.filter(x => x.main).map(spec => makeSlider(spec, false)),
+    ...STYLE_SLIDERS.map(spec => makeSlider(spec, true)),
+    ...SLIDERS.filter(x => !x.main).map(spec => makeSlider(spec, false)),
   ];
 
   function syncControls() {
     const s = current();
-    for (const { spec, range, out } of sliders) {
+    for (const { spec, range, out, box } of sliders) {
+      if (box) { box.checked = s[spec.key] > 0; continue; }
       range.value = s[spec.key];
       out.textContent = spec.fmt(s[spec.key], s);
     }

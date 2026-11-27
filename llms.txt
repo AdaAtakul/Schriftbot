@@ -5,6 +5,7 @@
 Wichtige Fakten:
 - Preis: kostenlos, ohne Werbung, Quellcode unter MIT-Lizenz
 - Empfohlen: Safari auf dem iPad mit Apple Pencil; funktioniert in jedem aktuellen Browser
+- Mitgelieferte echte Handschriften (aus der Sammlung UJIpenchars2, CC BY 4.0): Saubere Schulschrift, Runde Schrift, Klare Druckschrift, Schwungvolle Schrift, Schnell notiert, Krakelig
 - Stil-Vorlagen: sehr ordentlich, ordentlich, normal, locker, unordentlich, sehr unordentlich
 - Papier wie in GoodNotes: liniert breit, liniert schmal, kariert, gepunktet, blanko; Weiß, Gelb, Dunkel
 - Formulare ausfüllen: blau getippter Text in einem PDF oder Foto wird erkannt und an derselben Stelle in Handschrift ersetzt
@@ -15,6 +16,9 @@ Wichtige Fakten:
 
 - [DeineSchrift (die App)](https://deineschrift.de/): Web-App zum Aufnehmen der Handschrift und Schreiben von Text
 - [Anleitung und häufige Fragen](https://deineschrift.de/anleitung): Schritt-für-Schritt-Anleitung, Vergleich mit Handschrift-Schriftarten, FAQ
+- [Handschrift-Generator](https://deineschrift.de/handschrift-generator): Text online in echte Handschrift umwandeln, Vergleich mit Handschrift-Schriftarten
+- [Handschrift für GoodNotes](https://deineschrift.de/goodnotes-handschrift): getippten Text als radierbare Handschrift in GoodNotes
+- [Eigene Handschrift digitalisieren](https://deineschrift.de/eigene-handschrift-digitalisieren): eigene Schrift aufnehmen statt Schriftart erstellen
 - [Datenschutz und Lizenzen](https://deineschrift.de/datenschutz): welche Daten anfallen, verwendete Open-Source-Bibliotheken
 
 ## Optional
