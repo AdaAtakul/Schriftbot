@@ -64,9 +64,9 @@ export function setActiveProfile(id) {
 // Löschen: nicht das letzte Profil und keins, dessen Schrift noch ein anderes benutzt (Fehlertext oder null).
 export async function deleteProfile(id) {
   const m = profilesMeta();
-  if (m.list.length < 2) return 'Das letzte Profil kann nicht gelöscht werden.';
+  if (m.list.length < 2) return 'Die letzte Schrift kann nicht gelöscht werden.';
   const users = m.list.filter(p => p.from === id);
-  if (users.length) return `Die Schrift dieses Profils wird noch von „${users.map(p => p.name).join('“, „')}“ benutzt.`;
+  if (users.length) return `Die Buchstaben dieser Schrift werden noch von „${users.map(p => p.name).join('“, „')}“ benutzt.`;
   const p = m.list.find(q => q.id === id);
   if (!p) return null;
   if (!p.from) await tx('readwrite', s => s.delete(dataKey(id)));

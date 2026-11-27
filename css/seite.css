@@ -54,3 +54,6 @@ code { font-size: 0.9em; padding: 1px 5px; border-radius: 6px; background: var(-
 
 /* Werbeplatz (vorbereitet, standardmäßig verborgen) */
 .ad-slot:not([hidden]) { display: block; max-width: 728px; min-height: 100px; margin: 32px auto; }
+
+/* Logo in echter Handschrift */
+.logo-hw { height: 28px; width: 158px; color: var(--accent, #0b6464); }

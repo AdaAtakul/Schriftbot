@@ -34,7 +34,7 @@ export function initProfilwahl(onSwitch = null) {
       g.append(...fresh.map(b => new Option(b.name, '__builtin:' + b.id)));
       switcher.append(g);
     }
-    switcher.add(new Option('Profile verwalten …', '__manage'));
+    switcher.add(new Option('Schriften verwalten …', '__manage'));
 
     list.replaceChildren(...m.list.map(p => {
       const li = document.createElement('li');
@@ -62,11 +62,11 @@ export function initProfilwahl(onSwitch = null) {
         actions.append(badge);
       } else button('Wechseln', () => switchTo(p.id), 'primary');
       button('Umbenennen', async () => {
-        const n = (await askText('Neuer Name für das Profil', p.name))?.trim();
+        const n = (await askText('Neuer Name für die Schrift', p.name))?.trim();
         if (n) { renameProfile(p.id, n); render(); }
       });
       button('Löschen', async () => {
-        if (!await ask(`Profil „${p.name}“ löschen?` + (p.from ? '' : '\nSeine aufgenommene Schrift wird dabei gelöscht – vorher sichern!'), { ok: 'Löschen', danger: true })) return;
+        if (!await ask(`Schrift „${p.name}“ löschen?` + (p.from ? '' : '\nIhre aufgenommenen Buchstaben werden dabei gelöscht – vorher sichern!'), { ok: 'Löschen', danger: true })) return;
         const err = await deleteProfile(p.id);
         if (err) return showInfo(err);
         if (p.id === active.id) location.reload(); else render();
@@ -96,7 +96,7 @@ export function initProfilwahl(onSwitch = null) {
     const keys = ['paper', 'paperColor', 'ink', 'inkHue', 'lineHeight', 'margin', ...(fromSel.value ? ['xHeight'] : [])];
     for (const k of keys) if (k in cur) keep[k] = cur[k];
     seedSettings(id, { ...keep, style: styleSel.value, styles: {} });
-    if (!fromSel.value) await showInfo(`Profil „${name}“ ist angelegt. Nimm jetzt unter „Aufnehmen“ die neue Schrift auf.`);
+    if (!fromSel.value) await showInfo(`„${name}“ ist angelegt. Nimm sie jetzt unter „Aufnehmen“ auf – nach etwa drei Minuten ist sie nutzbar.`);
     switchTo(id);
   });
 

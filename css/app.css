@@ -1009,3 +1009,25 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
 
 /* Werbeplatz unter dem Textfeld (vorbereitet, standardmäßig verborgen); nie in Vorschau, Aufnahme oder Export */
 .ad-slot:not([hidden]) { display: block; min-height: 100px; margin-top: 12px; }
+
+/* Erster Besuch: kleiner Hinweis über der Vorschau statt Tour */
+.first-hint {
+  position: absolute; z-index: 5; right: 16px; bottom: 72px; max-width: min(340px, calc(100% - 32px));
+  display: flex; align-items: center; gap: 6px; padding: 8px 6px 8px 14px; border-radius: 14px;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--border-strong); box-shadow: var(--shadow-2);
+  font-size: 0.882rem; animation: pop-in .45s var(--ease-spring) both;
+}
+.first-hint .icon-btn { min-width: 36px; min-height: 36px; }
+@media (max-width: 700px) { .first-hint { top: 8px; bottom: auto; right: 8px; } }
+@media (prefers-reduced-motion: reduce) { .first-hint { animation: none; } }
+
+/* Vorlagen nach Anlass über dem Textfeld */
+.templates { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 8px; }
+.templates .tpl-chip { min-height: 36px; padding: 0 12px; border-radius: 999px; font-size: 0.824rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border-strong); }
+.templates .tpl-chip:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Logo und leere Zustände in echter Handschrift (Schriftzug aus der Beispielschrift, tools/logo.mjs) */
+.brand-logo { height: 30px; width: 169px; color: var(--accent); }
+.brand .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hw-mark { width: 180px; height: 32px; color: var(--accent); }
+@media (max-width: 700px) { .brand-logo { height: 26px; width: 146px; } }

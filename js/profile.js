@@ -166,10 +166,10 @@ export function parseProfile(json) {
   let data;
   try { data = JSON.parse(json); } catch { throw new Error('Die Datei ist kein gültiges JSON.'); }
   if (!data || data.format !== 'handschrift-profil' || data.version !== 1) {
-    throw new Error('Die Datei ist kein Handschrift-Profil.');
+    throw new Error('Die Datei enthält keine Handschrift.');
   }
   if (typeof data.glyphs !== 'object' || data.glyphs === null || Array.isArray(data.glyphs)) {
-    throw new Error('Das Profil enthält keine Zeichen.');
+    throw new Error('Die Schrift enthält keine Zeichen.');
   }
   const profile = emptyProfile();
   const num = n => typeof n === 'number' && Number.isFinite(n);

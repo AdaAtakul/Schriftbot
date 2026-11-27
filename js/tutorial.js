@@ -61,22 +61,21 @@ const STEPS = demo => [
       'Oben rechts unter „Exportieren“ sicherst du alles als GoodNotes-Datei, PDF oder Bild.',
   },
   {
-    view: 'blatt',
-    title: '2. Ausfüllen',
-    text: 'Hier füllst du PDFs und Arbeitsblätter in Handschrift aus: Tippe deine Einträge vorher in Blau in das PDF und öffne es hier. ' +
-      'DeineSchrift ersetzt den blauen Text an derselben Stelle durch Handschrift.',
+    view: 'aufnahme',
+    title: '2. Eigene Schrift aufnehmen',
+    text: 'Unter „Aufnehmen“ schreibst du zuerst jeden Kleinbuchstaben einmal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
+      'Nach etwa drei Minuten schreibt DeineSchrift in deiner Schrift; Großbuchstaben, Ziffern und Varianten nimmst du nach und nach dazu.',
   },
   {
-    view: 'aufnahme',
-    title: '3. Eigene Schrift aufnehmen',
-    text: 'Unter „Aufnehmen“ schreibst du jedes Zeichen ein paar Mal – am besten mit dem Apple Pencil, Finger oder Maus gehen auch. ' +
-      'Plane etwa 20 bis 30 Minuten ein; du kannst jederzeit aufhören und später weitermachen.',
+    view: 'blatt',
+    title: '3. Ausfüllen',
+    text: 'Hier füllst du PDFs und Arbeitsblätter in Handschrift aus: PDF oder Foto öffnen, auf die Stelle tippen, Text eintippen.',
   },
   {
     view: 'profil',
     title: 'Wichtig: Schrift sichern',
     text: 'Deine Handschrift liegt nur in diesem Browser. Füge DeineSchrift zum Home-Bildschirm hinzu (Safari: Teilen → „Zum Home-Bildschirm“) ' +
-      'und sichere ab und zu im Bereich „Profil“ mit „Alle Profile sichern“.',
+      'und sichere ab und zu unter „Meine Schriften“ mit „Alle Schriften sichern“.',
     link: true,
   },
 ];
@@ -167,4 +166,26 @@ export function showTutorial({ goTo, demo = false, onClose = () => {} }) {
   document.addEventListener('keydown', onKey);
   document.body.append(bg);
   draw();
+}
+
+// Erster Besuch: statt der Tour nur ein kleiner Hinweis an der Vorschau (die Tour bleibt hinter dem ?-Knopf).
+export function showFirstHint(anchor) {
+  try { localStorage.setItem(DONE_KEY, '1'); } catch {}
+  const hint = document.createElement('div');
+  hint.className = 'first-hint';
+  hint.setAttribute('role', 'status');
+  const text = document.createElement('span');
+  text.textContent = matchMedia('(max-width: 700px)').matches
+    ? 'Tippe oben deinen Text – hier schreibt er sich hin.'
+    : 'Tippe links deinen Text – hier schreibt er sich hin.';
+  const x = document.createElement('button');
+  x.type = 'button';
+  x.className = 'icon-btn ghost';
+  x.setAttribute('aria-label', 'Hinweis schließen');
+  x.textContent = '✕';
+  const close = () => hint.remove();
+  x.addEventListener('click', close);
+  hint.append(text, x);
+  anchor.append(hint);
+  document.getElementById('text-input')?.addEventListener('input', close, { once: true });
 }

@@ -76,6 +76,15 @@ export function options(s = current()) {
   };
 }
 
+// Beispieltexte zum Ausprobieren (Knöpfe über dem Textfeld)
+const TEMPLATES = {
+  "Brief": "Liebe Oma,\n\nvielen Dank für das tolle Geschenk! Ich habe mich riesig gefreut und trage den Schal fast jeden Tag. Bei uns ist alles gut, nur das Wetter könnte schöner sein.\n\nIch hoffe, wir sehen uns bald wieder.\n\nGanz liebe Grüße\ndeine Mia",
+  "Notizen": "Biologie – Fotosynthese\n\n- Pflanzen wandeln Lichtenergie in chemische Energie um\n- Ort: Chloroplasten in den Blattzellen\n- Ausgangsstoffe: Wasser und Kohlenstoffdioxid\n- Produkte: Traubenzucker und Sauerstoff\n\nMerke: ohne Licht keine Fotosynthese!",
+  "To-do": "Erledigen bis Freitag\n\n- Mathe-Hausaufgaben S. 42, Nr. 3 bis 5\n- Bücher in die Bücherei bringen\n- Geschenk für Lena besorgen\n- Fahrrad aufpumpen\n- Oma anrufen",
+  "Grußkarte": "Alles Liebe zum Geburtstag!\n\nLiebe Lena,\nich wünsche dir ein wunderschönes neues Lebensjahr voller Glück, Gesundheit und vieler kleiner Abenteuer. Lass dich heute richtig feiern!\n\nDein Jonas",
+  "Entschuldigung": "Sehr geehrte Frau Becker,\n\nleider konnte meine Tochter Mia am Montag wegen einer Erkältung nicht am Unterricht teilnehmen. Ich bitte, ihr Fehlen zu entschuldigen.\n\nMit freundlichen Grüßen\nAnna Schneider",
+};
+
 export function initSchreiben(profile, onProfileChanged = () => {}) {
   const $ = id => document.getElementById(id);
   const input = $('text-input'), pagesEl = $('pages'), statusEl = $('schreiben-status');
@@ -414,7 +423,7 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
   $('reset-settings').addEventListener('click', async () => {
-    if (!await ask('Alle Schreib-Einstellungen dieses Profils auf Standard zurücksetzen (auch Stil-Vorlage und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
+    if (!await ask('Alle Einstellungen dieser Schrift auf Standard zurücksetzen (auch Stil und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
     for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
     setSetting('style', DEFAULT_STYLE);
     setSetting('styles', {});
@@ -515,6 +524,17 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
 
   syncControls();
   // Text von außen einsetzen (KI-Tab): ersetzen oder anhängen, der vorherige Text bleibt wiederherstellbar
+  // Vorlagen nach Anlass: ersetzen den Text, der vorherige bleibt wiederherstellbar
+  const tplEl = $('templates');
+  for (const [name, text] of Object.entries(TEMPLATES)) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'tpl-chip';
+    b.textContent = name;
+    b.addEventListener('click', () => insertText(text));
+    tplEl.append(b);
+  }
+
   function insertText(text, mode = 'replace') {
     if (input.value.trim()) keepPrevious('Vorherigen Text wiederherstellen');
     setText(mode === 'append' && input.value.trim() ? input.value.replace(/\s+$/, '') + '\n\n' + text : text);

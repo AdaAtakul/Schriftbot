@@ -31,7 +31,7 @@ const bad = mut => { const c = structuredClone(coll); mut(c); return () => parse
 assert.throws(bad(c => { c.profiles[1].from = 1; }), /verweist/);
 assert.throws(bad(c => { c.profiles[1].from = 5; }), /verweist/);
 assert.throws(bad(c => { c.profiles[0].handwriting.glyphs.a[0] = [['x']]; }), /Schrift von „Meine Schrift“/);
-assert.throws(bad(c => { c.profiles = []; }), /keine Profile/);
+assert.throws(bad(c => { c.profiles = []; }), /keine Schriften/);
 assert.throws(() => parseCollection('{'), /JSON/);
 assert.throws(bad(c => { c.format = 'anders'; }), /keine Handschrift-Sammlung/);
 // Verkettung (A benutzt B, B benutzt C) gibt es nicht

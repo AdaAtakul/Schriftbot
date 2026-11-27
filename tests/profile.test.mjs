@@ -25,7 +25,7 @@ assert.deepEqual(back.customPairs, ['ft']);
 
 // Kaputte Dateien werden abgelehnt
 assert.throws(() => parseProfile('kein json'), /kein gültiges JSON/);
-assert.throws(() => parseProfile('{"format":"x"}'), /kein Handschrift-Profil/);
+assert.throws(() => parseProfile('{"format":"x"}'), /keine Handschrift/);
 assert.throws(() => parseProfile(JSON.stringify({ ...p, glyphs: { a: [[[[0, 0, 'x', 0]]]] } })), /Ungültige Striche/);
 
 // Ausrichten: o schwebt knapp über der Grundlinie und steht links → mittig (Kästchen 3 breit) und auf y = 0

@@ -83,7 +83,7 @@ export function initProfil(profile) {
   async function importCollection(entries) {
     const meta = profilesMeta();
     const summary = entries.map(e => `• ${e.name}${e.from != null ? ` (Schrift von „${entries[e.from].name}“)` : ` – ${progress(e.handwriting).done} Zeichen`}`).join('\n');
-    if (!await ask(`${entries.length === 1 ? 'Dieses Profil' : `Diese ${entries.length} Profile`} hinzufügen?\n\n${summary}\n\nVorhandene Profile bleiben erhalten.`, { ok: 'Hinzufügen' })) return;
+    if (!await ask(`${entries.length === 1 ? 'Diese Schrift' : `Diese ${entries.length} Schriften`} hinzufügen?\n\n${summary}\n\nVorhandene Schriften bleiben erhalten.`, { ok: 'Hinzufügen' })) return;
     // Nur das leere Start-Profil eines neuen Geräts wird ersetzt
     const own = meta.list.filter(p => !p.demo);
     const lone = own.length === 1 && !own[0].from && progress(await loadGlyphs(own[0].id)).done === 0 ? own[0] : null;
@@ -110,7 +110,7 @@ export function initProfil(profile) {
   async function importSingle(imported) {
     const p = progress(imported), owner = glyphOwner();
     const msg = `Schrift mit ${p.done} von ${p.total} Zeichen importieren?`
-      + (progress(profile).done ? `\n\nDie Schrift von „${owner.name}“ wird dabei ersetzt` + (owner.id !== activeProfile().id ? ` (das aktive Profil „${activeProfile().name}“ benutzt sie).` : '.') : '');
+      + (progress(profile).done ? `\n\nDie Schrift von „${owner.name}“ wird dabei ersetzt` + (owner.id !== activeProfile().id ? ` (die gewählte Schrift „${activeProfile().name}“ benutzt sie).` : '.') : '');
     if (!await ask(msg, { ok: 'Importieren' })) return;
     await saveProfile(imported);
     location.reload();

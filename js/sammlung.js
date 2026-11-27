@@ -51,9 +51,9 @@ export function parseCollection(text) {
   let data;
   try { data = JSON.parse(text); } catch { throw new Error('Die Datei ist kein gültiges JSON.'); }
   if (data?.format !== FORMAT || data.version !== 1) throw new Error('Die Datei ist keine Handschrift-Sammlung.');
-  if (!Array.isArray(data.profiles) || !data.profiles.length || data.profiles.length > 50) throw new Error('Die Sammlung enthält keine Profile.');
+  if (!Array.isArray(data.profiles) || !data.profiles.length || data.profiles.length > 50) throw new Error('Die Sammlung enthält keine Schriften.');
   return data.profiles.map((p, i) => {
-    const name = typeof p?.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 60) : `Profil ${i + 1}`;
+    const name = typeof p?.name === 'string' && p.name.trim() ? p.name.trim().slice(0, 60) : `Schrift ${i + 1}`;
     const from = p?.from ?? null;
     if (from !== null) {
       const owner = data.profiles[from];

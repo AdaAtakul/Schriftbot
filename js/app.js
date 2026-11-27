@@ -10,7 +10,7 @@ import { info } from './dialog.js';
 import { cleanPasted } from './einfuegen.js';
 import { setupDemo, isDemo, ownProfile, seedSampleText } from './demo.js';
 import { BUILTIN } from './schriften.js';
-import { showTutorial, tutorialSeen } from './tutorial.js';
+import { showTutorial, tutorialSeen, showFirstHint } from './tutorial.js';
 
 // Navigation zwischen den Bereichen. Die App startet immer in „Schreiben“.
 const tabs = document.querySelectorAll('.tabs [data-view]');
@@ -102,8 +102,8 @@ try {
   profile = await loadProfile();
   if (alignAll(profile)) saveProfile(profile); // ältere Aufnahmen nachträglich ausrichten
 } catch (err) {
-  info('Das Handschrift-Profil konnte nicht geladen werden: ' + err.message +
-    '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, im Profil-Tab ein Backup importieren.');
+  info('Die Schrift konnte nicht geladen werden: ' + err.message +
+    '\n\nTipp: App schließen und neu öffnen. Falls das nicht hilft, unter „Meine Schriften“ eine Sicherung importieren.');
   throw err;
 }
 let schreiben;
@@ -143,10 +143,10 @@ document.getElementById('demo-own').addEventListener('click', () => {
   location.reload();
 });
 
-// Kurze Einführung beim ersten Öffnen, danach über den ?-Knopf
+// Erstes Öffnen: kleiner Hinweis an der Vorschau; die Einführung gibt es über den ?-Knopf
 document.getElementById('help-btn').addEventListener('click', () => showTutorial({ goTo: showView, demo }));
-if (!tutorialSeen()) showTutorial({ goTo: showView, demo, onClose: safetyHint });
-else safetyHint();
+if (!tutorialSeen()) showFirstHint(document.querySelector('#view-schreiben .stage'));
+safetyHint();
 
 // Hinweis oben: erst „Zum Home-Bildschirm“ (sonst darf Safari die Daten löschen), dann „Backup“.
 function safetyHint() {
@@ -165,9 +165,9 @@ function safetyHint() {
     $('safety-text').textContent = 'Füge DeineSchrift zum Home-Bildschirm hinzu – sonst darf Safari deine Schrift nach 7 Tagen ohne Nutzung löschen.';
     $('safety-action').textContent = 'So geht’s';
     $('safety-action').onclick = () => info(
-      '1. Sichere zuerst deine Schrift: Profil → „Alle Profile sichern“, z. B. in „Dateien“.\n' +
+      '1. Sichere zuerst deine Schrift: Meine Schriften → „Alle Schriften sichern“, z. B. in „Dateien“.\n' +
       '2. Tippe in Safari auf „Teilen“ (Quadrat mit Pfeil) und dann auf „Zum Home-Bildschirm“.\n' +
-      '3. Öffne DeineSchrift ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Profil → Importieren).\n\n' +
+      '3. Öffne DeineSchrift ab jetzt über das neue Symbol und importiere dort einmal die Sicherung (Meine Schriften → Importieren).\n\n' +
       'Die App auf dem Home-Bildschirm hat einen eigenen Speicher, deshalb der Umweg über die Sicherung.',
       { title: 'Zum Home-Bildschirm hinzufügen' });
   } else if (done >= 10 && (days == null || days > 7) && !later('hinweis-backup')) {
