@@ -8,7 +8,7 @@ import { PEN_SIZE, PENS, penColor } from './ink.js';
 import { buildPdf, buildPng, shareFiles } from './export.js';
 import { buildGoodnotes } from './goodnotes.js';
 import { PAPER_KINDS, PAPER_COLORS, paperLines } from './paper.js';
-import { PRESETS, DEFAULT_STYLE, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
+import { PRESETS, DEFAULT_STYLE, START_LOOK, styleValues, isModified, withStyleValue, migrateStyle, hueColor } from './stil.js';
 import { ask, info } from './dialog.js';
 import { isDemo } from './demo.js';
 
@@ -462,10 +462,8 @@ export function initSchreiben(profile, onProfileChanged = () => {}) {
     render();
   });
   $('reset-settings').addEventListener('click', async () => {
-    if (!await ask('Alle Einstellungen dieser Schrift auf Standard zurücksetzen (auch Stil und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
-    for (const key of Object.keys(STANDARD)) setSetting(key, STANDARD[key]);
-    setSetting('style', DEFAULT_STYLE);
-    setSetting('styles', {});
+    if (!await ask('Alle Einstellungen auf Standard zurücksetzen (auch Stil und deine Anpassungen)?', { ok: 'Zurücksetzen' })) return;
+    for (const [key, value] of Object.entries({ ...STANDARD, ...START_LOOK })) setSetting(key, value);
     syncControls();
     render();
   });

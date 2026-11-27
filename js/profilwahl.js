@@ -3,7 +3,7 @@
 import { profilesMeta, activeProfile, recProfile, ownProfiles, createProfile, renameProfile, deleteProfile, loadGlyphs } from './storage.js';
 import { progress } from './profile.js';
 import { ask, info, askText } from './dialog.js';
-import { BUILTIN, useBuiltin, renameOldBuiltins } from './schriften.js';
+import { BUILTIN, GROUPS, builtinOf, useBuiltin, renameOldBuiltins } from './schriften.js';
 import { previewPath } from './vorschau.js';
 import PREVIEWS from './vorschau-daten.js';
 
@@ -68,15 +68,11 @@ export function initProfilwahl({ chooseFont, chooseRec }) {
       });
     }), card({ name: 'Weitere aufnehmen', add: true, onPick: () => { close(); newHandwriting(); } }));
 
-    const demo = m.list.find(p => p.demo && !p.builtin);
-    const fonts = [
-      ...(demo ? [{ name: demo.name, prev: PREVIEWS.demo, have: demo.id }] : []),
-      ...BUILTIN.map(b => {
-        const have = m.list.find(p => p.builtin === b.id);
-        return { name: have?.name || b.name, prev: PREVIEWS[b.id], have: have?.id, builtin: b.id };
-      }),
-    ];
-    $('font-builtin').replaceChildren(...fonts.map(f => card({
+    const fonts = BUILTIN.map(b => {
+      const have = builtinOf(b, m.list);
+      return { name: have?.name || b.name, prev: PREVIEWS[b.id], have: have?.id, builtin: b.id, group: b.group };
+    });
+    const builtinCard = f => card({
       name: f.name, prev: f.prev, current: f.have && f.have === active.id,
       onPick: async el => {
         el.disabled = true;
@@ -91,7 +87,18 @@ export function initProfilwahl({ chooseFont, chooseRec }) {
           el.classList.remove('loading');
         }
       },
-    })));
+    });
+    $('font-builtin').replaceChildren(...Object.entries(GROUPS).flatMap(([key, label]) => {
+      const h = document.createElement('h4');
+      h.className = 'font-group-h';
+      h.textContent = label;
+      const grid = document.createElement('div');
+      grid.className = 'font-grid';
+      grid.setAttribute('role', 'group');
+      grid.setAttribute('aria-label', label);
+      grid.append(...fonts.filter(f => f.group === key).map(builtinCard));
+      return [h, grid];
+    }));
   }
   // Nach dem Auf-/Zuklappen durch die Leiste (schreiben.js) aufbauen
   btn.addEventListener('click', () => setTimeout(() => { if (!pop.hidden) renderGallery(); }));

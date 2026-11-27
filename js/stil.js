@@ -5,7 +5,7 @@
 export const STYLE_KEYS = ['connect', 'chaos', 'strike', 'fix', 'fatigue', 'wobble', 'edges', 'weight'];
 
 export const PRESETS = {
-  'sehr-ordentlich':   { label: 'Sehr ordentlich',   desc: 'Wie in Schönschrift: gleichmäßig, gerade Zeilen, keine Fehler.', connect: 40,  chaos: 10,  strike: 0, fix: 0, fatigue: 0,  wobble: 0,   edges: 0,   weight: 95 },
+  'sehr-ordentlich':   { label: 'Sehr ordentlich',   desc: 'Wie in Schönschrift: gleichmäßig, gerade Zeilen, keine Fehler.', connect: 40,  chaos: 0,   strike: 0, fix: 0, fatigue: 0,  wobble: 0,   edges: 0,   weight: 95 },
   'ordentlich':        { label: 'Ordentlich',        desc: 'Sauber, mit leichten natürlichen Schwankungen.', connect: 60,  chaos: 30,  strike: 0, fix: 0, fatigue: 10,  wobble: 15,  edges: 10,  weight: 100 },
   'normal':            { label: 'Normal',            desc: 'Wie man im Alltag schreibt.', connect: 70,  chaos: 50,  strike: 0, fix: 0, fatigue: 15,  wobble: 35,  edges: 30,  weight: 100 },
   'locker':            { label: 'Locker',            desc: 'Zügig geschrieben, hier und da durchgestrichen oder verbessert.', connect: 80,  chaos: 70,  strike: 20, fix: 15, fatigue: 35, wobble: 55,  edges: 50,  weight: 110 },
@@ -13,6 +13,12 @@ export const PRESETS = {
   'sehr-unordentlich': { label: 'Sehr unordentlich', desc: 'Schnell hingekritzelt.', connect: 100, chaos: 140, strike: 70, fix: 60, fatigue: 85, wobble: 100, edges: 100, weight: 135 },
 };
 export const DEFAULT_STYLE = 'ordentlich'; // neue Profile: ordentlich, wenig Unordnung
+// Erster Besuch und „Alles auf Standard“: so ordentlich wie möglich, kräftiger Strich, liniert breit auf dunklem Papier (weiße Tinte)
+export const START_FONT = 'uji-w18';
+export const START_LOOK = {
+  style: 'sehr-ordentlich', styles: { 'sehr-ordentlich': { weight: 135 } }, lineShift: 0,
+  paper: 'liniert-breit', paperColor: 'dunkel', ink: 'weiss', xHeight: 3, lineHeight: 8.8,
+};
 const LEGACY_STYLE = 'normal'; // alte Regler-Werte wurden als „Normal“ übernommen
 
 const styleKey = s => (PRESETS[s.style] ? s.style : DEFAULT_STYLE);

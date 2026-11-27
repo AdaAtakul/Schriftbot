@@ -1132,3 +1132,6 @@ select:not([multiple]) { background-image: var(--chev) !important; background-re
     width: auto; max-height: 70vh; border-radius: 20px 20px 0 0;
   }
 }
+/* Galerie: mitgelieferte Schriften nach Ordnung gruppiert */
+.font-groups { display: grid; gap: 6px; }
+.font-group-h { margin: 6px 0 0; font-size: 0.706rem; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; color: var(--muted); }

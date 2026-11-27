@@ -1,15 +1,12 @@
-// Demo-Schrift: Beim allerersten Öffnen (noch keine eigene Schrift) wird eine mitgelieferte Schrift als Profil
-// „Marie · natürlich“ angelegt und aktiviert, damit man DeineSchrift sofort ausprobieren kann.
-// Die Datei ist ein normales geteiltes Profil (Profil → „Profil teilen“) unter demo/demo-schrift.json.
-// Fehlt sie, passiert nichts.
-import { parseCollection } from './sammlung.js';
+// Erster Besuch (noch keine eigene Schrift): eine mitgelieferte Schrift wählen und das Start-Aussehen setzen,
+// damit man DeineSchrift sofort ausprobieren kann. Offline oder bei Fehlern passiert nichts.
 import { progress } from './profile.js';
-import { DEFAULT_STYLE } from './stil.js';
+import { START_FONT, START_LOOK } from './stil.js';
+import { useBuiltin } from './schriften.js';
 import {
-  profilesMeta, activeProfile, createProfile, setActiveProfile, saveGlyphs, loadGlyphs, seedSettings, renameProfile,
+  profilesMeta, activeProfile, setActiveProfile, loadGlyphs, seedSettings, renameProfile,
 } from './storage.js';
 
-export const DEMO_URL = 'demo/demo-schrift.json';
 const DONE_KEY = 'demo-angelegt';
 export const DEMO_NAME = 'Marie · natürlich';
 // Früher hieß die Demo „Beispielschrift“: einmalig umbenennen (selbst vergebene Namen bleiben)
@@ -26,15 +23,8 @@ export async function setupDemo() {
     const m = profilesMeta();
     if (m.list.length !== 1) return false;
     if (progress(await loadGlyphs(m.list[0].id)).done > 0) { localStorage.setItem(DONE_KEY, 'eigene'); return false; }
-    const res = await fetch(DEMO_URL, { cache: 'no-cache' });
-    if (!res.ok) return false;
-    const [entry] = parseCollection(await res.text());
-    if (!entry?.handwriting) return false;
-    const id = createProfile({ name: DEMO_NAME, demo: true });
-    await saveGlyphs(id, entry.handwriting);
-    // Erster Eindruck (Aussehen gilt für alle Schriften): ordentlich, schwarze Tinte, liniertes weißes Papier
-    const { boxScale, ...look } = entry.settings || {};
-    seedSettings('p1', { ...look, style: DEFAULT_STYLE, styles: {}, ink: 'schwarz' });
+    const id = await useBuiltin(START_FONT);
+    seedSettings('p1', START_LOOK); // Aussehen für alle Schriften
     setActiveProfile(id);
     localStorage.setItem(DONE_KEY, '1');
     return true;
