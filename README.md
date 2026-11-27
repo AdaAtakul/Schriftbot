@@ -127,26 +127,14 @@ Oben links auf **Als Text** umschalten. Statt jedes Zeichen einzeln schreibst du
 - Die Abstände zwischen deinen Wörtern werden automatisch als Leerzeichen übernommen.
 - Text dreimal schreiben = drei Varianten für jedes Zeichen. Einzelne Zeichen kannst du jederzeit unter **Einzeln** nachbessern.
 
-### Mitgelieferte Schriften
-
-Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften zur Auswahl, von ordentlich bis unordentlich. Sie stammen aus der freien Sammlung [UJIpenchars2](https://doi.org/10.24432/C5FG8S) (F. Prat, M. Castro, D. Llorens, A. Marzal, J. Vilar; Lizenz [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.de)): 60 Personen haben dort jedes Zeichen zweimal einzeln auf ein Tablet geschrieben.
-
-- Für DeineSchrift umgerechnet: Grundlinie und x-Höhe je Person bestimmt, Ä/Ö aus den Punkten des Ü ergänzt, „/ + =“ einfach nachgebildet; ß wird als „ss“ geschrieben. Werkzeug: `tools/uji-schriften.py`.
-- Es sind Einzelbuchstaben: Die Schrift wirkt wie ordentliche Druck-Handschrift, „Buchstaben verbinden“ hat hier keine Wirkung.
-- Eine Schrift wird erst beim Auswählen geladen (Internet nötig) und ist danach ein normales Profil.
-
 ### Text umwandeln (Bereich „Schreiben“ – hier startet die App)
 
-- Links Text eingeben oder einfügen (darunter Wörter, Seiten und fehlende Zeichen), rechts erscheint die A4-Vorschau.
-- **Leiste über der Seite**: Schrift (Profil), Stil **Ordentlich / Normal / Locker**, **Papier** und **Tinte** als Aufklapp-Menüs, **Feineinstellungen** (Regler-Symbol) und **Neu würfeln**. Esc oder ein Tipp daneben schließt ein Menü.
-- **Unter der Seite**: blättern („Seite 1 von 3“) und zoomen; 100 % zeigt die ganze Seite, ein Tipp auf die Prozentzahl setzt zurück.
-- **Standard** für neue Profile: Stil Ordentlich, schwarze Tinte, liniertes weißes Papier.
+- Links Text eingeben oder einfügen, rechts erscheint die A4-Vorschau.
 - Beim allerersten Öffnen steht eine Seite Beispieltext im Feld, damit die Vorschau sofort etwas zeigt. Gibt es noch keine Schrift, erklärt ein Hinweis über der Vorschau den nächsten Schritt.
-- **Exportieren** (oben rechts) öffnet ein Fenster: Format **GoodNotes, PDF oder Bild** und Hintergrund **Mit Papier** oder **Nur Schrift** (PNG mit durchsichtigem Hintergrund, PDF ohne Linien; die Vorschau zeigt dann ein Schachbrettmuster).
-- **Hell/Dunkel**: Mond- bzw. Sonnen-Knopf oben rechts; Standard ist hell, die Wahl merkt sich das Gerät.
-- **Leeren** über dem Textfeld: löscht den ganzen Text nach einer Rückfrage. Direkt danach holt **Gelöschten Text wiederherstellen** ihn zurück (bis du neu tippst).
+- **Papier** wählst du über Vorschaubilder (in der gewählten Papierfarbe). **Im Export** legt fest, ob Linien und Papierfarbe mitkommen oder **nur die Schrift** (PNG mit durchsichtigem Hintergrund, PDF ohne Linien); die Vorschau zeigt dann ein Schachbrettmuster.
+- **Roter Papierkorb** oben rechts im Textfeld: löscht den ganzen Text nach einer Rückfrage. Direkt danach holt **Gelöschten Text wiederherstellen** ihn zurück (bis du neu tippst).
 - **Papier**: die GoodNotes-Vorlagen Blanko, Liniert breit, Liniert schmal, Kariert und Gepunktet, jeweils in **Weiß, Gelb oder Dunkel** (Papierfarbe). Jede Zeile steht genau auf einer Linie, Karolinie oder Punktreihe (bei Kariert und Gepunktet anfangs jede zweite Reihe, änderbar über „Zeilenabstand“). Für dunkles Papier gibt es weiße Tinte.
-- **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich (alle unter **Feineinstellungen**). Unter **Regler der Vorlage** lässt sich jeder Wert ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
+- **Stil-Vorlage**: Sehr ordentlich, Ordentlich, Normal, Locker, Unordentlich oder Sehr unordentlich. Unter **Feineinstellungen der Vorlage** lässt sich jeder Wert ändern: Deine Werte bleiben für genau diese Vorlage gespeichert („Angepasst“), **Vorlage zurücksetzen** holt die Originalwerte zurück.
 - Feineinstellungen (gehören zur gewählten Vorlage):
   - **Buchstaben verbinden**: wie oft verbundene Paare statt Einzelbuchstaben genutzt werden.
   - **Unregelmäßigkeit** (bis 150 %): kleine Drehungen, Größen- und Abstandsunterschiede, leichte Schräglage.
@@ -157,7 +145,7 @@ Unter **Schrift** (Leiste über der Vorschau) stehen sechs echte Handschriften z
   - **Unruhige Zeilenränder**: Zeilenanfänge rücken mal etwas ein, Zeilen brechen rechts mal früher um – wie beim echten Schreiben.
   - **Strichdicke**: dünner oder kräftiger (40–250 %), gilt für Vorschau und alle Exporte.
 - **Tintenfarbe**: feste Farben oder der Regenbogen-Knopf mit dem **Farbton**-Regler für jede beliebige Tintenfarbe.
-- **Schriftgröße, Zeilenabstand, Rand** nach Geschmack. **Rand** verschiebt den ganzen Text, **Zeilen versetzen** rückt jede Zeile für sich etwas nach links oder rechts (Standard 20 %).
+- **Schriftgröße, Zeilenabstand, Rand** nach Geschmack.
 - **Neu würfeln**: andere Mischung der Varianten.
 - **Größen angleichen**: Bringt zu kleine oder zu große Buchstaben auf die typische Größe deiner übrigen Buchstaben (getrennt nach Kleinbuchstaben, Oberlängen, Großbuchstaben und Ziffern). Deine Proportionen bleiben, nur Ausreißer über 15 % werden korrigiert. i, j, t, Umlaute und Satzzeichen bleiben unberührt. Vor dem Übernehmen zeigt die App, welche Zeichen sich ändern. **Angleichen rückgängig** geht, bis du die App schließt.
 - Fehlende Zeichen werden **rot markiert** und unter dem Textfeld aufgelistet.
@@ -204,23 +192,23 @@ Du hast ein Formular oder Blatt als PDF, in das du deine Einträge blau hineinge
 
 **Als GoodNotes-Notizbuch (radierbar):**
 
-1. **Exportieren** → **GoodNotes** → **Für GoodNotes sichern** antippen.
+1. **GoodNotes** antippen.
 2. Im Teilen-Menü **GoodNotes** wählen. Fehlt GoodNotes dort, „In Dateien sichern“ wählen und die Datei in der Dateien-App antippen → „Öffnen in GoodNotes“ (oder in GoodNotes über **Importieren**).
 3. GoodNotes legt ein neues Notizbuch an. Jeder Strich ist ein echter Kugelschreiber-Strich: mit dem **Radierer** einzelne Buchstaben löschen, mit dem **Lasso** verschieben, umfärben oder löschen. Buchstaben aus mehreren Strichen (t, ä, i …) brauchen einen Radierer-Tipp pro Strich.
 
-- Mit „Mit Papier“ im Export-Fenster bekommt jede Seite das gewählte Papier als Hintergrund.
+- Mit „Papier“ in der Exportleiste bekommt jede Seite das gewählte Papier als Hintergrund.
 - Das .goodnotes-Format ist nicht offiziell dokumentiert, die App baut es nach dem offenen Projekt [goodnotes-codec](https://github.com/Taylor-Nilsen/goodnotes-codec) (MIT) nach. Ein GoodNotes-Update kann den Import brechen – dann vorübergehend das PDF nehmen.
 - GoodNotes-Striche haben eine feste Breite, der Druck des Pencils geht dabei verloren.
 
 **Als PDF (Seitenhintergrund, nicht radierbar):**
 
-1. **Exportieren** → **PDF** → **Als PDF sichern** antippen.
+1. **PDF** antippen.
 2. Im Teilen-Menü **GoodNotes** wählen (ggf. unter „Mehr“). GoodNotes legt ein neues Dokument an oder fügt die Seiten an.
 3. Erscheint stattdessen der Knopf **Jetzt teilen**, einfach noch einmal tippen (Safari verlangt das manchmal, wenn das Erzeugen länger gedauert hat).
 
 - Das PDF ist A4, mehrseitig und in Vektorqualität – die Schrift bleibt bei jedem Zoom scharf.
-- **Mit Papier** (Export-Fenster): Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommt das gewählte Papier standardmäßig mit ins PDF.
-- **PNG** erzeugt ein Bild pro Seite (300 dpi). Mit „Nur Schrift“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
+- **Papier** (Haken in der Exportleiste): Ein importiertes PDF wird in GoodNotes zum Seitenhintergrund, deshalb kommt das gewählte Papier standardmäßig mit ins PDF.
+- **PNG** erzeugt ein Bild pro Seite (300 dpi). Ohne Haken bei „Papier“ ist der Hintergrund transparent – praktisch, um die Schrift als Bild auf eine vorhandene GoodNotes-Seite zu legen.
 
 ### Papier wie in GoodNotes
 
@@ -237,14 +225,14 @@ Linien sind 0,5 pt dick und grau (#d0d2d3), auf dunklem Papier (#333333) #58595b
 
 Cornell-, Checklisten- und Planer-Papiere sind nicht dabei, weil für sie keine Maße vorliegen.
 
-### Profile (Tab „Profil“ und „Schrift“ in der Leiste)
+### Profile (Tab „Profil“ und Auswahl oben rechts)
 
 Du kannst mehrere Profile mit eigenem Namen anlegen. Jedes Profil hat eigenen Stil, eigene Tinte und eigenes Papier. Die Schrift ist entweder
 
 - **eine eigene** – z. B. eine zweite Handschrift oder die einer anderen Person; nach dem Anlegen im Tab „Aufnahme“ neu aufnehmen, oder
 - **die eines anderen Profils** – z. B. deine Schrift als „Schnell mitgeschrieben“ mit der Vorlage „Unordentlich“. Aufnahmen und Korrekturen landen dann bei dem Profil, dem die Schrift gehört.
 
-Gewechselt wird über **Schrift** in der Leiste über der Vorschau oder im Tab „Profil“ (die App lädt dabei kurz neu). Text, Arbeitsblatt und Exportwahl gelten für alle Profile.
+Gewechselt wird oben rechts in der Kopfzeile (die App lädt dabei kurz neu). Text, Arbeitsblatt und Exportwahl gelten für alle Profile.
 
 ## 4. Backup – wichtig!
 
@@ -260,7 +248,7 @@ Deine Profile liegen nur im Speicher von Safari auf diesem iPad. Wird die App ge
 ## 5. Updates einspielen
 
 1. Geänderte Dateien in GitHub hochladen (gleiche Stelle, überschreiben).
-2. In `sw.js` die Zeile `const VERSION = 'v32';` hochzählen (z. B. auf `'v32'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
+2. In `sw.js` die Zeile `const VERSION = 'v31';` hochzählen (z. B. auf `'v31'`). **Ohne diesen Schritt sieht das iPad die alten Dateien.**
 3. App auf dem iPad öffnen. Nach ein paar Sekunden erscheint „Eine neue Version ist bereit“ → **Neu laden**.
 
 ### claude.ai-Version aktualisieren
